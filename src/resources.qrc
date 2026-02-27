@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/transaltions"/>
+    <qresource prefix="/styles">
+        <file>styles/style.css</file>
+    </qresource>
+</RCC>
