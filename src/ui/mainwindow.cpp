@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent), ui(new Ui::MainWin
 {
     ui->setupUi(this);
     setWindowTitle("LIDE - Lisp IDE");
-    resize(1200, 800);
+    resize(1366, 1080);
 
     setupDockWidgets();
     setupMenuBar();
@@ -41,7 +41,7 @@ void MainWindow::loadStyleSheet() {
         file.close();
     }
     else {
-        qDebug() << "Failed to load stylesheet";
+        qDebug() << "Ошибка загрузки стилей!";
     }
 }
 
@@ -52,7 +52,7 @@ void MainWindow::setupDockWidgets()
     setCentralWidget(centralEditor);
 
     // 2. Дерево проекта (слева)
-    createDockWidget("Project Browser",
+    createDockWidget(tr("Дерево проекта"),
         createProjectTree(),
         Qt::LeftDockWidgetArea);
 
@@ -74,12 +74,8 @@ void MainWindow::createDockWidget(const QString& title, QWidget* widget, Qt::Doc
     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
     addDockWidget(area, dock);
 
-    // Сохраняем для меню View
     m_dockNames[dock] = title;
-
-    // Подключаем сигнал изменения позиции
-    connect(dock, &QDockWidget::dockLocationChanged,
-        this, &MainWindow::onDockLocationChanged);
+    connect(dock, &QDockWidget::dockLocationChanged, this, &MainWindow::onDockLocationChanged);
 }
 
 QTextEdit* MainWindow::createLispEditor()
@@ -87,14 +83,14 @@ QTextEdit* MainWindow::createLispEditor()
     auto* editor = new QTextEdit();
     editor->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
     editor->setFontPointSize(11);
-    editor->setPlaceholderText(";; Enter Lisp code here...");
+    editor->setPlaceholderText(";; Lisp код...");
     return editor;
 }
 
 QTreeWidget* MainWindow::createProjectTree()
 {
     auto* tree = new QTreeWidget();
-    tree->setHeaderLabel("Project Files");
+    tree->setHeaderLabel("Файлы проекта");
 
     // Пример структуры
     auto* root = new QTreeWidgetItem(tree);
@@ -110,8 +106,8 @@ QTreeWidget* MainWindow::createProjectTree()
 
     // Двойной клик для открытия
     connect(tree, &QTreeWidget::itemDoubleClicked, [this](QTreeWidgetItem* item) {
-        if (item->childCount() == 0) { // файл, не папка
-            QMessageBox::information(this, QObject::tr("Открыть"), "Opening: " + item->text(0));
+        if (item->childCount() == 0) {
+            // Открытие файла...
         }
         });
 
@@ -162,17 +158,14 @@ void MainWindow::setupMenuBar()
     editMenu->addAction("Вырезать", QKeySequence::Paste);
 
     // Run menu
-    auto* runMenu = menuBar()->addMenu("&Run");
-    runMenu->addAction("Evaluate Buffer", QKeySequence("Ctrl+E"));
-    runMenu->addAction("Evaluate Region", QKeySequence("Ctrl+R"));
+    auto* runMenu = menuBar()->addMenu("&Запуск");
     runMenu->addSeparator();
     runMenu->addAction("Запустить REPL");
     runMenu->addAction("Очистить REPL");
 
     // Tools menu
-    auto* toolsMenu = menuBar()->addMenu("&Tools");
-    toolsMenu->addAction("Preferences...");
-    toolsMenu->addAction("Package Manager");
+    auto* toolsMenu = menuBar()->addMenu("&Настройки");
+    toolsMenu->addAction("Стиль...");
 }
 
 void MainWindow::setupStatusBar()
@@ -195,13 +188,12 @@ void MainWindow::loadLayout()
     if (settings.contains("geometry")) {
         restoreGeometry(settings.value("geometry").toByteArray());
         restoreState(settings.value("state").toByteArray());
-        statusBar()->showMessage("Layout restored", 2000);
     }
 }
 
 void MainWindow::onDockLocationChanged(Qt::DockWidgetArea area)
 {
-    // Можно автоматически сохранять или обновлять UI
+    saveLayout();
 }
 
 void MainWindow::toggleDockWidget(QDockWidget* dock)

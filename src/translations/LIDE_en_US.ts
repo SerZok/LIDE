@@ -9,6 +9,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/mainwindow.cpp" line="55"/>
+        <source>Дерево проекта</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/mainwindow.cpp" line="60"/>
         <source>Консоль REPL</source>
         <translation>REPL Console</translation>
@@ -19,41 +24,33 @@
         <translation>List items</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="147"/>
+        <location filename="../ui/mainwindow.cpp" line="143"/>
         <source>&amp;Файл</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="148"/>
+        <location filename="../ui/mainwindow.cpp" line="144"/>
         <source>Новый</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="149"/>
+        <location filename="../ui/mainwindow.cpp" line="145"/>
         <source>Открыть...</source>
         <translation>Open...</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="150"/>
+        <location filename="../ui/mainwindow.cpp" line="146"/>
         <source>Сохранить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="151"/>
+        <location filename="../ui/mainwindow.cpp" line="147"/>
         <source>Сохранить как...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="153"/>
+        <location filename="../ui/mainwindow.cpp" line="149"/>
         <source>Выйти</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QObject</name>
-    <message>
-        <location filename="../ui/mainwindow.cpp" line="114"/>
-        <source>Открыть</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
