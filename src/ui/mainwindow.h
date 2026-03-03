@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QMap>
 
+#include "ui/widgets/lisp_editor.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -39,7 +41,7 @@ private:
         QWidget* widget,
         Qt::DockWidgetArea area);
 
-    QTextEdit* createLispEditor();
+    LispEditor* createLispEditor();
     QTreeWidget* createProjectTree();
     QTextEdit* createREPLConsole();
     QListWidget* createSymbolTable();

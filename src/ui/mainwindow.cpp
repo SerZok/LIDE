@@ -1,5 +1,3 @@
-#include "mainwindow.h"
-#include "ui/ui_mainwindow.h"
 #include <QTextEdit>
 #include <QTreeWidget>
 #include <QListWidget>
@@ -14,12 +12,16 @@
 #include <QMessageBox>
 #include <QFile>
 
+#include "mainwindow.h"
+#include "ui/ui_mainwindow.h"
+
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     setWindowTitle("LIDE - Lisp IDE");
     resize(1366, 1080);
 
+    loadStyleSheet();
     setupDockWidgets();
     setupMenuBar();
     setupStatusBar();
@@ -78,12 +80,9 @@ void MainWindow::createDockWidget(const QString& title, QWidget* widget, Qt::Doc
     connect(dock, &QDockWidget::dockLocationChanged, this, &MainWindow::onDockLocationChanged);
 }
 
-QTextEdit* MainWindow::createLispEditor()
+LispEditor* MainWindow::createLispEditor()
 {
-    auto* editor = new QTextEdit();
-    editor->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-    editor->setFontPointSize(11);
-    editor->setPlaceholderText(";; Lisp код...");
+    auto* editor = new LispEditor();
     return editor;
 }
 
