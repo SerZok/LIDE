@@ -83,3 +83,7 @@ CMakeLists.txt.user*
 /.vs/LIDE/v17
 /out/x64-Debug
 /.vs
+
+# Сохраняем sbcl
+!libs/sbcl/
+!libs/sbcl/**
