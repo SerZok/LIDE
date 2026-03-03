@@ -113,12 +113,9 @@ QTreeWidget* MainWindow::createProjectTree()
     return tree;
 }
 
-QTextEdit* MainWindow::createREPLConsole()
+Console* MainWindow::createREPLConsole()
 {
-    auto* console = new QTextEdit();
-    console->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-    console->setMaximumHeight(200);
-    console->setPlaceholderText("Lisp REPL ready...");
+    auto* console = new Console();
     return console;
 }
 

@@ -5,6 +5,7 @@
 #include <QMap>
 
 #include "ui/widgets/lisp_editor.h"
+#include "ui/widgets/console.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -43,7 +44,7 @@ private:
 
     LispEditor* createLispEditor();
     QTreeWidget* createProjectTree();
-    QTextEdit* createREPLConsole();
+    Console* createREPLConsole();
     QListWidget* createSymbolTable();
 };
 

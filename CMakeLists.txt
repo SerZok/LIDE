@@ -96,6 +96,14 @@ if(WIN32)
         COMMAND ${WINDEPLOYQT} $<TARGET_FILE:${PROJECT_NAME}> --no-translations --verbose 0
         COMMENT "Running windeployqt..."
     )
+
+    # Копирование sbcl
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+        "${CMAKE_CURRENT_SOURCE_DIR}/libs/SBCL" 
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sbcl"
+    COMMENT "Copying SBCL to output directory..."
+)
 endif()
 
 if(QT_VERSION_MAJOR EQUAL 6)

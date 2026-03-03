@@ -1,4 +1,5 @@
 #include "lisp_editor.h"
+
 #include <QPainter>
 #include <QTextBlock>
 #include <QFile>
