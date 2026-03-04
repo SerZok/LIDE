@@ -35,7 +35,7 @@ int LispEditor::lineNumberAreaWidth() const
         ++digits;
     }
 
-    int space = 10 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
+    int space = 15 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
     return space;
 }
 
@@ -69,8 +69,7 @@ void LispEditor::highlightCurrentLine()
 
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
-        // Цвет теперь из CSS, оставляем только прозрачность
-        selection.format.setBackground(QColor(230, 230, 230, 20)); // 20 вместо 50
+        selection.format.setBackground(QColor(230, 230, 230, 20));
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();
@@ -89,7 +88,7 @@ void LispEditor::paintEvent(QPaintEvent* event)
 void LispEditor::LineNumberArea::paintEvent(QPaintEvent* event)
 {
     QPainter painter(this);
-    painter.fillRect(event->rect(), QColor(0, 0, 0));
+    painter.fillRect(event->rect(), QColor(0, 0, 0, 0));
 
     QTextBlock block = m_editor->firstVisibleBlock();
     int blockNumber = block.blockNumber();
@@ -99,10 +98,7 @@ void LispEditor::LineNumberArea::paintEvent(QPaintEvent* event)
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
-            // Цвет текста теперь в CSS
-            painter.setPen(QColor(255, 255, 255));
-            painter.drawText(0, top, this->m_editor->m_lineNumberArea->width() - 5,
-                fontMetrics().height(), Qt::AlignRight, number);
+            painter.drawText(0, top, this->m_editor->m_lineNumberArea->width() - 10, fontMetrics().height(), Qt::AlignRight, number);
         }
 
         block = block.next();

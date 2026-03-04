@@ -36,8 +36,9 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::loadStyleSheet() {
-    QFile file(":/styles/style.css");
+    QFile file(":/styles/dark.css");
     if (file.open(QFile::ReadOnly)) {
+        qDebug() << "Загрузка файл стиля: " << file.fileName();
         QString styleSheet = QLatin1String(file.readAll());
         qApp->setStyleSheet(styleSheet);
         file.close();
