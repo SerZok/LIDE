@@ -1,6 +1,8 @@
 #pragma once
 
+#include <QFileSystemWatcher>
 #include <QPlainTextEdit>
+#include <QTimer>
 #include <QWidget>
 
 class QPaintEvent;
@@ -16,9 +18,18 @@ public:
 
     // Методы для работы с файлами
     bool loadFile(const QString& fileName);
-    bool saveFile(const QString& fileName);
+    bool saveFile();
+    bool saveFileAs(const QString& fileName);
+
     QString currentFile() const { return m_currentFile; }
     bool isModified() const { return document()->isModified(); }
+
+signals:
+    void fileChangedExternally(const QString& path);
+    void fileSaved(const QString& path);
+    void fileLoaded(const QString& path);
+    void fileModifiedChanged(const QString& path, bool modified);
+    void fileClosed(const QString& path);
 
 protected:
     // Переопределяем для нумерации строк
@@ -26,16 +37,29 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private slots:
+    // Визуал
     void updateLineNumberAreaWidth(int newBlockCount);
     void highlightCurrentLine();
     void updateLineNumberArea(const QRect& rect, int dy);
 
+    void onFileChanged(const QString& path);
+    void onTextChanged();
+    void askForReload();
+
 private:
     class LineNumberArea;
-    LineNumberArea* m_lineNumberArea;
+
     QString m_currentFile;
+    QFileSystemWatcher* m_fileWatcher;
+    LineNumberArea* m_lineNumberArea;
+    QTimer* m_reloadTimer;
+    bool m_ignoreChanges;
 
     int lineNumberAreaWidth() const;
+
+    void setupWatcher();
+    void updateWatcher();
+    bool reloadFile();
 };
 
 // Нумерация строк

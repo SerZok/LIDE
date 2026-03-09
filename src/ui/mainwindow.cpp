@@ -17,7 +17,11 @@
 #include "mainwindow.h"
 #include "ui/ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget* parent): QMainWindow(parent), ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget* parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow),
+    m_lispEditor(nullptr),
+    m_projectTree(nullptr)
 {
     ui->setupUi(this);
     setWindowTitle("LIDE - Lisp IDE");
@@ -37,7 +41,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::loadStyleSheet() {
+void MainWindow::loadStyleSheet() 
+{
     QFile file(":/styles/dark.css");
     if (file.open(QFile::ReadOnly)) {
         qDebug() << "Загрузка файл стиля: " << file.fileName();
@@ -53,8 +58,8 @@ void MainWindow::loadStyleSheet() {
 void MainWindow::setupDockWidgets()
 {
     // 1. Центральный редактор (не док, а центральный виджет)
-    auto* centralEditor = createLispEditor();
-    setCentralWidget(centralEditor);
+    m_lispEditor = new LispEditor();
+    setCentralWidget(m_lispEditor);
 
     // 2. Дерево проекта (слева)
     createDockWidget(tr("Дерево проекта"),
@@ -70,6 +75,16 @@ void MainWindow::setupDockWidgets()
     createDockWidget(tr("Список переменных"),
         createSymbolTable(),
         Qt::RightDockWidgetArea);
+
+    setupConnections();
+}
+
+void MainWindow::setupConnections() {
+    connect(m_projectTree, &ProjectTree::fileActivated, m_lispEditor, &LispEditor::loadFile);
+    connect(m_lispEditor, &LispEditor::fileLoaded, m_projectTree, &ProjectTree::onFileLoaded);
+    connect(m_lispEditor, &LispEditor::fileSaved, m_projectTree, &ProjectTree::onFileSaved);
+    connect(m_lispEditor, &LispEditor::fileModifiedChanged, m_projectTree, &ProjectTree::onFileModifiedChanged);
+    connect(m_lispEditor, &LispEditor::fileClosed, m_projectTree, &ProjectTree::onFileClosed);
 }
 
 void MainWindow::createDockWidget(const QString& title, QWidget* widget, Qt::DockWidgetArea area)
@@ -83,12 +98,6 @@ void MainWindow::createDockWidget(const QString& title, QWidget* widget, Qt::Doc
     connect(dock, &QDockWidget::dockLocationChanged, this, &MainWindow::onDockLocationChanged);
 }
 
-LispEditor* MainWindow::createLispEditor()
-{
-    auto* editor = new LispEditor();
-    return editor;
-}
-
 ProjectTree* MainWindow::createProjectTree()
 {
     m_projectTree = new ProjectTree();
@@ -97,8 +106,8 @@ ProjectTree* MainWindow::createProjectTree()
 
 Console* MainWindow::createREPLConsole()
 {
-    auto* console = new Console();
-    return console;
+    m_console = new Console();
+    return m_console;
 }
 
 QListWidget* MainWindow::createSymbolTable()
@@ -119,53 +128,34 @@ void MainWindow::setupMenuBar()
 {
     // File menu
     auto* fileMenu = menuBar()->addMenu(tr("&Файл"));
+
     fileMenu->addAction(tr("Новый"), QKeySequence::New);
-    fileMenu->addAction(tr("Открыть..."), QKeySequence::Open);
-    
-    fileMenu->addSeparator();
 
-    auto openProjectAction = fileMenu->addAction(tr("Открыть проект..."), QKeySequence::Open);
-    connect(openProjectAction, &QAction::triggered, this, [this]() {
-        QString path = QFileDialog::getExistingDirectory(this, tr("Открыть проект"), m_projectTree->rootPath(), QFileDialog::ReadOnly | QFileDialog::ShowDirsOnly);
-        if (!path.isEmpty()) {
-            m_projectTree->openProject(path);
-        }
-        });
-
-    QAction* newProjectAction = fileMenu->addAction(tr("Новый проект..."));
-    connect(newProjectAction, &QAction::triggered, [this]() {
-        // Выбираем где создавать(папку)
-        QString parentPath = QFileDialog::getExistingDirectory(
-            this,
-            tr("Выберите папку для нового проекта"),
-            m_projectTree->rootPath(),
-            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-        );
-
-        if (parentPath.isEmpty()) return;
-
-        // ИМЯ проекта(папки)
-        QString projectName = QInputDialog::getText(
-            this,
-            tr("Новый проект"),
-            tr("Название проекта:")
-        );
-
-        if (!projectName.isEmpty()) {
-            QString newPath = parentPath + "/" + projectName;
-            QDir dir;
-            if (dir.mkpath(newPath)) {
-                m_projectTree->openProject(newPath);
-            }
-            else {
-                QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось создать проект"));
-            }
-        }
+    m_openFileAction = fileMenu->addAction(tr("Открыть..."), QKeySequence::Open);
+    connect(m_openFileAction, &QAction::triggered, this, [this]() {
+        QString path = QFileDialog::getOpenFileName(this, tr("Открытие файла"), m_projectTree->rootPath(), tr("Lisp файлы (* .lisp *.lsp * .asd)"));
+        if (!path.isEmpty()) m_lispEditor->loadFile(path);
         });
 
     fileMenu->addSeparator();
-    fileMenu->addAction(tr("Сохранить"), QKeySequence::Save);
-    fileMenu->addAction(tr("Сохранить как..."), QKeySequence::SaveAs);
+
+    m_openProjectAction = fileMenu->addAction(tr("Открыть проект..."), QKeySequence::Open);
+    m_newProjectAction = fileMenu->addAction(tr("Новый проект..."));
+    connect(m_openProjectAction, &QAction::triggered, this, &MainWindow::openProject);
+    connect(m_newProjectAction, &QAction::triggered, this, &MainWindow::createProject);
+
+    fileMenu->addSeparator();
+
+    m_saveFileAction = fileMenu->addAction(tr("Сохранить"), QKeySequence::Save);
+    auto m_saveFileAsAction = fileMenu->addAction(tr("Сохранить как..."), QKeySequence::SaveAs);
+
+    connect(m_saveFileAction, &QAction::triggered, m_lispEditor, &LispEditor::saveFile);
+    connect(m_saveFileAsAction, &QAction::triggered, this, [this]() {
+        QString path = QFileDialog::getSaveFileName(this, tr("Сохранение файла как..."), m_projectTree->rootPath(), tr("Lisp файлы (* .lisp *.lsp * .asd)"));
+        if (!path.isEmpty())
+            m_lispEditor->saveFileAs(path);
+        });
+
     fileMenu->addSeparator();
     fileMenu->addAction(tr("Выйти"), [this]() { close(); });
 
@@ -177,6 +167,21 @@ void MainWindow::setupMenuBar()
     editMenu->addAction("Вырезать", QKeySequence::Cut);
     editMenu->addAction("Скопировать", QKeySequence::Copy);
     editMenu->addAction("Вырезать", QKeySequence::Paste);
+
+    // View
+    auto* viewMenu = menuBar()->addMenu("&Вид");
+    for (auto it = m_dockNames.begin(); it != m_dockNames.end(); ++it) {
+        auto* dock = it.key();
+        auto* action = viewMenu->addAction(it.value());
+        action->setCheckable(true);
+        action->setChecked(dock->isVisible());
+
+        connect(action, &QAction::toggled, [this, dock](bool checked) {
+            dock->setVisible(checked);
+            });
+
+        connect(dock, &QDockWidget::visibilityChanged, action, &QAction::setChecked);
+    }
 
     // Run menu
     auto* runMenu = menuBar()->addMenu("&Запуск");
@@ -220,4 +225,41 @@ void MainWindow::onDockLocationChanged(Qt::DockWidgetArea area)
 void MainWindow::toggleDockWidget(QDockWidget* dock)
 {
     dock->setVisible(!dock->isVisible());
+}
+
+void MainWindow::openProject() {
+    QString path = QFileDialog::getExistingDirectory(this, tr("Открыть проект"), m_projectTree->rootPath(), QFileDialog::ReadOnly | QFileDialog::ShowDirsOnly);
+    if (!path.isEmpty()) {
+        m_projectTree->openProject(path);
+    }
+}
+
+void MainWindow::createProject() {
+    // Выбираем где создавать(папку)
+    QString parentPath = QFileDialog::getExistingDirectory(
+        this,
+        tr("Выберите папку для нового проекта"),
+        m_projectTree->rootPath(),
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+    );
+
+    if (parentPath.isEmpty()) return;
+
+    // ИМЯ проекта(папки)
+    QString projectName = QInputDialog::getText(
+        this,
+        tr("Новый проект"),
+        tr("Название проекта:")
+    );
+
+    if (!projectName.isEmpty()) {
+        QString newPath = parentPath + "/" + projectName;
+        QDir dir;
+        if (dir.mkpath(newPath)) {
+            m_projectTree->openProject(newPath);
+        }
+        else {
+            QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось создать проект"));
+        }
+    }
 }

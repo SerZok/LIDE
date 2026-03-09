@@ -1,5 +1,7 @@
 #pragma once
 
+#include "components/project_tree_delegate.h"
+
 #include <QTreeView>
 #include <QFileSystemModel>
 
@@ -14,6 +16,12 @@ public:
     bool openProject(const QString& path);
     QString rootPath() const;
     void keyPressEvent(QKeyEvent* event);
+
+public slots:
+    void onFileLoaded(const QString& path);
+    void onFileSaved(const QString& path);
+    void onFileModifiedChanged(const QString& path, bool modified);
+    void onFileClosed(const QString& path);
 
 signals:
     void fileActivated(const QString& path);
@@ -31,7 +39,13 @@ private:
     QAction* m_openFileAction;
     QString m_rootPath;
 
-    void setupFilter();
+    // Для отслеживания состояния файлов
+    QSet<QString> m_modifiedFiles;
+    QString m_currentFile;
+    ProjectTreeDelegate* m_delegate;
+
     void saveState();
     void restoreState();
+    void expandToPath(const QString& path);
+    QModelIndex findFileIndex(const QString& path);
 };

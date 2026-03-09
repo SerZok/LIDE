@@ -13,6 +13,7 @@
 ProjectTree::ProjectTree(QWidget* parent)
     : QTreeView(parent)
     , m_model(new QFileSystemModel(this))
+    , m_delegate(new ProjectTreeDelegate(this))
     , m_newFileAction(nullptr)
     , m_newFolderAction(nullptr)
     , m_openFileAction(nullptr)
@@ -22,6 +23,7 @@ ProjectTree::ProjectTree(QWidget* parent)
     m_model->setNameFilterDisables(false);
 
     setModel(m_model);
+    setItemDelegate(m_delegate);
 
     setAnimated(true);
     setHeaderHidden(true);
@@ -177,6 +179,92 @@ void ProjectTree::keyPressEvent(QKeyEvent* event)
     }
 
     QTreeView::keyPressEvent(event);
+}
+
+QModelIndex ProjectTree::findFileIndex(const QString& path)
+{
+    return m_model->index(path);
+}
+
+void ProjectTree::expandToPath(const QString& path)
+{
+    qDebug() << "Развёртывание до файла: " << path;
+
+    QModelIndex index = m_model->index(path);
+    if (!index.isValid()) return;
+
+    // Разворачиваем всех родителей
+    QModelIndex parent = index.parent();
+    while (parent.isValid()) {
+        expand(parent);
+        parent = parent.parent();
+    }
+}
+
+void ProjectTree::onFileLoaded(const QString& path)
+{
+    qDebug() << "Файл загружен: " << path;
+    m_currentFile = path;
+    m_delegate->setCurrentFile(path);
+
+    QModelIndex index = findFileIndex(path);
+    if (index.isValid()) {
+        expandToPath(path);
+        setCurrentIndex(index);
+        scrollTo(index, QAbstractItemView::PositionAtCenter);
+        update(index);
+    }
+}
+
+void ProjectTree::onFileSaved(const QString& path)
+{
+    qDebug() << "Файл сохранён: " << path;
+
+    m_modifiedFiles.remove(path);
+    m_delegate->setModifiedFiles(m_modifiedFiles);
+
+    QModelIndex index = findFileIndex(path);
+    if (index.isValid()) {
+        update(index);
+    }
+}
+
+void ProjectTree::onFileModifiedChanged(const QString& path, bool modified)
+{
+    qDebug() << "Файл изменён: " << path;
+
+    if (modified) {
+        m_modifiedFiles.insert(path);
+    }
+    else {
+        m_modifiedFiles.remove(path);
+    }
+    m_delegate->setModifiedFiles(m_modifiedFiles);
+
+    QModelIndex index = findFileIndex(path);
+    if (index.isValid()) {
+        update(index);
+    }
+}
+
+void ProjectTree::onFileClosed(const QString& path)
+{
+    qDebug() << "Файл закрыт: " << path;
+
+    if (m_currentFile == path) {
+        m_currentFile.clear();
+        m_delegate->setCurrentFile("");
+    }
+    m_modifiedFiles.remove(path);
+    m_delegate->setModifiedFiles(m_modifiedFiles);
+
+    QModelIndex index = findFileIndex(path);
+    if (index.isValid()) {
+        update(index);
+        if (currentIndex() == index) {
+            clearSelection();
+        }
+    }
 }
 
 void ProjectTree::saveState()
