@@ -1,6 +1,10 @@
 # LIDE - Lisp IDE
+``Qt6`` ``Cmake`` ``C++``
 
 ### Интегрированная среда разработки для Common Lisp
+
+<img width="1920" height="1042" alt="изображение" src="https://github.com/user-attachments/assets/2fae52b3-04f4-45af-9ba7-992c09a5a6d3" />
+
 
 LIDE — это современная, легковесная IDE для Common Lisp, построенная на Qt/C++.
 Проект направлен на создание удобной среды разработки с интуитивным интерфейсом.
