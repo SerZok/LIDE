@@ -11,6 +11,8 @@
 #include <QFontDatabase>
 #include <QMessageBox>
 #include <QFile>
+#include <QFileDialog>
+#include <QInputDialog>
 
 #include "mainwindow.h"
 #include "ui/ui_mainwindow.h"
@@ -87,31 +89,10 @@ LispEditor* MainWindow::createLispEditor()
     return editor;
 }
 
-QTreeWidget* MainWindow::createProjectTree()
+ProjectTree* MainWindow::createProjectTree()
 {
-    auto* tree = new QTreeWidget();
-    tree->setHeaderLabel("Файлы проекта");
-
-    // Пример структуры
-    auto* root = new QTreeWidgetItem(tree);
-    root->setText(0, "src/");
-
-    auto* file1 = new QTreeWidgetItem(root);
-    file1->setText(0, "main.lisp");
-
-    auto* file2 = new QTreeWidgetItem(root);
-    file2->setText(0, "utils.lisp");
-
-    tree->expandAll();
-
-    // Двойной клик для открытия
-    connect(tree, &QTreeWidget::itemDoubleClicked, [this](QTreeWidgetItem* item) {
-        if (item->childCount() == 0) {
-            // Открытие файла...
-        }
-        });
-
-    return tree;
+    m_projectTree = new ProjectTree();
+    return m_projectTree;
 }
 
 Console* MainWindow::createREPLConsole()
@@ -140,6 +121,49 @@ void MainWindow::setupMenuBar()
     auto* fileMenu = menuBar()->addMenu(tr("&Файл"));
     fileMenu->addAction(tr("Новый"), QKeySequence::New);
     fileMenu->addAction(tr("Открыть..."), QKeySequence::Open);
+    
+    fileMenu->addSeparator();
+
+    auto openProjectAction = fileMenu->addAction(tr("Открыть проект..."), QKeySequence::Open);
+    connect(openProjectAction, &QAction::triggered, this, [this]() {
+        QString path = QFileDialog::getExistingDirectory(this, tr("Открыть проект"), m_projectTree->rootPath(), QFileDialog::ReadOnly | QFileDialog::ShowDirsOnly);
+        if (!path.isEmpty()) {
+            m_projectTree->openProject(path);
+        }
+        });
+
+    QAction* newProjectAction = fileMenu->addAction(tr("Новый проект..."));
+    connect(newProjectAction, &QAction::triggered, [this]() {
+        // Выбираем где создавать(папку)
+        QString parentPath = QFileDialog::getExistingDirectory(
+            this,
+            tr("Выберите папку для нового проекта"),
+            m_projectTree->rootPath(),
+            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+        );
+
+        if (parentPath.isEmpty()) return;
+
+        // ИМЯ проекта(папки)
+        QString projectName = QInputDialog::getText(
+            this,
+            tr("Новый проект"),
+            tr("Название проекта:")
+        );
+
+        if (!projectName.isEmpty()) {
+            QString newPath = parentPath + "/" + projectName;
+            QDir dir;
+            if (dir.mkpath(newPath)) {
+                m_projectTree->openProject(newPath);
+            }
+            else {
+                QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось создать проект"));
+            }
+        }
+        });
+
+    fileMenu->addSeparator();
     fileMenu->addAction(tr("Сохранить"), QKeySequence::Save);
     fileMenu->addAction(tr("Сохранить как..."), QKeySequence::SaveAs);
     fileMenu->addSeparator();

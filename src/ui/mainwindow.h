@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMap>
 
+#include "ui/widgets/project_tree.h"
 #include "ui/widgets/lisp_editor.h"
 #include "ui/widgets/console.h"
 
@@ -34,6 +35,8 @@ private:
     Ui::MainWindow* ui;
     QMap<QDockWidget*, QString> m_dockNames;
 
+    ProjectTree* m_projectTree;
+
     void loadStyleSheet();
     void setupDockWidgets();
     void setupMenuBar();
@@ -43,7 +46,7 @@ private:
         Qt::DockWidgetArea area);
 
     LispEditor* createLispEditor();
-    QTreeWidget* createProjectTree();
+    ProjectTree* createProjectTree();
     Console* createREPLConsole();
     QListWidget* createSymbolTable();
 };
