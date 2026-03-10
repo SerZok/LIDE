@@ -17,39 +17,39 @@
 <context>
     <name>LispEditor</name>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="133"/>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="178"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="134"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="179"/>
         <source>Ошибка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="134"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="135"/>
         <source>Не удалось открыть файл %1:
 %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="179"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="180"/>
         <source>Не удалось сохранить файл %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="220"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="221"/>
         <source>Файл удалён</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="220"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="221"/>
         <source>Файл %1 был удалён извне.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="228"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="229"/>
         <source>Файл изменён</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="229"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="230"/>
         <source>Файл %1 был изменён.
 Обновить? (Ваши изменения будут потеряны)</source>
         <translation type="unfinished"></translation>
@@ -73,9 +73,8 @@
         <translation>REPL Console</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="75"/>
         <source>Список переменных</source>
-        <translation>List items</translation>
+        <translation type="vanished">List items</translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.cpp" line="130"/>
@@ -167,11 +166,6 @@
 <context>
     <name>ProjectTree</name>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="118"/>
-        <source>Открыть</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/widgets/project_tree.cpp" line="96"/>
         <location filename="../ui/widgets/project_tree.cpp" line="145"/>
         <source>Новый файл...</source>
@@ -181,21 +175,6 @@
         <location filename="../ui/widgets/project_tree.cpp" line="97"/>
         <location filename="../ui/widgets/project_tree.cpp" line="146"/>
         <source>Новая папка...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="124"/>
-        <source>Переименовать</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="125"/>
-        <source>Удалить</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="127"/>
-        <source>Показать в проводнике</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -220,6 +199,26 @@
         <location filename="../ui/widgets/project_tree.cpp" line="109"/>
         <location filename="../ui/widgets/project_tree.cpp" line="158"/>
         <source>Название папки:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/project_tree.cpp" line="118"/>
+        <source>Открыть</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/project_tree.cpp" line="124"/>
+        <source>Переименовать</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/project_tree.cpp" line="125"/>
+        <source>Удалить</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/project_tree.cpp" line="127"/>
+        <source>Показать в проводнике</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

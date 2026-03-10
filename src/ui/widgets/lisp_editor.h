@@ -5,6 +5,8 @@
 #include <QTimer>
 #include <QWidget>
 
+#include "ui/components/lisp_highlighter.h"
+
 class QPaintEvent;
 class QResizeEvent;
 
@@ -54,6 +56,7 @@ private:
     LineNumberArea* m_lineNumberArea;
     QTimer* m_reloadTimer;
     bool m_ignoreChanges;
+    LispHighlighter* m_highlighter;
 
     int lineNumberAreaWidth() const;
 

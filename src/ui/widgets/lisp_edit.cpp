@@ -13,6 +13,7 @@ LispEditor::LispEditor(QWidget* parent)
     , m_fileWatcher(new QFileSystemWatcher(this))
     , m_reloadTimer(new QTimer(this))
     , m_ignoreChanges(false)
+    , m_highlighter(new LispHighlighter(this->document()))
 {
     m_lineNumberArea->setObjectName("LineNumberArea");
     setTabStopDistance(40);

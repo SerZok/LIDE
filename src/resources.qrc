@@ -2,5 +2,7 @@
     <qresource prefix="/">
         <file>styles/dark.css</file>
         <file>styles/light.css</file>
+        <file>styles/colors/dark.colors</file>
+        <file>styles/colors/light.colors</file>
     </qresource>
 </RCC>
