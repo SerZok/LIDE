@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QTextEdit>
 #include <QProcess>
@@ -48,11 +48,17 @@ private:
     QString m_prompt;
     bool m_waitingForInput;
 
+    // Позиция, от которой можно редактировать (после prompt)
+    int m_editableStart;
+
     void setupConsole();
     void appendOutput(const QString& text, bool isError = false);
     void appendPrompt();
     QString getCurrentLine() const;
-    void clearCurrentLine();
     void insertFromHistory(int direction); // -1 назад, +1 вперёд
     void setupContextMenu();
+
+    // Вспомогательные
+    void ensureCursorInEditableArea();
+    bool cursorBeforeEditable() const;
 };
