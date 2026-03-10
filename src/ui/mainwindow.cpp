@@ -72,9 +72,9 @@ void MainWindow::setupDockWidgets()
         Qt::BottomDockWidgetArea);
 
     // 4. Список символов/переменных (справа)
-    createDockWidget(tr("Список переменных"),
-        createSymbolTable(),
-        Qt::RightDockWidgetArea);
+    //createDockWidget(tr("Список переменных"),
+    //    createSymbolTable(),
+    //    Qt::RightDockWidgetArea);
 
     setupConnections();
 }
