@@ -15,6 +15,20 @@
     </message>
 </context>
 <context>
+    <name>EditorTabWidget</name>
+    <message>
+        <location filename="../ui/widgets/editor_tab_widget.cpp" line="83"/>
+        <source>Закрыть файл</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/editor_tab_widget.cpp" line="84"/>
+        <source>Файл %1 не сохранён.
+Сохранить перед закрытием?</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>LispEditor</name>
     <message>
         <location filename="../ui/widgets/lisp_edit.cpp" line="134"/>
@@ -77,88 +91,92 @@
         <translation type="vanished">List items</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="130"/>
+        <location filename="../ui/mainwindow.cpp" line="110"/>
         <source>&amp;Файл</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="132"/>
+        <location filename="../ui/mainwindow.cpp" line="112"/>
         <source>Новый</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="134"/>
+        <location filename="../ui/mainwindow.cpp" line="114"/>
         <source>Открыть...</source>
         <translation>Open...</translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="136"/>
+        <location filename="../ui/mainwindow.cpp" line="116"/>
         <source>Открытие файла</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="136"/>
-        <location filename="../ui/mainwindow.cpp" line="154"/>
+        <location filename="../ui/mainwindow.cpp" line="116"/>
         <source>Lisp файлы (* .lisp *.lsp * .asd)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="142"/>
+        <location filename="../ui/mainwindow.cpp" line="122"/>
         <source>Открыть проект...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="154"/>
+        <location filename="../ui/mainwindow.cpp" line="143"/>
         <source>Сохранение файла как...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="231"/>
+        <location filename="../ui/mainwindow.cpp" line="145"/>
+        <source>Lisp файлы (*.lisp *.lsp *.asd)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.cpp" line="224"/>
         <source>Открыть проект</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="143"/>
+        <location filename="../ui/mainwindow.cpp" line="123"/>
         <source>Новый проект...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="241"/>
+        <location filename="../ui/mainwindow.cpp" line="234"/>
         <source>Выберите папку для нового проекта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="251"/>
+        <location filename="../ui/mainwindow.cpp" line="244"/>
         <source>Новый проект</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="252"/>
+        <location filename="../ui/mainwindow.cpp" line="245"/>
         <source>Название проекта:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="262"/>
+        <location filename="../ui/mainwindow.cpp" line="255"/>
         <source>Ошибка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="262"/>
+        <location filename="../ui/mainwindow.cpp" line="255"/>
         <source>Не удалось создать проект</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="149"/>
+        <location filename="../ui/mainwindow.cpp" line="129"/>
         <source>Сохранить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="150"/>
+        <location filename="../ui/mainwindow.cpp" line="130"/>
         <source>Сохранить как...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="160"/>
+        <location filename="../ui/mainwindow.cpp" line="153"/>
         <source>Выйти</source>
         <translation type="unfinished"></translation>
     </message>

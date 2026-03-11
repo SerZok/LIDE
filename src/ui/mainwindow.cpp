@@ -18,10 +18,10 @@
 #include "ui/ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget* parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    m_lispEditor(nullptr),
-    m_projectTree(nullptr)
+      QMainWindow(parent)
+    ,ui(new Ui::MainWindow)
+    ,m_projectTree(nullptr)
+    ,m_tabWidget(nullptr)
 {
     ui->setupUi(this);
     setWindowTitle("LIDE - Lisp IDE");
@@ -58,8 +58,8 @@ void MainWindow::loadStyleSheet()
 void MainWindow::setupDockWidgets()
 {
     // 1. Центральный редактор (не док, а центральный виджет)
-    m_lispEditor = new LispEditor();
-    setCentralWidget(m_lispEditor);
+    m_tabWidget = new EditorTabWidget(this);
+    setCentralWidget(m_tabWidget);
 
     // 2. Дерево проекта (слева)
     createDockWidget(tr("Дерево проекта"),
@@ -71,20 +71,14 @@ void MainWindow::setupDockWidgets()
         createREPLConsole(),
         Qt::BottomDockWidgetArea);
 
-    // 4. Список символов/переменных (справа)
-    //createDockWidget(tr("Список переменных"),
-    //    createSymbolTable(),
-    //    Qt::RightDockWidgetArea);
-
     setupConnections();
 }
 
 void MainWindow::setupConnections() {
-    connect(m_projectTree, &ProjectTree::fileActivated, m_lispEditor, &LispEditor::loadFile);
-    connect(m_lispEditor, &LispEditor::fileLoaded, m_projectTree, &ProjectTree::onFileLoaded);
-    connect(m_lispEditor, &LispEditor::fileSaved, m_projectTree, &ProjectTree::onFileSaved);
-    connect(m_lispEditor, &LispEditor::fileModifiedChanged, m_projectTree, &ProjectTree::onFileModifiedChanged);
-    connect(m_lispEditor, &LispEditor::fileClosed, m_projectTree, &ProjectTree::onFileClosed);
+    connect(m_tabWidget, &EditorTabWidget::currentFileChanged, m_projectTree, &ProjectTree::onFileLoaded);
+    connect(m_tabWidget, &EditorTabWidget::fileModifiedChanged, m_projectTree, &ProjectTree::onFileModifiedChanged);
+    connect(m_tabWidget, &EditorTabWidget::fileClosed, m_projectTree, &ProjectTree::onFileClosed);
+    connect(m_projectTree, &ProjectTree::fileActivated, m_tabWidget, &EditorTabWidget::openFile);
 }
 
 void MainWindow::createDockWidget(const QString& title, QWidget* widget, Qt::DockWidgetArea area)
@@ -110,20 +104,6 @@ Console* MainWindow::createREPLConsole()
     return m_console;
 }
 
-QListWidget* MainWindow::createSymbolTable()
-{
-    auto* list = new QListWidget();
-    list->addItem("defun");
-    list->addItem("defvar");
-    list->addItem("defparameter");
-    list->addItem("lambda");
-    list->addItem("let");
-    list->addItem("if");
-    list->addItem("cond");
-
-    return list;
-}
-
 void MainWindow::setupMenuBar()
 {
     // File menu
@@ -134,7 +114,7 @@ void MainWindow::setupMenuBar()
     m_openFileAction = fileMenu->addAction(tr("Открыть..."), QKeySequence::Open);
     connect(m_openFileAction, &QAction::triggered, this, [this]() {
         QString path = QFileDialog::getOpenFileName(this, tr("Открытие файла"), m_projectTree->rootPath(), tr("Lisp файлы (* .lisp *.lsp * .asd)"));
-        if (!path.isEmpty()) m_lispEditor->loadFile(path);
+        if (!path.isEmpty()) m_tabWidget->openFile(path);
         });
 
     fileMenu->addSeparator();
@@ -149,11 +129,24 @@ void MainWindow::setupMenuBar()
     m_saveFileAction = fileMenu->addAction(tr("Сохранить"), QKeySequence::Save);
     auto m_saveFileAsAction = fileMenu->addAction(tr("Сохранить как..."), QKeySequence::SaveAs);
 
-    connect(m_saveFileAction, &QAction::triggered, m_lispEditor, &LispEditor::saveFile);
-    connect(m_saveFileAsAction, &QAction::triggered, this, [this]() {
-        QString path = QFileDialog::getSaveFileName(this, tr("Сохранение файла как..."), m_projectTree->rootPath(), tr("Lisp файлы (* .lisp *.lsp * .asd)"));
-        if (!path.isEmpty())
-            m_lispEditor->saveFileAs(path);
+    connect(m_saveFileAction, &QAction::triggered, [this]() {
+        if (auto* editor = m_tabWidget->currentEditor()) {
+            editor->saveFile();
+        }
+        });
+
+    connect(m_saveFileAsAction, &QAction::triggered, [this]() {
+        auto* editor = m_tabWidget->currentEditor();
+        if (!editor) return;
+
+        QString path = QFileDialog::getSaveFileName(this,
+            tr("Сохранение файла как..."),
+            m_projectTree->rootPath(),
+            tr("Lisp файлы (*.lisp *.lsp *.asd)"));
+
+        if (!path.isEmpty()) {
+            editor->saveFileAs(path);
+        }
         });
 
     fileMenu->addSeparator();

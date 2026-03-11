@@ -4,8 +4,8 @@
 #include <QMainWindow>
 #include <QMap>
 
+#include "ui/widgets/editor_tab_widget.h"
 #include "ui/widgets/project_tree.h"
-#include "ui/widgets/lisp_editor.h"
 #include "ui/widgets/console.h"
 
 QT_BEGIN_NAMESPACE
@@ -39,7 +39,7 @@ private:
     QMap<QDockWidget*, QString> m_dockNames;
 
     // Основные виджеты
-    LispEditor* m_lispEditor;
+    EditorTabWidget* m_tabWidget;
     ProjectTree* m_projectTree;
     Console* m_console;
 
@@ -62,7 +62,6 @@ private:
 
     ProjectTree* createProjectTree();
     Console* createREPLConsole();
-    QListWidget* createSymbolTable();
 };
 
 #endif
