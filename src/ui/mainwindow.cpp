@@ -52,6 +52,8 @@ void MainWindow::loadTheme(QString theme)
         qApp->setStyleSheet(styleSheet);
         qDebug() << "Стиль: " << file.fileName() << " загружен успешно!";
         file.close();
+
+        emit themeChanged(theme);
     }
     else {
         qDebug() << "Ошибка загрузки темы:" << theme;
@@ -83,6 +85,7 @@ void MainWindow::setupConnections() {
     connect(m_tabWidget, &EditorTabWidget::fileModifiedChanged, m_projectTree, &ProjectTree::onFileModifiedChanged);
     connect(m_tabWidget, &EditorTabWidget::fileClosed, m_projectTree, &ProjectTree::onFileClosed);
     connect(m_projectTree, &ProjectTree::fileActivated, m_tabWidget, &EditorTabWidget::openFile);
+    connect(this, &MainWindow::themeChanged, m_tabWidget, &EditorTabWidget::onThemeChanged);
 }
 
 void MainWindow::createDockWidget(const QString& title, QWidget* widget, Qt::DockWidgetArea area)

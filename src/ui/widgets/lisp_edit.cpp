@@ -44,6 +44,11 @@ LispEditor::~LispEditor()
     }
 }
 
+void LispEditor::themeChanged(QString& themeName) {
+    if (m_highlighter)
+        m_highlighter->onThemeChanged(themeName);
+}
+
 int LispEditor::lineNumberAreaWidth() const
 {
     int digits = 1;

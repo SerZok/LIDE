@@ -2,31 +2,55 @@
 
 LispHighlighter::LispHighlighter(QTextDocument* parent): QSyntaxHighlighter(parent)
 {
+    setupFormat(ThemeColors::darkTheme());
+}
+
+void LispHighlighter::onThemeChanged(const QString& theme) {
+    qDebug() << "Меняем HighLight из-за темы: " << theme;
+
+    setupFormat(ThemeColors::fromString(theme));
+    rehighlight();
+}
+
+void LispHighlighter::highlightBlock(const QString& text)
+{
+    for (const HighlightingRule& rule : qAsConst(highlightingRules)) {
+        QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
+        while (matchIterator.hasNext()) {
+            QRegularExpressionMatch match = matchIterator.next();
+            setFormat(match.capturedStart(), match.capturedLength(), rule.format);
+        }
+    }
+    setCurrentBlockState(0);
+}
+
+
+void LispHighlighter::setupFormat(ThemeColors themeColors) {
+    highlightingRules.clear();
+
     // Ключевые слова
-    keywordFormat.setForeground(QColor(255, 160, 0)); // Оранжевый
+    keywordFormat.setForeground(themeColors.keyword);
     keywordFormat.setFontWeight(QFont::Bold);
 
     // Функции
-    functionFormat.setForeground(QColor(0, 180, 255)); // Голубой
+    functionFormat.setForeground(themeColors.function);
 
-    // Комментарии (точка с запятой)
-    commentFormat.setForeground(QColor(0, 128, 0)); // Серый
+    // Комментарии
+    commentFormat.setForeground(themeColors.comment);
     commentFormat.setFontItalic(true);
 
     // Строки
-    stringFormat.setForeground(QColor(255, 120, 120)); // Красноватый
+    stringFormat.setForeground(themeColors.string);
 
     // Числа
-    numberFormat.setForeground(QColor(180, 120, 255)); // Фиолетовый
+    numberFormat.setForeground(themeColors.number);
 
     // Скобки
-    parenthesisFormat.setForeground(QColor(255, 255, 255)); // Белый
+    parenthesisFormat.setForeground(themeColors.parenthesis);
     parenthesisFormat.setFontWeight(QFont::Bold);
 
-    // Цитирование '
-    quoteFormat.setForeground(QColor(255, 200, 100)); // Золотой
-
-    // --- Правила подсветки ---
+    // Цитирование
+    quoteFormat.setForeground(themeColors.quote);
 
     // Ключевые слова Lisp
     QStringList keywordPatterns;
@@ -82,20 +106,4 @@ LispHighlighter::LispHighlighter(QTextDocument* parent): QSyntaxHighlighter(pare
     rule.pattern = QRegularExpression(";[^\n]*");
     rule.format = commentFormat;
     highlightingRules.append(rule);
-}
-
-void LispHighlighter::highlightBlock(const QString& text)
-{
-    // Применяем все правила
-    for (const HighlightingRule& rule : qAsConst(highlightingRules)) {
-        QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
-        while (matchIterator.hasNext()) {
-            QRegularExpressionMatch match = matchIterator.next();
-            setFormat(match.capturedStart(), match.capturedLength(), rule.format);
-        }
-    }
-
-    // Дополнительно: подсветка многострочных комментариев
-    // (если нужны, хотя в Lisp обычно только однострочные)
-    setCurrentBlockState(0);
 }

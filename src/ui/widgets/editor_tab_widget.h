@@ -29,6 +29,8 @@ public:
     // Получить список всех открытых файлов
     QStringList openedFiles();
 
+    void onThemeChanged(QString& themeName);
+
 signals:
     void fileOpened(const QString& path);
     void fileClosed(const QString& path);

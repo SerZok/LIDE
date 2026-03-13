@@ -26,6 +26,9 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
+signals:
+    void themeChanged(QString& themeName);
+
 private slots:
     void saveAppState();
     void loadAppState();

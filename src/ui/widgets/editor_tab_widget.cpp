@@ -130,6 +130,13 @@ void EditorTabWidget::onEditorSaved(const QString& path)
     }
 }
 
+void EditorTabWidget::onThemeChanged(QString& themeName) {
+    for (int i = 0; i < count(); ++i) {
+        auto* editor = editorAt(i);
+        editor->themeChanged(themeName);
+    }
+}
+
 void EditorTabWidget::updateTabText(int index, const QString& path, bool modified)
 {
     QFileInfo info(path);
