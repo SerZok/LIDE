@@ -188,8 +188,6 @@ QModelIndex ProjectTree::findFileIndex(const QString& path)
 
 void ProjectTree::expandToPath(const QString& path)
 {
-    qDebug() << "Развёртывание до файла: " << path;
-
     QModelIndex index = m_model->index(path);
     if (!index.isValid()) return;
 

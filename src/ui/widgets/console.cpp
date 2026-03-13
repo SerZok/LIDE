@@ -1,4 +1,4 @@
-﻿#include "console.h"
+#include "console.h"
 
 #include <QScrollBar>
 #include <QMenu>
@@ -103,16 +103,20 @@ bool Console::startLispProcess()
 
 void Console::stopLispProcess()
 {
-    if (m_process) {
-        if (m_process->state() == QProcess::Running) {
-            m_process->terminate();
-            if (!m_process->waitForFinished(3000)) {
-                m_process->kill();
-            }
+    if (!m_process) return;
+
+    m_process->disconnect();
+    if (m_process->state() == QProcess::Running) {
+        qDebug() << "Завершение Lisp процесса...";
+        m_process->terminate();
+        if (!m_process->waitForFinished(1000)) {
+            qDebug() << "Процесс не завершился, убиваем...";
+            m_process->kill();
+            m_process->waitForFinished(1000);
         }
-        m_process->deleteLater();
-        m_process = nullptr;
     }
+    delete m_process;
+    m_process = nullptr;
 }
 
 void Console::sendCommand(const QString& command)

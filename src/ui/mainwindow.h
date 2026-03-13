@@ -7,6 +7,7 @@
 #include "ui/widgets/editor_tab_widget.h"
 #include "ui/widgets/project_tree.h"
 #include "ui/widgets/console.h"
+#include "settings.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -26,10 +27,8 @@ public:
     ~MainWindow();
 
 private slots:
-    void saveLayout();
-    void loadLayout();
-    void toggleDockWidget(QDockWidget* dock);
-    void onDockLocationChanged(Qt::DockWidgetArea area);
+    void saveAppState();
+    void loadAppState();
 
     void openProject();
     void createProject();
@@ -50,7 +49,13 @@ private:
     QAction* m_saveFileAction = nullptr;
     QAction* m_saveFileAsAction = nullptr;
 
-    void loadStyleSheet();
+    // Меню для тем приложения
+    QAction* m_lightStyleAction = nullptr;
+    QAction* m_darkStyleAction = nullptr;
+
+    void loadTheme(QString stylePath);
+    void openFiles(QStringList files);
+
     void setupDockWidgets();
     void setupMenuBar();
     void setupStatusBar();
@@ -61,7 +66,7 @@ private:
         Qt::DockWidgetArea area);
 
     ProjectTree* createProjectTree();
-    Console* createREPLConsole();
+    Console* createConsoleLisp();
 };
 
 #endif

@@ -157,3 +157,11 @@ void EditorTabWidget::saveAll()
         }
     }
 }
+
+QStringList EditorTabWidget::openedFiles() {
+    QStringList files;
+    for (int i = 0; i < count(); ++i) {
+        files.emplace_back(editorAt(i)->currentFile());
+    }
+    return files;
+}

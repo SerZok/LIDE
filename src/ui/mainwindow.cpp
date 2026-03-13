@@ -5,7 +5,7 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
-#include <QSettings>
+#include <QActionGroup>
 #include <QSplitter>
 #include <QLabel>
 #include <QFontDatabase>
@@ -13,6 +13,7 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QLayout>
 
 #include "mainwindow.h"
 #include "ui/ui_mainwindow.h"
@@ -27,49 +28,52 @@ MainWindow::MainWindow(QWidget* parent) :
     setWindowTitle("LIDE - Lisp IDE");
     resize(1366, 1080);
 
-    loadStyleSheet();
     setupDockWidgets();
     setupMenuBar();
     setupStatusBar();
 
-    loadLayout();
+    loadAppState();
 }
 
 MainWindow::~MainWindow()
 {
-    saveLayout();
+    saveAppState();
     delete ui;
 }
 
-void MainWindow::loadStyleSheet() 
+void MainWindow::loadTheme(QString theme)
 {
-    QFile file(":/styles/dark.css");
+    QFile file(QString(":styles/%1.css").arg(theme));
     if (file.open(QFile::ReadOnly)) {
-        qDebug() << "Загрузка файл стиля: " << file.fileName();
+        auto* settings = Settings::instance();
+        settings->setCurrentTheme(theme);
+
         QString styleSheet = QLatin1String(file.readAll());
         qApp->setStyleSheet(styleSheet);
+        qDebug() << "Стиль: " << file.fileName() << " загружен успешно!";
         file.close();
     }
     else {
-        qDebug() << "Ошибка загрузки стилей!";
+        qDebug() << "Ошибка загрузки темы:" << theme;
+    }
+}
+
+void MainWindow::openFiles(QStringList files) {
+    if (!m_tabWidget) return;
+
+    for (const auto& file : files) {
+        m_tabWidget->openFile(file);
     }
 }
 
 void MainWindow::setupDockWidgets()
 {
-    // 1. Центральный редактор (не док, а центральный виджет)
     m_tabWidget = new EditorTabWidget(this);
+    m_tabWidget->setObjectName("editorTabWidget");
     setCentralWidget(m_tabWidget);
 
-    // 2. Дерево проекта (слева)
-    createDockWidget(tr("Дерево проекта"),
-        createProjectTree(),
-        Qt::LeftDockWidgetArea);
-
-    // 3. REPL консоль (снизу)
-    createDockWidget(tr("Консоль REPL"),
-        createREPLConsole(),
-        Qt::BottomDockWidgetArea);
+    createDockWidget(tr("Дерево проекта"), createProjectTree(), Qt::LeftDockWidgetArea);
+    createDockWidget(tr("Консоль LISP"), createConsoleLisp(), Qt::BottomDockWidgetArea);
 
     setupConnections();
 }
@@ -86,21 +90,23 @@ void MainWindow::createDockWidget(const QString& title, QWidget* widget, Qt::Doc
     auto* dock = new QDockWidget(title, this);
     dock->setWidget(widget);
     dock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dock->setObjectName(widget->objectName() + "_dock");
     addDockWidget(area, dock);
 
     m_dockNames[dock] = title;
-    connect(dock, &QDockWidget::dockLocationChanged, this, &MainWindow::onDockLocationChanged);
 }
 
 ProjectTree* MainWindow::createProjectTree()
 {
     m_projectTree = new ProjectTree();
+    m_projectTree->setObjectName("projectTree_1");
     return m_projectTree;
 }
 
-Console* MainWindow::createREPLConsole()
+Console* MainWindow::createConsoleLisp()
 {
     m_console = new Console();
+    m_console->setObjectName("consoleLisp_1");
     return m_console;
 }
 
@@ -169,11 +175,16 @@ void MainWindow::setupMenuBar()
         action->setCheckable(true);
         action->setChecked(dock->isVisible());
 
+        connect(dock, &QDockWidget::visibilityChanged, [this, action](bool visible) {
+            // Блокируем сигналы action, чтобы не создавать цикл
+            action->blockSignals(true);
+            action->setChecked(visible);
+            action->blockSignals(false);
+            });
+
         connect(action, &QAction::toggled, [this, dock](bool checked) {
             dock->setVisible(checked);
             });
-
-        connect(dock, &QDockWidget::visibilityChanged, action, &QAction::setChecked);
     }
 
     // Run menu
@@ -184,7 +195,27 @@ void MainWindow::setupMenuBar()
 
     // Tools menu
     auto* toolsMenu = menuBar()->addMenu("&Настройки");
-    toolsMenu->addAction("Стиль...");
+    auto styleMenu = toolsMenu->addMenu("Тема...");
+
+    // Создаём группу для взаимного исключения
+    auto* themeGroup = new QActionGroup(this);
+
+    m_lightStyleAction = styleMenu->addAction("Светлая");
+    m_lightStyleAction->setCheckable(true);
+    m_lightStyleAction->setActionGroup(themeGroup);
+
+    m_darkStyleAction = styleMenu->addAction("Тёмная");
+    m_darkStyleAction->setCheckable(true);
+    m_darkStyleAction->setActionGroup(themeGroup);
+
+    QString currentTheme = Settings::instance()->currentTheme();
+    m_lightStyleAction->setChecked(currentTheme == "light");
+    m_darkStyleAction->setChecked(currentTheme == "dark");
+
+    connect(themeGroup, &QActionGroup::triggered, this, [this](QAction* action) {
+        QString theme = (action == m_lightStyleAction) ? "light" : "dark";
+        loadTheme(theme);
+        });
 }
 
 void MainWindow::setupStatusBar()
@@ -194,30 +225,27 @@ void MainWindow::setupStatusBar()
     statusBar()->showMessage("Ready");
 }
 
-void MainWindow::saveLayout()
+void MainWindow::saveAppState()
 {
-    QSettings settings("LIDE", "LIDE");
-    settings.setValue("geometry", saveGeometry());
-    settings.setValue("state", saveState());
+    auto* settings = Settings::instance();
+
+    QByteArray state = saveState();
+    settings->setMainWindowState(state);
+    settings->setMainWindowGeometry(saveGeometry());
+
+    if(m_tabWidget)
+        settings->setOpenedFiles(m_tabWidget->openedFiles());
 }
 
-void MainWindow::loadLayout()
+void MainWindow::loadAppState()
 {
-    QSettings settings("LIDE", "LIDE");
-    if (settings.contains("geometry")) {
-        restoreGeometry(settings.value("geometry").toByteArray());
-        restoreState(settings.value("state").toByteArray());
-    }
-}
+    auto* settings = Settings::instance();
 
-void MainWindow::onDockLocationChanged(Qt::DockWidgetArea area)
-{
-    saveLayout();
-}
-
-void MainWindow::toggleDockWidget(QDockWidget* dock)
-{
-    dock->setVisible(!dock->isVisible());
+    restoreGeometry(settings->mainWindowGeometry());
+    restoreState(settings->mainWindowState());
+    loadTheme(settings->currentTheme());
+    openFiles(settings->openedFiles());
+    
 }
 
 void MainWindow::openProject() {
