@@ -61,12 +61,34 @@ QToolButton {
         background-color: #3e4451;
     }
 
-QDockWidget {
+QTabBar::tab {
+    background-color: #2d2d2d;
     color: #e0e0e0;
+    padding: 0.4em 1.2em;
+    margin-right: 2px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border: 1px solid #3d3d3d;
+    border-bottom: none;
+}
+
+QTabBar::tab:selected {
+    background-color: #1e1e1e;
+    border-bottom: 2px solid #00aca1;
+}
+
+QTabBar::tab:hover {
+    background-color: #3e4451;
+}
+
+QDockWidget {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border: none;
 }
 
     QDockWidget::focus {
-        border: 1px solid #00aca1;
+        border: 1px solid #3e4451;
     }
 
     QDockWidget::title {
@@ -78,9 +100,9 @@ QDockWidget {
 
     QDockWidget::close-button, QDockWidget::float-button {
         background-color: #4a4a4a;
-        width: 10px;
-        height: 10px;
-        border-radius: 10px;
+        width: 1.2em;
+        height: 1.2em;
+        border-radius: 0.6em;
     }
 
         QDockWidget::close-button:hover, QDockWidget::float-button:hover {
@@ -88,18 +110,20 @@ QDockWidget {
         }
 
 /* ===== LispEditor ===== */
-#LispEditor {
+LispEditor {
     background-color: #1e1e1e;
     color: #d4d4d4;
     font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
-    font-size: 14pt;
+    font-size: 12pt;
     selection-background-color: #3e4451;
     selection-color: #e0e0e0;
-    border: none;
+    border: 1px solid #3d3d3d;
 }
 
-    #LispEditor:focus {
-        border: 1px solid #00aca1;
+    /* Стили для области содержимого */
+    LispEditor QWidget {
+        margin: 0px;
+        padding: 0px;
     }
 
 /* ===== LineNumberArea ===== */
@@ -116,6 +140,19 @@ QDockWidget {
         font-weight: bold;
     }
 
+/* ===== ProjectTree ===== */
+ProjectTree {
+    color: #d4d4d4;
+    background-color: #1e1e1e;
+    border: 1px solid #3d3d3d;
+    outline: none;
+}
+
+ProjectTree::item:selected {
+    background-color: #3e4451;
+    border: none;
+}
+
 /* ===== Console ===== */
 Console {
     background-color: #1e1e1e;
@@ -124,54 +161,6 @@ Console {
     font-size: 11pt;
     border: none;
 }
-
-    Console:focus {
-        border: 1px solid #00aca1;
-    }
-
-/* ===== QTreeWidget ===== */
-QTreeWidget {
-    border: none;
-    background-color: #1e1e1e;
-    color: #e0e0e0;
-    alternate-background-color: #2d2d2d;
-    outline: none;
-}
-
-    QTreeWidget::item {
-        padding: 4px;
-        border: none;
-    }
-
-        QTreeWidget::item:hover {
-            background-color: #3e4451;
-        }
-
-        QTreeWidget::item:selected {
-            background-color: #3e4451;
-            color: #e0e0e0;
-        }
-
-/* ===== QListWidget ===== */
-QListWidget {
-    background-color: #1e1e1e;
-    color: #e0e0e0;
-    border: none;
-    outline: none;
-}
-
-    QListWidget::item {
-        padding: 4px;
-    }
-
-        QListWidget::item:hover {
-            background-color: #3e4451;
-        }
-
-        QListWidget::item:selected {
-            background-color: #3e4451;
-            color: #e0e0e0;
-        }
 
 /* ===== QStatusBar ===== */
 QStatusBar {
@@ -191,49 +180,119 @@ QStatusBar {
             border-right: none;
         }
 
-/* ===== QScrollBar ===== */
-QScrollBar:vertical {
-    background-color: #1e1e1e;
-    width: 14px;
+/* ===== EditorTabWidget ===== */
+
+EditorTabWidget::pane {
     border: none;
-    border-radius: 0;
+    background-color: #1e1e1e;
+}
+
+EditorTabWidget QTabBar::tab {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    padding: 5px 15px;
+    margin-right: 2px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border: 1px solid #3d3d3d;
+    border-bottom: none;
+}
+
+/* ===== QScrollBar ===== */
+
+/* Вертикальный скроллбар */
+QScrollBar:vertical {
+    background-color: transparent;
+    width: 0.8em;           /* относительно базового шрифта */
+    margin: 0px;
+    border: none;
+    border-radius: 0px;
 }
 
 QScrollBar::handle:vertical {
     background-color: #4a4a4a;
-    min-height: 20px;
-    border-radius: 7px;
-    margin: 2px;
+    min-height: 3em;
+    border-radius: 0.4em;   /* половина от ширины = круглый */
+    margin: 0.2em;
 }
 
-    QScrollBar::handle:vertical:hover {
-        background-color: #5a5a5a;
-    }
+QScrollBar::handle:vertical:hover {
+    background-color: #5a5a5a;
+}
 
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-    height: 0;
+QScrollBar::handle:vertical:pressed {
+    background-color: #5a5a5a;
+}
+
+QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical {
+    height: 0px;
+    border: none;
     background: none;
 }
 
+QScrollBar::sub-page:vertical, QScrollBar::add-page:vertical {
+    background: transparent;
+}
+
+/* Горизонтальный скроллбар */
 QScrollBar:horizontal {
-    background-color: #1e1e1e;
-    height: 14px;
+    background-color: transparent;
+    height: 0.8em;
+    margin: 0px;
     border: none;
-    border-radius: 0;
+    border-radius: 0px;
 }
 
 QScrollBar::handle:horizontal {
     background-color: #4a4a4a;
-    min-width: 20px;
-    border-radius: 7px;
-    margin: 2px;
+    min-width: 3em;
+    border-radius: 0.4em;
+    margin: 0.2em;
 }
 
-    QScrollBar::handle:horizontal:hover {
-        background-color: #5a5a5a;
-    }
+QScrollBar::handle:horizontal:hover {
+    background-color: #5a5a5a;
+}
 
-QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
-    width: 0;
+QScrollBar::handle:horizontal:pressed {
+    background-color: #5a5a5a;
+}
+
+QScrollBar::sub-line:horizontal, QScrollBar::add-line:horizontal {
+    width: 0px;
+    border: none;
     background: none;
+}
+
+QScrollBar::sub-page:horizontal, QScrollBar::add-page:horizontal {
+    background: transparent;
+}
+
+/* Отступ для горизонтального скроллбара с учётом LineNumberArea */
+QAbstractScrollArea::corner {
+    background-color: #1e1e1e;
+    border: none;
+}
+
+EditorTabWidget QTabBar::tab:selected {
+    background-color: #1e1e1e;
+    border-bottom: 2px solid #00aca1;
+}
+
+EditorTabWidget QTabBar::tab:hover {
+    background-color: #3e4451;
+}
+
+EditorTabWidget QTabBar::tab:!selected {
+    margin-top: 2px;
+}
+
+/* Индикатор изменённого файла (звёздочка) */
+EditorTabWidget QTabBar::tab:modified {
+    font-weight: bold;
+}
+
+EditorTabWidget QTabBar::tab:modified::after {
+    content: " *";
+    color: #00aca1;
 }
