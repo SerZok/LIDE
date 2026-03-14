@@ -93,7 +93,7 @@ void MainWindow::setupDockWidgets()
             if (!currentPath.isEmpty()) {
                 QFileInfo info(currentPath);
                 m_projectDock->setWindowTitle(tr("Дерево проекта - %1").arg(info.fileName()));
-                m_projectDock->setToolTip(tr("Текущий проект: %1").arg(info.absolutePath()));
+                m_projectDock->setToolTip(tr("Текущий проект: %1").arg(currentPath));
             }
         }
         });

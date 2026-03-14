@@ -167,7 +167,7 @@ void ProjectTree::onContextMenuRequested(const QPoint& pos)
 
         QAction* showInFolderAction = menu.addAction(tr("Показать в проводнике"));
         connect(showInFolderAction, &QAction::triggered, [this]() {
-            QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(m_rootPath).path()));
+            QDesktopServices::openUrl(QUrl::fromLocalFile(m_rootPath));
             });
     }
 
