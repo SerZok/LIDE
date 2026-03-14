@@ -2,12 +2,13 @@
 
 LispHighlighter::LispHighlighter(QTextDocument* parent): QSyntaxHighlighter(parent)
 {
-    setupFormat(ThemeColors::darkTheme());
+    auto* m_settings = Settings::instance();
+    setupFormat(ThemeColors::fromString(m_settings->currentTheme()));
+
+    connect(m_settings, &Settings::themeChanged, this, &LispHighlighter::onThemeChanged);
 }
 
 void LispHighlighter::onThemeChanged(const QString& theme) {
-    qDebug() << "Меняем HighLight из-за темы: " << theme;
-
     setupFormat(ThemeColors::fromString(theme));
     rehighlight();
 }

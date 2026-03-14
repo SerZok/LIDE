@@ -29,13 +29,12 @@ public:
     // Получить список всех открытых файлов
     QStringList openedFiles();
 
-    void onThemeChanged(QString& themeName);
-
 signals:
     void fileOpened(const QString& path);
     void fileClosed(const QString& path);
     void currentFileChanged(const QString& path);
     void fileModifiedChanged(const QString& path, bool modified);
+    void currentEditorChanged(LispEditor* editor);
 
 private slots:
     void onTabCloseRequested(int index);

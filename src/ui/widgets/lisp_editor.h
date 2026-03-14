@@ -26,8 +26,6 @@ public:
     QString currentFile() const { return m_currentFile; }
     bool isModified() const { return document()->isModified(); }
 
-    void themeChanged(QString& themeName);
-
 signals:
     void fileChangedExternally(const QString& path);
     void fileSaved(const QString& path);

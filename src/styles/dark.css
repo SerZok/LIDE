@@ -163,7 +163,7 @@ ProjectTree::item:selected {
 /* ===== Console ===== */
 Console {
     background-color: #1e1e1e;
-    color: #d4d4d4;
+    color: #e0e0e0;
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 11pt;
     border: none;
@@ -221,11 +221,6 @@ EditorTabWidget QTabBar::tab:!selected {
 /* Индикатор изменённого файла (звёздочка) */
 EditorTabWidget QTabBar::tab:modified {
     font-weight: bold;
-}
-
-EditorTabWidget QTabBar::tab:modified::after {
-    content: " *";
-    color: #00aca1;
 }
 
 /* ===== QScrollBar ===== */

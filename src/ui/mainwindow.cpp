@@ -78,12 +78,14 @@ void MainWindow::setupDockWidgets()
     m_projectDock->setWidget(createProjectTree());
     m_projectDock->setAllowedAreas(Qt::AllDockWidgetAreas);
     m_projectDock->setObjectName("treeProject_dock");
+    m_dockNames[m_projectDock] = m_projectDock->windowTitle();
     addDockWidget(Qt::LeftDockWidgetArea, m_projectDock);
 
     m_ConsoleDock = new QDockWidget(tr("Консоль LISP"), this);
     m_ConsoleDock->setWidget(createConsoleLisp());
     m_ConsoleDock->setAllowedAreas(Qt::AllDockWidgetAreas);
     m_ConsoleDock->setObjectName("console_dock");
+    m_dockNames[m_ConsoleDock] = m_ConsoleDock->windowTitle();
     addDockWidget(Qt::BottomDockWidgetArea, m_ConsoleDock);
 
     QTimer::singleShot(0, [this]() {
@@ -112,7 +114,7 @@ void MainWindow::setupConnections() {
             m_projectDock->setWindowTitle(tr("Дерево проекта - %1").arg(info.fileName()));
             m_projectDock->setToolTip(tr("Текущий проект: %1").arg(info.absolutePath()));
         });
-    connect(this, &MainWindow::themeChanged, m_tabWidget, &EditorTabWidget::onThemeChanged);
+    connect(this, &MainWindow::themeChanged, Settings::instance(), &Settings::setCurrentTheme);
 }
 
 
@@ -204,12 +206,45 @@ void MainWindow::setupMenuBar()
 
     // Edit menu
     auto* editMenu = menuBar()->addMenu("&Правка");
-    editMenu->addAction("Назад", QKeySequence::Undo);
-    editMenu->addAction("Вернуть", QKeySequence::Redo);
+    m_undoAction = editMenu->addAction("Назад", QKeySequence::Undo);
+    m_redoAction = editMenu->addAction("Вернуть", QKeySequence::Redo);
     editMenu->addSeparator();
-    editMenu->addAction("Вырезать", QKeySequence::Cut);
-    editMenu->addAction("Скопировать", QKeySequence::Copy);
-    editMenu->addAction("Вырезать", QKeySequence::Paste);
+    m_cutAction = editMenu->addAction("Вырезать", QKeySequence::Cut);
+    m_copyAction = editMenu->addAction("Скопировать", QKeySequence::Copy);
+    m_pasteAction = editMenu->addAction("Вставить", QKeySequence::Paste);
+
+    m_undoAction->setEnabled(false);
+    m_redoAction->setEnabled(false);
+    m_cutAction->setEnabled(false);
+    m_copyAction->setEnabled(false);
+    m_pasteAction->setEnabled(false);
+
+    connect(m_tabWidget, &EditorTabWidget::currentEditorChanged, this, [this](LispEditor* editor) {
+        if (editor) {
+            connect(m_undoAction, &QAction::triggered, editor, &LispEditor::undo, Qt::UniqueConnection);
+            connect(m_redoAction, &QAction::triggered, editor, &LispEditor::redo, Qt::UniqueConnection);
+            connect(m_cutAction, &QAction::triggered, editor, &LispEditor::cut, Qt::UniqueConnection);
+            connect(m_copyAction, &QAction::triggered, editor, &LispEditor::copy, Qt::UniqueConnection);
+            connect(m_pasteAction, &QAction::triggered, editor, &LispEditor::paste, Qt::UniqueConnection);
+
+            m_undoAction->setEnabled(editor->document()->isUndoAvailable());
+            m_redoAction->setEnabled(editor->document()->isRedoAvailable());
+            m_cutAction->setEnabled(true);
+            m_copyAction->setEnabled(true);
+            m_pasteAction->setEnabled(true);
+
+            // обновления состояния undo/redo
+            connect(editor->document(), &QTextDocument::undoAvailable, m_undoAction, &QAction::setEnabled, Qt::UniqueConnection);
+            connect(editor->document(), &QTextDocument::redoAvailable, m_redoAction, &QAction::setEnabled, Qt::UniqueConnection);
+        }
+        else {
+            m_undoAction->setEnabled(false);
+            m_redoAction->setEnabled(false);
+            m_cutAction->setEnabled(false);
+            m_copyAction->setEnabled(false);
+            m_pasteAction->setEnabled(false);
+        }
+        });
 
     // View
     auto* viewMenu = menuBar()->addMenu("&Вид");

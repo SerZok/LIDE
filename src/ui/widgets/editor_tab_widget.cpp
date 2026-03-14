@@ -56,13 +56,18 @@ void EditorTabWidget::addEditorTab(const QString& path, LispEditor* editor)
     QFileInfo info(path);
     QString filename = info.fileName();
 
+    bool wasBlocked = signalsBlocked();
+    this->blockSignals(true);
+
     int index = addTab(editor, filename);
     setTabToolTip(index, path);
-
     m_pathToIndex[path] = index;
     m_indexToPath[index] = path;
-
     setCurrentIndex(index);
+
+    this->blockSignals(wasBlocked);
+
+    emit currentChanged(index);
 }
 
 int EditorTabWidget::findTabByPath(const QString& path) const
@@ -107,9 +112,11 @@ void EditorTabWidget::onCurrentChanged(int index)
 {
     if (index >= 0 && m_indexToPath.contains(index)) {
         emit currentFileChanged(m_indexToPath[index]);
+        emit currentEditorChanged(editorAt(index));
     }
     else {
         emit currentFileChanged(QString());
+        emit currentEditorChanged(nullptr);
     }
 }
 
@@ -137,13 +144,6 @@ void EditorTabWidget::onFileClosed(const QString& path)
         m_pathToIndex.remove(path);
         m_indexToPath.remove(index);
         removeTab(index);
-    }
-}
-
-void EditorTabWidget::onThemeChanged(QString& themeName) {
-    for (int i = 0; i < count(); ++i) {
-        auto* editor = editorAt(i);
-        editor->themeChanged(themeName);
     }
 }
 

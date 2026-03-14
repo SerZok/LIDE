@@ -210,7 +210,6 @@ void ProjectTree::expandToPath(const QString& path)
 
 void ProjectTree::onFileLoaded(const QString& path)
 {
-    qDebug() << "Файл загружен: " << path;
     m_currentFile = path;
     m_delegate->setCurrentFile(path);
 

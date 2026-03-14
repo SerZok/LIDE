@@ -60,6 +60,13 @@ private:
     QAction* m_lightStyleAction = nullptr;
     QAction* m_darkStyleAction = nullptr;
 
+    // Меню правка
+    QAction* m_undoAction;
+    QAction* m_redoAction;
+    QAction* m_cutAction;
+    QAction* m_copyAction;
+    QAction* m_pasteAction;
+
     void loadTheme(QString stylePath);
     void openFiles(QStringList files);
 
