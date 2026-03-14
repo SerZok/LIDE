@@ -7,7 +7,7 @@
 #include <QHeaderView>
 #include <QInputDialog>
 #include <QStandardPaths>
-#include <QSettings>
+#include <QDockWidget>
 
 // ==================[ ProjectTree ]==================
 ProjectTree::ProjectTree(QWidget* parent)
@@ -21,6 +21,7 @@ ProjectTree::ProjectTree(QWidget* parent)
     m_model->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs);
     m_model->setNameFilters(QStringList() << "*.lisp" << "*.lsp" << "*.asd");
     m_model->setNameFilterDisables(false);
+    m_model->setReadOnly(false);
 
     setModel(m_model);
     setItemDelegate(m_delegate);
@@ -29,6 +30,7 @@ ProjectTree::ProjectTree(QWidget* parent)
     setHeaderHidden(true);
     setExpandsOnDoubleClick(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
+    setEditTriggers(QAbstractItemView::EditKeyPressed);
 
     header()->hideSection(1); // Size
     header()->hideSection(2); // Type
@@ -127,7 +129,9 @@ void ProjectTree::onContextMenuRequested(const QPoint& pos)
         QAction* showInFolderAction = menu.addAction(tr("Показать в проводнике"));
 
         connect(renameAction, &QAction::triggered, [this, index]() {
-            edit(index);
+            if (index.isValid() && (m_model->flags(index) & Qt::ItemIsEditable)) {
+                edit(index);
+            }
             });
 
         connect(deleteAction, &QAction::triggered, [this, index, path]() {
@@ -159,6 +163,11 @@ void ProjectTree::onContextMenuRequested(const QPoint& pos)
             if (!dirName.isEmpty()) {
                 QDir().mkdir(m_rootPath + "/" + dirName);
             }
+            });
+
+        QAction* showInFolderAction = menu.addAction(tr("Показать в проводнике"));
+        connect(showInFolderAction, &QAction::triggered, [this]() {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(m_rootPath).path()));
             });
     }
 
@@ -216,8 +225,6 @@ void ProjectTree::onFileLoaded(const QString& path)
 
 void ProjectTree::onFileSaved(const QString& path)
 {
-    qDebug() << "Файл сохранён: " << path;
-
     m_modifiedFiles.remove(path);
     m_delegate->setModifiedFiles(m_modifiedFiles);
 
@@ -229,8 +236,6 @@ void ProjectTree::onFileSaved(const QString& path)
 
 void ProjectTree::onFileModifiedChanged(const QString& path, bool modified)
 {
-    qDebug() << "Файл изменён: " << path;
-
     if (modified) {
         m_modifiedFiles.insert(path);
     }
@@ -247,8 +252,6 @@ void ProjectTree::onFileModifiedChanged(const QString& path, bool modified)
 
 void ProjectTree::onFileClosed(const QString& path)
 {
-    qDebug() << "Файл закрыт: " << path;
-
     if (m_currentFile == path) {
         m_currentFile.clear();
         m_delegate->setCurrentFile("");
@@ -267,20 +270,19 @@ void ProjectTree::onFileClosed(const QString& path)
 
 void ProjectTree::saveState()
 {
-    QSettings settings("LIDE", "LIDE");
-    settings.setValue("project_tree/root_path", m_rootPath);
+    auto* settings = Settings::instance();
+    settings->setLastProjectPath(m_rootPath);
 }
 
 void ProjectTree::restoreState()
 {
-    QSettings settings("LIDE", "LIDE");
-    QString lastPath = settings.value("project_tree/root_path").toString();
+    auto* settings = Settings::instance();
+    QString lastPath = settings->lastProjectPath();
 
     if (!lastPath.isEmpty() && QDir(lastPath).exists()) {
         openProject(lastPath);
     }
     else {
-        QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-        openProject(documentsPath);
+        openProject(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
     }
 }

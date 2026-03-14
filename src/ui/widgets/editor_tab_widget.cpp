@@ -37,6 +37,7 @@ bool EditorTabWidget::openFile(const QString& path)
     // Подключаем сигналы редактора
     connect(editor, &LispEditor::fileModifiedChanged, this, &EditorTabWidget::onEditorModifiedChanged);
     connect(editor, &LispEditor::fileSaved, this, &EditorTabWidget::onEditorSaved);
+    connect(editor, &LispEditor::fileClosed, this, &EditorTabWidget::onFileClosed);
 
     if (!editor->loadFile(path)) {
         delete editor;
@@ -83,7 +84,7 @@ void EditorTabWidget::onTabCloseRequested(int index)
             tr("Закрыть файл"),
             tr("Файл %1 не сохранён.\nСохранить перед закрытием?")
             .arg(info.fileName()),
-            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+            QMessageBox::Save | QMessageBox::Abort | QMessageBox::Cancel);
 
         if (reply == QMessageBox::Save) {
             editor->saveFile();
@@ -93,7 +94,6 @@ void EditorTabWidget::onTabCloseRequested(int index)
         }
     }
 
-    // Закрываем вкладку
     QString path = m_indexToPath.value(index);
     emit fileClosed(path);
 
@@ -127,6 +127,16 @@ void EditorTabWidget::onEditorSaved(const QString& path)
     int index = findTabByPath(path);
     if (index != -1) {
         updateTabText(index, path, false);
+    }
+}
+
+void EditorTabWidget::onFileClosed(const QString& path)
+{
+    int index = findTabByPath(path);
+    if (index != -1) {
+        m_pathToIndex.remove(path);
+        m_indexToPath.remove(index);
+        removeTab(index);
     }
 }
 

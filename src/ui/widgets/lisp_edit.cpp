@@ -36,9 +36,6 @@ LispEditor::LispEditor(QWidget* parent)
 
 LispEditor::~LispEditor()
 {
-    if(!m_currentFile.isEmpty()) {
-        emit fileClosed(m_currentFile);
-    }
     if (!m_fileWatcher->files().isEmpty()) {
         m_fileWatcher->removePaths(m_fileWatcher->files());
     }
@@ -223,22 +220,12 @@ void LispEditor::onTextChanged()
 void LispEditor::askForReload()
 {
     if (!QFile::exists(m_currentFile)) {
-        QMessageBox::warning(this, tr("Файл удалён"), tr("Файл %1 был удалён извне.").arg(m_currentFile));
         emit fileClosed(m_currentFile);
         m_currentFile.clear();
         return;
     }
 
-    // Спрашиваем перед обновлением
-    QMessageBox::StandardButton reply = QMessageBox::question(this,
-        tr("Файл изменён"),
-        tr("Файл %1 был изменён.\n" "Обновить? (Ваши изменения будут потеряны)")
-        .arg(QFileInfo(m_currentFile).fileName()),
-        QMessageBox::Yes | QMessageBox::No);
-
-    if (reply == QMessageBox::Yes) {
-        reloadFile();
-    }
+    reloadFile();
 }
 
 bool LispEditor::reloadFile()

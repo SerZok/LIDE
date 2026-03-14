@@ -74,8 +74,28 @@ void MainWindow::setupDockWidgets()
     m_tabWidget->setObjectName("editorTabWidget");
     setCentralWidget(m_tabWidget);
 
-    createDockWidget(tr("Дерево проекта"), createProjectTree(), Qt::LeftDockWidgetArea);
-    createDockWidget(tr("Консоль LISP"), createConsoleLisp(), Qt::BottomDockWidgetArea);
+    m_projectDock = new QDockWidget(tr("Дерево проекта"), this);
+    m_projectDock->setWidget(createProjectTree());
+    m_projectDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    m_projectDock->setObjectName("treeProject_dock");
+    addDockWidget(Qt::LeftDockWidgetArea, m_projectDock);
+
+    m_ConsoleDock = new QDockWidget(tr("Консоль LISP"), this);
+    m_ConsoleDock->setWidget(createConsoleLisp());
+    m_ConsoleDock->setAllowedAreas(Qt::AllDockWidgetAreas);
+    m_ConsoleDock->setObjectName("console_dock");
+    addDockWidget(Qt::BottomDockWidgetArea, m_ConsoleDock);
+
+    QTimer::singleShot(0, [this]() {
+        if (m_projectTree && m_projectDock) {
+            QString currentPath = m_projectTree->rootPath();
+            if (!currentPath.isEmpty()) {
+                QFileInfo info(currentPath);
+                m_projectDock->setWindowTitle(tr("Дерево проекта - %1").arg(info.fileName()));
+                m_projectDock->setToolTip(tr("Текущий проект: %1").arg(info.absolutePath()));
+            }
+        }
+        });
 
     setupConnections();
 }
@@ -85,19 +105,16 @@ void MainWindow::setupConnections() {
     connect(m_tabWidget, &EditorTabWidget::fileModifiedChanged, m_projectTree, &ProjectTree::onFileModifiedChanged);
     connect(m_tabWidget, &EditorTabWidget::fileClosed, m_projectTree, &ProjectTree::onFileClosed);
     connect(m_projectTree, &ProjectTree::fileActivated, m_tabWidget, &EditorTabWidget::openFile);
+    connect(m_projectTree, &ProjectTree::projectOpened, this, [this](const QString& projectPath) {
+            QFileInfo info(projectPath);
+            if (!info.exists() || !info.isDir()) return;
+
+            m_projectDock->setWindowTitle(tr("Дерево проекта - %1").arg(info.fileName()));
+            m_projectDock->setToolTip(tr("Текущий проект: %1").arg(info.absolutePath()));
+        });
     connect(this, &MainWindow::themeChanged, m_tabWidget, &EditorTabWidget::onThemeChanged);
 }
 
-void MainWindow::createDockWidget(const QString& title, QWidget* widget, Qt::DockWidgetArea area)
-{
-    auto* dock = new QDockWidget(title, this);
-    dock->setWidget(widget);
-    dock->setAllowedAreas(Qt::AllDockWidgetAreas);
-    dock->setObjectName(widget->objectName() + "_dock");
-    addDockWidget(area, dock);
-
-    m_dockNames[dock] = title;
-}
 
 ProjectTree* MainWindow::createProjectTree()
 {
@@ -118,18 +135,42 @@ void MainWindow::setupMenuBar()
     // File menu
     auto* fileMenu = menuBar()->addMenu(tr("&Файл"));
 
-    fileMenu->addAction(tr("Новый"), QKeySequence::New);
+    m_createFileAction = fileMenu->addAction(tr("Новый файл..."), QKeySequence::New);
+    connect(m_createFileAction, &QAction::triggered, this, [this]() {
+        QString path = QFileDialog::getSaveFileName(this, tr("Новый файл"), m_projectTree->rootPath(), tr("Lisp файлы (*.lisp *.lsp *.asd)"));
+        if (!path.isEmpty()) {
+            if (QFile::exists(path)) {
+                int ret = QMessageBox::question(this, tr("Файл существует"), tr("Файл %1 уже существует.\nПерезаписать?").arg(path), QMessageBox::Yes | QMessageBox::No);
+                if (ret != QMessageBox::Yes) {
+                    return;
+                }
+            }
 
-    m_openFileAction = fileMenu->addAction(tr("Открыть..."), QKeySequence::Open);
+            QFile file(path);
+            if (file.open(QIODevice::WriteOnly)) {
+                file.close();
+                m_tabWidget->openFile(path);
+            }
+            else {
+                QMessageBox::warning(this, tr("Ошибка"), tr("Не удалось создать файл %1").arg(path));
+            }
+        }
+        });
+    addAction(m_createFileAction);
+
+    m_openFileAction = fileMenu->addAction(tr("Открыть файл..."), QKeySequence::Open);
     connect(m_openFileAction, &QAction::triggered, this, [this]() {
         QString path = QFileDialog::getOpenFileName(this, tr("Открытие файла"), m_projectTree->rootPath(), tr("Lisp файлы (* .lisp *.lsp * .asd)"));
         if (!path.isEmpty()) m_tabWidget->openFile(path);
         });
+    addAction(m_openFileAction);
 
     fileMenu->addSeparator();
 
-    m_openProjectAction = fileMenu->addAction(tr("Открыть проект..."), QKeySequence::Open);
+    m_openProjectAction = fileMenu->addAction(tr("Открыть проект..."));
+    m_openProjectAction->setShortcut(QKeySequence((Qt::CTRL | Qt::SHIFT | Qt::Key_O)));
     m_newProjectAction = fileMenu->addAction(tr("Новый проект..."));
+    m_newProjectAction->setShortcut(QKeySequence((Qt::CTRL | Qt::SHIFT | Qt::Key_N)));
     connect(m_openProjectAction, &QAction::triggered, this, &MainWindow::openProject);
     connect(m_newProjectAction, &QAction::triggered, this, &MainWindow::createProject);
 

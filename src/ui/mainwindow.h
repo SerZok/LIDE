@@ -40,12 +40,16 @@ private:
     Ui::MainWindow* ui;
     QMap<QDockWidget*, QString> m_dockNames;
 
+    QDockWidget* m_projectDock = nullptr;
+    QDockWidget* m_ConsoleDock = nullptr;
+
     // Основные виджеты
     EditorTabWidget* m_tabWidget;
     ProjectTree* m_projectTree;
     Console* m_console;
 
     // Меню работы с файлами
+    QAction* m_createFileAction = nullptr;
     QAction* m_openFileAction = nullptr;
     QAction* m_openProjectAction = nullptr;
     QAction* m_newProjectAction = nullptr;
@@ -63,10 +67,6 @@ private:
     void setupMenuBar();
     void setupStatusBar();
     void setupConnections();
-
-    void createDockWidget(const QString& title,
-        QWidget* widget,
-        Qt::DockWidgetArea area);
 
     ProjectTree* createProjectTree();
     Console* createConsoleLisp();

@@ -42,6 +42,7 @@ private slots:
     void onCurrentChanged(int index);
     void onEditorModifiedChanged(const QString& path, bool modified);
     void onEditorSaved(const QString& path);
+    void onFileClosed(const QString& path);
 
 private:
     QMap<QString, int> m_pathToIndex;  // Путь -> индекс вкладки

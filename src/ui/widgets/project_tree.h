@@ -4,6 +4,7 @@
 
 #include <QTreeView>
 #include <QFileSystemModel>
+#include "settings.h"
 
 class ProjectTree : public QTreeView
 {
