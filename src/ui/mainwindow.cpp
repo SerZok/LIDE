@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget* parent) :
     ,m_tabWidget(nullptr)
 {
     ui->setupUi(this);
-    setWindowTitle("LIDE - Lisp IDE");
+    setWindowTitle("LIDE - LISP IDE");
     resize(1366, 1080);
 
     setupDockWidgets();
@@ -50,7 +50,6 @@ void MainWindow::loadTheme(QString theme)
 
         QString styleSheet = QLatin1String(file.readAll());
         qApp->setStyleSheet(styleSheet);
-        qDebug() << "Стиль: " << file.fileName() << " загружен успешно!";
         file.close();
 
         emit themeChanged(theme);
@@ -205,13 +204,13 @@ void MainWindow::setupMenuBar()
     fileMenu->addAction(tr("Выйти"), [this]() { close(); });
 
     // Edit menu
-    auto* editMenu = menuBar()->addMenu("&Правка");
-    m_undoAction = editMenu->addAction("Назад", QKeySequence::Undo);
-    m_redoAction = editMenu->addAction("Вернуть", QKeySequence::Redo);
+    auto* editMenu = menuBar()->addMenu(tr("&Правка"));
+    m_undoAction = editMenu->addAction(tr("Назад"), QKeySequence::Undo);
+    m_redoAction = editMenu->addAction(tr("Вернуть"), QKeySequence::Redo);
     editMenu->addSeparator();
-    m_cutAction = editMenu->addAction("Вырезать", QKeySequence::Cut);
-    m_copyAction = editMenu->addAction("Скопировать", QKeySequence::Copy);
-    m_pasteAction = editMenu->addAction("Вставить", QKeySequence::Paste);
+    m_cutAction = editMenu->addAction(tr("Вырезать"), QKeySequence::Cut);
+    m_copyAction = editMenu->addAction(tr("Скопировать"), QKeySequence::Copy);
+    m_pasteAction = editMenu->addAction(tr("Вставить"), QKeySequence::Paste);
 
     m_undoAction->setEnabled(false);
     m_redoAction->setEnabled(false);
@@ -247,7 +246,7 @@ void MainWindow::setupMenuBar()
         });
 
     // View
-    auto* viewMenu = menuBar()->addMenu("&Вид");
+    auto* viewMenu = menuBar()->addMenu(tr("&Вид"));
     for (auto it = m_dockNames.begin(); it != m_dockNames.end(); ++it) {
         auto* dock = it.key();
         auto* action = viewMenu->addAction(it.value());
@@ -267,23 +266,23 @@ void MainWindow::setupMenuBar()
     }
 
     // Run menu
-    auto* runMenu = menuBar()->addMenu("&Запуск");
+    auto* runMenu = menuBar()->addMenu(tr("&Запуск"));
     runMenu->addSeparator();
-    runMenu->addAction("Запустить REPL");
-    runMenu->addAction("Очистить REPL");
+    runMenu->addAction(tr("Запустить REPL"));
+    runMenu->addAction(tr("Очистить REPL"));
 
     // Tools menu
-    auto* toolsMenu = menuBar()->addMenu("&Настройки");
-    auto styleMenu = toolsMenu->addMenu("Тема...");
+    auto* toolsMenu = menuBar()->addMenu(tr("&Настройки"));
+    auto styleMenu = toolsMenu->addMenu(tr("Тема..."));
 
     // Создаём группу для взаимного исключения
     auto* themeGroup = new QActionGroup(this);
 
-    m_lightStyleAction = styleMenu->addAction("Светлая");
+    m_lightStyleAction = styleMenu->addAction(tr("Светлая"));
     m_lightStyleAction->setCheckable(true);
     m_lightStyleAction->setActionGroup(themeGroup);
 
-    m_darkStyleAction = styleMenu->addAction("Тёмная");
+    m_darkStyleAction = styleMenu->addAction(tr("Тёмная"));
     m_darkStyleAction->setCheckable(true);
     m_darkStyleAction->setActionGroup(themeGroup);
 
@@ -295,6 +294,15 @@ void MainWindow::setupMenuBar()
         QString theme = (action == m_lightStyleAction) ? "light" : "dark";
         loadTheme(theme);
         });
+
+    // Справка
+    auto* helpMenu = menuBar()->addMenu(tr("&Справка"));
+    auto aboutAction = helpMenu->addAction(tr("О программе"));
+    connect(aboutAction, &QAction::triggered, this, [this]() {
+        AboutDialog dlg(this);
+        dlg.exec();
+        });
+
 }
 
 void MainWindow::setupStatusBar()
@@ -335,21 +343,16 @@ void MainWindow::openProject() {
 }
 
 void MainWindow::createProject() {
-    // Выбираем где создавать(папку)
     QString parentPath = QFileDialog::getExistingDirectory(
         this,
         tr("Выберите папку для нового проекта"),
         m_projectTree->rootPath(),
-        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-    );
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if (parentPath.isEmpty()) return;
 
     // ИМЯ проекта(папки)
-    QString projectName = QInputDialog::getText(
-        this,
-        tr("Новый проект"),
-        tr("Название проекта:")
+    QString projectName = QInputDialog::getText(this, tr("Новый проект"), tr("Название проекта:")
     );
 
     if (!projectName.isEmpty()) {

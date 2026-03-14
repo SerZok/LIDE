@@ -7,6 +7,7 @@
 #include "ui/widgets/editor_tab_widget.h"
 #include "ui/widgets/project_tree.h"
 #include "ui/widgets/console.h"
+#include "ui/about_dialog.h"
 #include "settings.h"
 
 QT_BEGIN_NAMESPACE
