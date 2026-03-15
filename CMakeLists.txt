@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 set (PROJECT_NAME LIDE)
 set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 1)
+set(PROJECT_VERSION_MINOR 2)
 set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
@@ -150,10 +150,10 @@ if(WIN32)
         --no-opengl
         --no-quick
         --no-3dcore
+        --no-compiler-runtime
         --no-system-d3d-compiler
         --no-system-dxc-compiler
         --verbose 0
-
         COMMENT "Running windeployqt..."
     )
 

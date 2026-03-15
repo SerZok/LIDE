@@ -19,6 +19,7 @@ execute_process(
         --no-network
         --no-opengl
         --no-3dcore
+        --no-compiler-runtime
         --no-system-d3d-compiler
         --no-system-dxc-compiler
         --dir "${TEMP_DIR}"

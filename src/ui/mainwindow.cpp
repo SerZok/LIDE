@@ -62,8 +62,11 @@ void MainWindow::loadTheme(QString theme)
 void MainWindow::openFiles(QStringList files) {
     if (!m_tabWidget) return;
 
-    for (const auto& file : files) {
-        m_tabWidget->openFile(file);
+    for (const QString& file : files) {
+        if (file.endsWith(".lisp", Qt::CaseInsensitive) ||
+            file.endsWith(".lsp", Qt::CaseInsensitive)) {
+            m_tabWidget->openFile(file);
+        }
     }
 }
 

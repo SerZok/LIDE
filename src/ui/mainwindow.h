@@ -27,6 +27,8 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
+    void openFiles(QStringList files);
+
 signals:
     void themeChanged(QString& themeName);
 
@@ -36,6 +38,7 @@ private slots:
 
     void openProject();
     void createProject();
+
 
 private:
     Ui::MainWindow* ui;
@@ -69,7 +72,6 @@ private:
     QAction* m_pasteAction;
 
     void loadTheme(QString stylePath);
-    void openFiles(QStringList files);
 
     void setupDockWidgets();
     void setupMenuBar();
