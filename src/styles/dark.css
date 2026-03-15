@@ -6,6 +6,35 @@ QMainWindow {
     background-color: #1e1e1e;
 }
 
+QDialog {
+    font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+    QDialog QLabel {
+        color: #e0e0e0;
+    }
+
+    QDialog QLineEdit {
+        color: #e0e0e0;
+        background-color: #1e1e1e;
+        border: 1px solid #3d3d3d;
+    }
+
+QPushButton {
+    color: #e0e0e0;
+    background-color: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    padding: 0.2em 0.8em;
+    border-radius: 0.2em;
+}
+
+    QPushButton::hover {
+        background-color: #3e4451;
+    }
+
+
 QMenuBar {
     background-color: #2d2d2d;
     color: #e0e0e0;

@@ -11,7 +11,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 	connect(ui.buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
 	setFixedSize(size());
 
-	QString versionText = tr("Версия: %1<br>Сборка: %2")
+	QString versionText = tr("Версия: %1 (%2)")
 		.arg(APP_VERSION)
 		.arg(BUILD_DATE);
 	ui.versionLabel->setText(versionText);

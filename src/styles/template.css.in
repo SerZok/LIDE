@@ -6,6 +6,35 @@ QMainWindow {
     background-color: @BG_PRIMARY@;
 }
 
+QDialog {
+    font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
+    background-color: @BG_PRIMARY@;
+    color: @TEXT_PRIMARY@;
+}
+
+    QDialog QLabel {
+        color: @TEXT_PRIMARY@;
+    }
+
+    QDialog QLineEdit {
+        color: @TEXT_PRIMARY@;
+        background-color: @BG_PRIMARY@;
+        border: 1px solid @BORDER@;
+    }
+
+QPushButton {
+    color: @TEXT_PRIMARY@;
+    background-color: @BG_SECONDARY@;
+    border: 1px solid @BORDER@;
+    padding: 0.2em 0.8em;
+    border-radius: 0.2em;
+}
+
+    QPushButton::hover {
+        background-color: @BG_TERTIARY@;
+    }
+
+
 QMenuBar {
     background-color: @BG_SECONDARY@;
     color: @TEXT_PRIMARY@;

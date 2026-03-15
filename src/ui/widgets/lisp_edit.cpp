@@ -22,9 +22,14 @@ LispEditor::LispEditor(QWidget* parent)
     m_reloadTimer->setSingleShot(true);
     m_reloadTimer->setInterval(200);
 
+    m_matchedBracketFormat.setBackground(QColor(100, 150, 100, 100));
+    m_matchedBracketFormat.setForeground(Qt::white);
+    m_mismatchedBracketFormat.setBackground(QColor(200, 80, 80, 150));
+
     connect(this, &LispEditor::blockCountChanged, this, &LispEditor::updateLineNumberAreaWidth);
     connect(this, &LispEditor::updateRequest, this, &LispEditor::updateLineNumberArea);
     connect(this, &LispEditor::cursorPositionChanged, this, &LispEditor::highlightCurrentLine);
+    connect(this, &LispEditor::cursorPositionChanged, this, &LispEditor::highlightMatchingBrackets);
 
     connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &LispEditor::onFileChanged);
     connect(m_reloadTimer, &QTimer::timeout, this, &LispEditor::askForReload);
@@ -52,6 +57,164 @@ int LispEditor::lineNumberAreaWidth() const
 
     int space = 15 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
     return space;
+}
+
+void LispEditor::highlightMatchingBrackets()
+{
+    QTextCursor cursor = textCursor();
+    int position = cursor.position();
+
+    // Пропускаем, если курсор в комментарии
+    if (isPositionInComment(position)) {
+        setExtraSelections(QList<QTextEdit::ExtraSelection>());
+        return;
+    }
+
+    // ЕСЛИ ЕСТЬ ВЫДЕЛЕНИЕ - используем его начало
+    if (cursor.hasSelection()) {
+        position = cursor.selectionStart();
+        cursor.setPosition(position);
+
+        // Проверяем, не в комментарии ли начало выделения
+        if (isPositionInComment(position)) {
+            setExtraSelections(QList<QTextEdit::ExtraSelection>());
+            return;
+        }
+    }
+
+    // Проверяем, не находимся ли мы в конце документа
+    if (position >= document()->characterCount() - 1) {
+        setExtraSelections(QList<QTextEdit::ExtraSelection>());
+        return;
+    }
+
+    // Получаем символ под курсором
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+    QString selectedText = cursor.selectedText();
+
+    if (selectedText.isEmpty()) {
+        setExtraSelections(QList<QTextEdit::ExtraSelection>());
+        return;
+    }
+
+    QChar currentChar = selectedText.at(0);
+
+    // Если символ не скобка - выходим
+    if (currentChar != '(' && currentChar != ')') {
+        setExtraSelections(QList<QTextEdit::ExtraSelection>());
+        return;
+    }
+
+    // Проверяем, не в комментарии ли сама скобка
+    if (isPositionInComment(position)) {
+        setExtraSelections(QList<QTextEdit::ExtraSelection>());
+        return;
+    }
+
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    // Подсвечиваем текущую скобку
+    QTextEdit::ExtraSelection currentSelection;
+    currentSelection.cursor = cursor;
+    currentSelection.format.setBackground(QColor(50, 50, 255, 200));
+    extraSelections.append(currentSelection);
+
+    // Ищем парную скобку
+    int matchPos = findMatchingBracket(position, currentChar == '(');
+
+    if (matchPos != -1) {
+        // Проверяем, не в комментарии ли найденная скобка
+        if (!isPositionInComment(matchPos)) {
+            // Подсвечиваем область между скобками
+            QTextEdit::ExtraSelection regionSelection;
+            QTextCursor regionCursor = textCursor();
+
+            if (currentChar == '(') {
+                regionCursor.setPosition(position + 1);
+                regionCursor.setPosition(matchPos, QTextCursor::KeepAnchor);
+            }
+            else {
+                regionCursor.setPosition(matchPos + 1);
+                regionCursor.setPosition(position, QTextCursor::KeepAnchor);
+            }
+
+            if (!regionCursor.selectedText().isEmpty()) {
+                regionSelection.cursor = regionCursor;
+                regionSelection.format.setBackground(QColor(80, 80, 80, 50));
+                extraSelections.append(regionSelection);
+            }
+
+            // Подсвечиваем парную скобку
+            QTextEdit::ExtraSelection matchSelection;
+            QTextCursor matchCursor(document());
+            matchCursor.setPosition(matchPos);
+            matchCursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
+
+            matchSelection.cursor = matchCursor;
+            matchSelection.format.setBackground(QColor(50, 50, 255, 200));
+            extraSelections.append(matchSelection);
+        }
+    }
+    else {
+        // Если парная скобка не найдена, подсвечиваем ошибку
+        QTextEdit::ExtraSelection errorSelection;
+        errorSelection.cursor = cursor;
+        errorSelection.format.setBackground(QColor(255, 50, 50));
+        extraSelections.append(errorSelection);
+    }
+
+    setExtraSelections(extraSelections);
+}
+
+int LispEditor::findMatchingBracket(int startPos, bool forward) const
+{
+    const QTextDocument* doc = document();
+    int depth = 1;
+
+    if (forward) {
+        for (int i = startPos + 1; i < doc->characterCount(); ++i) {
+            QChar c = doc->characterAt(i);
+
+            if (c == '(') depth++;
+            else if (c == ')') depth--;
+
+            if (depth == 0) {
+                return i;
+            }
+        }
+    }
+    else {
+        for (int i = startPos - 1; i >= 0; --i) {
+            QChar c = doc->characterAt(i);
+
+            if (c == ')') depth++;
+            else if (c == '(') depth--;
+
+            if (depth == 0) {
+                return i;
+            }
+        }
+    }
+
+    return -1;
+}
+
+bool LispEditor::isPositionInComment(int position) const
+{
+    const QTextDocument* doc = document();
+    QTextBlock block = doc->findBlock(position);
+
+    if (!block.isValid()) return false;
+
+    QString text = block.text();
+    int blockPosition = block.position();
+    int relativePos = position - blockPosition;
+
+    // Ищем первый символ ';' в строке
+    int commentStart = text.indexOf(';');
+
+    // Если комментарий начинается до текущей позиции
+    return (commentStart != -1 && relativePos >= commentStart);
 }
 
 void LispEditor::updateLineNumberAreaWidth(int /* newBlockCount */)

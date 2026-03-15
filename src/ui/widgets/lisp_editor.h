@@ -39,7 +39,7 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private slots:
-    // Визуал
+    void highlightMatchingBrackets();
     void updateLineNumberAreaWidth(int newBlockCount);
     void highlightCurrentLine();
     void updateLineNumberArea(const QRect& rect, int dy);
@@ -57,12 +57,19 @@ private:
     QTimer* m_reloadTimer;
     bool m_ignoreChanges;
     LispHighlighter* m_highlighter;
+    QTextCharFormat m_matchedBracketFormat;
+    QTextCharFormat m_mismatchedBracketFormat;
 
     int lineNumberAreaWidth() const;
 
     void setupWatcher();
     void updateWatcher();
     bool reloadFile();
+
+    int findMatchingBracket(int startPos, bool forward) const;
+    void matchBrackets(const QTextCursor& cursor);
+    bool isPositionInComment(int position) const;
+
 };
 
 // Нумерация строк

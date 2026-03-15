@@ -20,7 +20,7 @@
     </message>
     <message>
         <location filename="../ui/about_dialog.cpp" line="14"/>
-        <source>Версия: %1&lt;br&gt;Сборка: %2</source>
+        <source>Версия: %1 (%2)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -54,19 +54,19 @@
 <context>
     <name>LispEditor</name>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="131"/>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="176"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="294"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="339"/>
         <source>Ошибка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="132"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="295"/>
         <source>Не удалось открыть файл %1:
 %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="177"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="340"/>
         <source>Не удалось сохранить файл %1</source>
         <translation type="unfinished"></translation>
     </message>
