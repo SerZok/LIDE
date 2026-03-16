@@ -79,10 +79,11 @@ CMakeLists.txt.user*
 .pch/
 .rcc/
 .uic/
-/build*/
-/.vs/LIDE/v17
-/out/
-/.vs
+
+build/
+.vs/
+out/
+setups/
 
 # Сохраняем sbcl
 !libs/sbcl/

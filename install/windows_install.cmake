@@ -1,14 +1,13 @@
-# 1. Создаём временную директорию
 set(TEMP_DIR "${CMAKE_CURRENT_BINARY_DIR}/install_temp")
 file(REMOVE_RECURSE ${TEMP_DIR})
 
-# 2. Копируем exe
+# Копируем exe
 file(COPY 
     "${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.exe"
     DESTINATION "${TEMP_DIR}"
 )
 
-# 3. Запускаем windeployqt
+# windeployqt
 message(STATUS "Запуск windeployqt...")
 execute_process(
     COMMAND ${WINDEPLOYQT} 
@@ -31,15 +30,28 @@ if(NOT DEPLOY_RESULT EQUAL 0)
     message(WARNING "windeployqt завершился с ошибкой")
 endif()
 
-# 4. Копируем SBCL если есть
 if(EXISTS "${ROOT_PATH}/libs/SBCL")
     message(STATUS "Копирование SBCL...")
-    file(COPY "${ROOT_PATH}/libs/SBCL"
-        DESTINATION "${TEMP_DIR}"
+    file(COPY "${ROOT_PATH}/libs/SBCL"  DESTINATION "${TEMP_DIR}"
     )
 endif()
 
-# 5. Ищем Inno Setup
+# ZIP архив
+set(ZIP_NAME "${SETUP_DIR}/${PROJECT_NAME}_${PROJECT_VERSION}.zip")
+message(STATUS "Создание портативной ZIP версии...")
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E tar "cf" "${ZIP_NAME}" --format=zip "."
+        WORKING_DIRECTORY ${TEMP_DIR}
+        RESULT_VARIABLE ZIP_RESULT
+    )
+
+if(ZIP_RESULT EQUAL 0)
+    message(STATUS "Портативная версия создана: ${ZIP_NAME}")
+else()
+    message(WARNING "Не удалось создать ZIP архив")
+endif()
+
+# Inno Setup (Установщик)
 set(INNO_PATH "")
 foreach(PATH 
     "C:/Program Files (x86)/Inno Setup 6/ISCC.exe"
@@ -57,7 +69,7 @@ if(NOT INNO_PATH)
     message(FATAL_ERROR "Inno Setup не найден! Сайт: https://jrsoftware.org/isdl.php#stable")
 endif()
 
-# 6. Запускаем Inno Setup с параметрами
+# Запускаем Inno Setup
 message(STATUS "Запуск Inno Setup...")
 
 execute_process(
