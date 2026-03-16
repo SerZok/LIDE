@@ -36,12 +36,23 @@ private slots:
     void saveAppState();
     void loadAppState();
 
+private:
+    Ui::MainWindow* ui;
+    QToolBar* m_mainToolBar;
+
+    void setupMenuBar();
+    void setupToolBar();
+    void setupStatusBar();
+    void setupDockWidgets();
+    void setupConnections();
+    void loadTheme(QString stylePath);
+
+    ProjectTree* createProjectTree();
+    Console* createConsoleLisp();
+
     void openProject();
     void createProject();
 
-
-private:
-    Ui::MainWindow* ui;
     QMap<QDockWidget*, QString> m_dockNames;
 
     QDockWidget* m_projectDock = nullptr;
@@ -59,27 +70,23 @@ private:
     QAction* m_newProjectAction = nullptr;
     QAction* m_saveFileAction = nullptr;
     QAction* m_saveFileAsAction = nullptr;
+    QAction* m_saveFileAllAction = nullptr;
 
     // Меню для тем приложения
     QAction* m_lightStyleAction = nullptr;
     QAction* m_darkStyleAction = nullptr;
 
     // Меню правка
-    QAction* m_undoAction;
-    QAction* m_redoAction;
-    QAction* m_cutAction;
-    QAction* m_copyAction;
-    QAction* m_pasteAction;
+    QAction* m_undoAction = nullptr;
+    QAction* m_redoAction = nullptr;
+    QAction* m_cutAction = nullptr;
+    QAction* m_copyAction = nullptr;
+    QAction* m_pasteAction = nullptr;
 
-    void loadTheme(QString stylePath);
+    // Запуск
+    QAction* m_startReplAction = nullptr;
 
-    void setupDockWidgets();
-    void setupMenuBar();
-    void setupStatusBar();
-    void setupConnections();
-
-    ProjectTree* createProjectTree();
-    Console* createConsoleLisp();
+    
 };
 
 #endif

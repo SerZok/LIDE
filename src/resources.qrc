@@ -5,7 +5,14 @@
         <file>styles/colors/dark.colors</file>
         <file>styles/colors/light.colors</file>
         <file>images/logo.ico</file>
-        <file>images/logo.png</file>
         <file>images/logo.svg</file>
+        <file>images/open-project.svg</file>
+        <file>images/new-file.svg</file>
+        <file>images/open-file.svg</file>
+        <file>images/save.svg</file>
+        <file>images/save-all.svg</file>
+        <file>images/dark-theme.svg</file>
+        <file>images/light-theme.svg</file>
+        <file>images/start.svg</file>
     </qresource>
 </RCC>

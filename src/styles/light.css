@@ -36,6 +36,7 @@ QPushButton {
 
 
 QMenuBar {
+    font-size: 10pt;
     background-color: #ffffff;
     color: #2d2d2d;
     border-bottom: 1px solid #d0d0d0;
