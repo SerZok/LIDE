@@ -90,3 +90,4 @@ setups/
 !libs/sbcl/**
 /src/backend
 /src/app/version.h
+!/src/resources.rc

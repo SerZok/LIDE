@@ -14,5 +14,6 @@
         <file>images/dark-theme.svg</file>
         <file>images/light-theme.svg</file>
         <file>images/start.svg</file>
+        <file>resources.rc</file>
     </qresource>
 </RCC>
