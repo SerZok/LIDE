@@ -22,6 +22,7 @@ public:
     // Отправка команд
     void sendCommand(const QString& command);
     void sendCurrentLine();  // Отправить текущую строку
+    void sendCode(const QString& code); // Отправить код 'code'
     void sendSelectedText(); // Отправить выделенный текст
 
 protected:
@@ -52,7 +53,7 @@ private:
     int m_editableStart;
 
     void setupConsole();
-    void appendOutput(const QString& text, bool isError = false);
+    void appendOutput(const QString& text, bool isError = false, bool isNotice = false);
     void appendPrompt();
     QString getCurrentLine() const;
     void insertFromHistory(int direction); // -1 назад, +1 вперёд
