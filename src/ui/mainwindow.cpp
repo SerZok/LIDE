@@ -59,7 +59,7 @@ void MainWindow::setupMenuBar()
     // File menu
     auto* fileMenu = menuBar()->addMenu(tr("&Файл"));
 
-    m_createFileAction = fileMenu->addAction(QIcon(":/images/new-file.svg"), tr("Новый файл..."), QKeySequence::New);
+    m_createFileAction = fileMenu->addAction(QIcon(":/icons/images/new-file.svg"), tr("Новый файл..."), QKeySequence::New);
     connect(m_createFileAction, &QAction::triggered, this, [this]() {
         QString path = QFileDialog::getSaveFileName(this, tr("Новый файл"), m_projectTree->rootPath(), tr("Lisp файлы (*.lisp *.lsp *.asd)"));
         if (!path.isEmpty()) {
@@ -82,7 +82,7 @@ void MainWindow::setupMenuBar()
         });
     addAction(m_createFileAction);
 
-    m_openFileAction = fileMenu->addAction(QIcon(":/images/open-file.svg"), tr("Открыть файл..."), QKeySequence::Open);
+    m_openFileAction = fileMenu->addAction(QIcon(":/icons/images/open-file.svg"), tr("Открыть файл..."), QKeySequence::Open);
     connect(m_openFileAction, &QAction::triggered, this, [this]() {
         QString path = QFileDialog::getOpenFileName(this, tr("Открытие файла"), m_projectTree->rootPath(), tr("Lisp файлы (* .lisp *.lsp * .asd)"));
         if (!path.isEmpty()) m_tabWidget->openFile(path);
@@ -91,15 +91,15 @@ void MainWindow::setupMenuBar()
 
     fileMenu->addSeparator();
 
-    m_openProjectAction = fileMenu->addAction(QIcon(":/images/open-project.svg"), tr("Открыть проект..."), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_O));
+    m_openProjectAction = fileMenu->addAction(QIcon(":/icons/images/open-project.svg"), tr("Открыть проект..."), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_O));
     m_newProjectAction = fileMenu->addAction(tr("Новый проект..."), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_N));
     connect(m_openProjectAction, &QAction::triggered, this, &MainWindow::openProject);
     connect(m_newProjectAction, &QAction::triggered, this, &MainWindow::createProject);
 
     fileMenu->addSeparator();
 
-    m_saveFileAction = fileMenu->addAction(QIcon(":/images/save.svg"), tr("Сохранить"), QKeySequence::Save);
-    m_saveFileAllAction = fileMenu->addAction(QIcon(":/images/save-all.svg"), tr("Сохранить все"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
+    m_saveFileAction = fileMenu->addAction(QIcon(":/icons/images/save.svg"), tr("Сохранить"), QKeySequence::Save);
+    m_saveFileAllAction = fileMenu->addAction(QIcon(":/icons/images/save-all.svg"), tr("Сохранить все"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
     m_saveFileAsAction = fileMenu->addAction(tr("Сохранить как..."), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_S));
 
     connect(m_saveFileAction, &QAction::triggered, [this]() {
@@ -131,12 +131,12 @@ void MainWindow::setupMenuBar()
 
     // Edit menu
     auto* editMenu = menuBar()->addMenu(tr("&Правка"));
-    m_undoAction = editMenu->addAction(tr("Назад"), QKeySequence::Undo);
-    m_redoAction = editMenu->addAction(tr("Вернуть"), QKeySequence::Redo);
+    m_redoAction = editMenu->addAction(QIcon(":/icons/images/redo.svg"),tr("Повтор"), QKeySequence::Redo);
+    m_undoAction = editMenu->addAction(QIcon(":/icons/images/undo.svg"), tr("Отмена"), QKeySequence::Undo);
     editMenu->addSeparator();
-    m_copyAction = editMenu->addAction(QIcon(":/images/copy.svg"), tr("Скопировать"), QKeySequence::Copy);
-    m_cutAction = editMenu->addAction(tr("Вырезать"), QKeySequence::Cut);
-    m_pasteAction = editMenu->addAction(tr("Вставить"), QKeySequence::Paste);
+    m_copyAction = editMenu->addAction(QIcon(":/icons/images/copy.svg"), tr("Скопировать"), QKeySequence::Copy);
+    m_cutAction = editMenu->addAction(QIcon(":/icons/images/cut.svg"), tr("Вырезать"), QKeySequence::Cut);
+    m_pasteAction = editMenu->addAction(QIcon(":/icons/images/paste.svg"), tr("Вставить"), QKeySequence::Paste);
 
     m_undoAction->setEnabled(false);
     m_redoAction->setEnabled(false);
@@ -194,7 +194,7 @@ void MainWindow::setupMenuBar()
     // Run menu
     auto* runMenu = menuBar()->addMenu(tr("&Запуск"));
     runMenu->addSeparator();
-    m_startReplAction = runMenu->addAction(QIcon(":/images/start.svg"), tr("Запустить REPL"));
+    m_startReplAction = runMenu->addAction(QIcon(":/icons/images/start.svg"), tr("Запустить REPL"));
 
     runMenu->addAction(tr("Очистить REPL"));
 
@@ -205,10 +205,10 @@ void MainWindow::setupMenuBar()
     // Создаём группу для взаимного исключения
     auto* themeGroup = new QActionGroup(this);
 
-    m_lightStyleAction = styleMenu->addAction(QIcon(":/images/light-theme.svg"), tr("Светлая"));
+    m_lightStyleAction = styleMenu->addAction(QIcon(":/icons/images/light-theme.svg"), tr("Светлая"));
     m_lightStyleAction->setActionGroup(themeGroup);
 
-    m_darkStyleAction = styleMenu->addAction(QIcon(":/images/dark-theme.svg"), tr("Тёмная"));
+    m_darkStyleAction = styleMenu->addAction(QIcon(":/icons/images/dark-theme.svg"), tr("Тёмная"));
     m_darkStyleAction->setActionGroup(themeGroup);
 
     connect(themeGroup, &QActionGroup::triggered, this, [this](QAction* action) {
@@ -218,7 +218,7 @@ void MainWindow::setupMenuBar()
 
     // Справка
     auto* helpMenu = menuBar()->addMenu(tr("&Справка"));
-    auto aboutAction = helpMenu->addAction(QIcon(":/images/copy.svg"), tr("О программе"));
+    auto aboutAction = helpMenu->addAction(QIcon(":/icons/images/info.svg"), tr("О программе"));
     connect(aboutAction, &QAction::triggered, this, [this]() {
         AboutDialog dlg(this);
         dlg.exec();

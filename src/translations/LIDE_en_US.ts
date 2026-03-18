@@ -177,16 +177,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="134"/>
-        <source>Назад</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/mainwindow.cpp" line="135"/>
-        <source>Вернуть</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../ui/mainwindow.cpp" line="138"/>
         <source>Вырезать</source>
         <translation type="unfinished"></translation>
@@ -194,6 +184,16 @@
     <message>
         <location filename="../ui/mainwindow.cpp" line="137"/>
         <source>Скопировать</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.cpp" line="134"/>
+        <source>Повтор</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.cpp" line="135"/>
+        <source>Отмена</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

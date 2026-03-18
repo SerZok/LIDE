@@ -236,7 +236,7 @@ EditorTabWidget::pane {
     }
 
     EditorTabWidget QTabBar::close-button {
-        image: url(:/images/close.svg);
+        image: url(:/icons/images/close.svg);
         margin-right: 3px;
     }
 
