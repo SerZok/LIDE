@@ -44,7 +44,6 @@ private:
     void setupToolBar();
     void setupStatusBar();
     void setupDockWidgets();
-    void setupConnections();
     void loadTheme(QString stylePath);
 
     ProjectTree* createProjectTree();

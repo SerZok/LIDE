@@ -1,4 +1,4 @@
-﻿#include "console.h"
+#include "console.h"
 
 #include <QScrollBar>
 #include <QMenu>
@@ -34,7 +34,7 @@ void Console::setupConsole()
 	setLineWrapMode(QTextEdit::NoWrap);
 
 	// Начальный промпт
-	appendPrompt();
+	//appendPrompt();
 
 	// Установка objectName для CSS
 	setObjectName("Console");
@@ -131,9 +131,9 @@ void Console::sendCommand(const QString& command)
 	}
 
 	if (!m_process || m_process->state() != QProcess::Running) {
-		appendOutput("Lisp process not running. Starting...\n", true, true);
+		qDebug() << "Lisp process not running. Starting...";
 		if (!startLispProcess()) {
-			appendOutput("Cannot send command: SBCL not available.\n", true, true);
+			qDebug() << "Cannot send command: SBCL not available.";
 			return;
 		}
 	}
@@ -320,9 +320,9 @@ void Console::contextMenuEvent(QContextMenuEvent* event)
 
 void Console::onProcessStarted()
 {
-	appendOutput("Lisp process started.\n", false, true);
-	m_waitingForInput = true;
+	qDebug() << "Lisp process started";
 	appendPrompt();
+	m_waitingForInput = true;
 }
 
 void Console::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)

@@ -158,6 +158,8 @@ void MainWindow::setupMenuBar()
             m_copyAction->setEnabled(true);
             m_pasteAction->setEnabled(true);
 
+            m_startReplAction->setEnabled(true);
+
             // обновления состояния undo/redo
             connect(editor->document(), &QTextDocument::undoAvailable, m_undoAction, &QAction::setEnabled, Qt::UniqueConnection);
             connect(editor->document(), &QTextDocument::redoAvailable, m_redoAction, &QAction::setEnabled, Qt::UniqueConnection);
@@ -168,6 +170,7 @@ void MainWindow::setupMenuBar()
             m_cutAction->setEnabled(false);
             m_copyAction->setEnabled(false);
             m_pasteAction->setEnabled(false);
+            m_startReplAction->setEnabled(false);
         }
         });
 
@@ -180,7 +183,6 @@ void MainWindow::setupMenuBar()
         action->setChecked(dock->isVisible());
 
         connect(dock, &QDockWidget::visibilityChanged, [this, action](bool visible) {
-            // Блокируем сигналы action, чтобы не создавать цикл
             action->blockSignals(true);
             action->setChecked(visible);
             action->blockSignals(false);
@@ -195,6 +197,14 @@ void MainWindow::setupMenuBar()
     auto* runMenu = menuBar()->addMenu(tr("&Запуск"));
     runMenu->addSeparator();
     m_startReplAction = runMenu->addAction(QIcon(":/icons/images/start.svg"), tr("Запустить REPL"));
+    m_startReplAction->setEnabled(false);
+
+    connect(m_startReplAction, &QAction::triggered, this, [this]() {
+        auto code = m_tabWidget->currentEditor()->toPlainText();
+        qDebug() << code;
+        m_console->sendCode(code);
+        });
+
 
     runMenu->addAction(tr("Очистить REPL"));
 
@@ -279,20 +289,16 @@ void MainWindow::setupDockWidgets()
         }
         });
 
-    setupConnections();
-}
-
-void MainWindow::setupConnections() {
     connect(m_tabWidget, &EditorTabWidget::currentFileChanged, m_projectTree, &ProjectTree::onFileLoaded);
     connect(m_tabWidget, &EditorTabWidget::fileModifiedChanged, m_projectTree, &ProjectTree::onFileModifiedChanged);
     connect(m_tabWidget, &EditorTabWidget::fileClosed, m_projectTree, &ProjectTree::onFileClosed);
     connect(m_projectTree, &ProjectTree::fileActivated, m_tabWidget, &EditorTabWidget::openFile);
     connect(m_projectTree, &ProjectTree::projectOpened, this, [this](const QString& projectPath) {
-            QFileInfo info(projectPath);
-            if (!info.exists() || !info.isDir()) return;
+        QFileInfo info(projectPath);
+        if (!info.exists() || !info.isDir()) return;
 
-            m_projectDock->setWindowTitle(tr("Дерево проекта - %1").arg(info.fileName()));
-            m_projectDock->setToolTip(tr("Текущий проект: %1").arg(info.absolutePath()));
+        m_projectDock->setWindowTitle(tr("Дерево проекта - %1").arg(info.fileName()));
+        m_projectDock->setToolTip(tr("Текущий проект: %1").arg(info.absolutePath()));
         });
     connect(this, &MainWindow::themeChanged, Settings::instance(), &Settings::setCurrentTheme);
 }

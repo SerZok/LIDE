@@ -112,7 +112,7 @@
     </message>
     <message>
         <location filename="../ui/mainwindow.cpp" line="79"/>
-        <location filename="../ui/mainwindow.cpp" line="382"/>
+        <location filename="../ui/mainwindow.cpp" line="388"/>
         <source>Ошибка</source>
         <translation type="unfinished"></translation>
     </message>
@@ -202,104 +202,104 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="175"/>
+        <location filename="../ui/mainwindow.cpp" line="178"/>
         <source>&amp;Вид</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="195"/>
+        <location filename="../ui/mainwindow.cpp" line="197"/>
         <source>&amp;Запуск</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="197"/>
+        <location filename="../ui/mainwindow.cpp" line="199"/>
         <source>Запустить REPL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="199"/>
+        <location filename="../ui/mainwindow.cpp" line="209"/>
         <source>Очистить REPL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="202"/>
+        <location filename="../ui/mainwindow.cpp" line="212"/>
         <source>&amp;Настройки</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="203"/>
+        <location filename="../ui/mainwindow.cpp" line="213"/>
         <source>Тема...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="208"/>
+        <location filename="../ui/mainwindow.cpp" line="218"/>
         <source>Светлая</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="211"/>
+        <location filename="../ui/mainwindow.cpp" line="221"/>
         <source>Тёмная</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="220"/>
+        <location filename="../ui/mainwindow.cpp" line="230"/>
         <source>&amp;Справка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="221"/>
+        <location filename="../ui/mainwindow.cpp" line="231"/>
         <source>О программе</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="230"/>
+        <location filename="../ui/mainwindow.cpp" line="240"/>
         <source>Панель инструментов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="257"/>
+        <location filename="../ui/mainwindow.cpp" line="267"/>
         <source>Дерево проекта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="264"/>
+        <location filename="../ui/mainwindow.cpp" line="274"/>
         <source>Консоль LISP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="276"/>
-        <location filename="../ui/mainwindow.cpp" line="294"/>
+        <location filename="../ui/mainwindow.cpp" line="286"/>
+        <location filename="../ui/mainwindow.cpp" line="300"/>
         <source>Дерево проекта - %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="277"/>
-        <location filename="../ui/mainwindow.cpp" line="295"/>
+        <location filename="../ui/mainwindow.cpp" line="287"/>
+        <location filename="../ui/mainwindow.cpp" line="301"/>
         <source>Текущий проект: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="356"/>
+        <location filename="../ui/mainwindow.cpp" line="362"/>
         <source>Открыть проект</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="365"/>
+        <location filename="../ui/mainwindow.cpp" line="371"/>
         <source>Выберите папку для нового проекта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="372"/>
+        <location filename="../ui/mainwindow.cpp" line="378"/>
         <source>Новый проект</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="372"/>
+        <location filename="../ui/mainwindow.cpp" line="378"/>
         <source>Название проекта:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="382"/>
+        <location filename="../ui/mainwindow.cpp" line="388"/>
         <source>Не удалось создать проект</source>
         <translation type="unfinished"></translation>
     </message>
