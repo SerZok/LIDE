@@ -91,16 +91,16 @@ void MainWindow::setupMenuBar()
 
     fileMenu->addSeparator();
 
-    m_openProjectAction = fileMenu->addAction(QIcon(":/images/open-project.svg"), tr("Открыть проект..."), QKeySequence((Qt::CTRL | Qt::SHIFT | Qt::Key_O)));
-    m_newProjectAction = fileMenu->addAction(tr("Новый проект..."), QKeySequence((Qt::CTRL | Qt::SHIFT | Qt::Key_N)));
+    m_openProjectAction = fileMenu->addAction(QIcon(":/images/open-project.svg"), tr("Открыть проект..."), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_O));
+    m_newProjectAction = fileMenu->addAction(tr("Новый проект..."), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_N));
     connect(m_openProjectAction, &QAction::triggered, this, &MainWindow::openProject);
     connect(m_newProjectAction, &QAction::triggered, this, &MainWindow::createProject);
 
     fileMenu->addSeparator();
 
     m_saveFileAction = fileMenu->addAction(QIcon(":/images/save.svg"), tr("Сохранить"), QKeySequence::Save);
-    m_saveFileAllAction = fileMenu->addAction(QIcon(":/images/save-all.svg"), tr("Сохранить все"), QKeySequence((Qt::CTRL | Qt::SHIFT | Qt::Key_S)));
-    m_saveFileAsAction = fileMenu->addAction(tr("Сохранить как..."), QKeySequence((Qt::CTRL | Qt::ALT | Qt::Key_S)));
+    m_saveFileAllAction = fileMenu->addAction(QIcon(":/images/save-all.svg"), tr("Сохранить все"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
+    m_saveFileAsAction = fileMenu->addAction(tr("Сохранить как..."), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_S));
 
     connect(m_saveFileAction, &QAction::triggered, [this]() {
         if (auto* editor = m_tabWidget->currentEditor()) {
@@ -134,8 +134,8 @@ void MainWindow::setupMenuBar()
     m_undoAction = editMenu->addAction(tr("Назад"), QKeySequence::Undo);
     m_redoAction = editMenu->addAction(tr("Вернуть"), QKeySequence::Redo);
     editMenu->addSeparator();
+    m_copyAction = editMenu->addAction(QIcon(":/images/copy.svg"), tr("Скопировать"), QKeySequence::Copy);
     m_cutAction = editMenu->addAction(tr("Вырезать"), QKeySequence::Cut);
-    m_copyAction = editMenu->addAction(tr("Скопировать"), QKeySequence::Copy);
     m_pasteAction = editMenu->addAction(tr("Вставить"), QKeySequence::Paste);
 
     m_undoAction->setEnabled(false);
@@ -218,7 +218,7 @@ void MainWindow::setupMenuBar()
 
     // Справка
     auto* helpMenu = menuBar()->addMenu(tr("&Справка"));
-    auto aboutAction = helpMenu->addAction(tr("О программе"));
+    auto aboutAction = helpMenu->addAction(QIcon(":/images/copy.svg"), tr("О программе"));
     connect(aboutAction, &QAction::triggered, this, [this]() {
         AboutDialog dlg(this);
         dlg.exec();

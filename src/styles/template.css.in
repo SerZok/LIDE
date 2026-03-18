@@ -52,7 +52,7 @@ QMenuBar {
     }
 
 QMenu {
-    background-color: @BG_PRIMARY@;
+    background-color: @BG_SECONDARY@;
     color: @TEXT_PRIMARY@;
     border: 1px solid @BORDER@;
 }
@@ -65,7 +65,7 @@ QMenu {
     QMenu::separator {
         height: 1px;
         background-color: @BORDER@;
-        margin: 5px 0;
+        margin: 0.2em 0;
     }
 
 QToolBar {
@@ -224,29 +224,38 @@ EditorTabWidget::pane {
     background-color: @BG_PRIMARY@;
 }
 
-EditorTabWidget QTabBar::tab {
-    background-color: @BG_SECONDARY@;
-    color: @TEXT_PRIMARY@;
-    padding: 5px 15px;
-    margin-right: 2px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border: 1px solid @BORDER@;
-    border-bottom: none;
-}
+    EditorTabWidget QTabBar::tab {
+        background-color: @BG_SECONDARY@;
+        color: @TEXT_PRIMARY@;
+        padding: 5px 5px 2px 5px;
+        margin: 0px 3px 0px 0px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        border: 1px solid @BORDER@;
+        border-bottom: none;
+    }
 
-EditorTabWidget QTabBar::tab:selected {
-    background-color: @BG_PRIMARY@;
-    border-bottom: 2px solid @ACCENT@;
-}
+    EditorTabWidget QTabBar::close-button {
+        image: url(:/images/close.svg);
+        margin-right: 3px;
+    }
 
-EditorTabWidget QTabBar::tab:hover {
-    background-color: @BG_TERTIARY@;
-}
+    EditorTabWidget QTabBar::close-button:pressed {
+        padding: 1px -1px -1px 1px;
+    }
 
-EditorTabWidget QTabBar::tab:!selected {
-    margin-top: 2px;
-}
+    EditorTabWidget QTabBar::tab:selected {
+        background-color: @BG_PRIMARY@;
+        border-bottom: 2px solid @ACCENT@;
+    }
+
+    EditorTabWidget QTabBar::tab:hover {
+        background-color: @BG_TERTIARY@;
+    }
+
+    EditorTabWidget QTabBar::tab:!selected {
+        margin-top: 2px;
+    }
 
 /* Индикатор изменённого файла (звёздочка) */
 EditorTabWidget QTabBar::tab:modified {

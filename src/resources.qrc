@@ -15,5 +15,7 @@
         <file>images/light-theme.svg</file>
         <file>images/start.svg</file>
         <file>resources.rc</file>
+        <file>images/close.svg</file>
+        <file>images/copy.svg</file>
     </qresource>
 </RCC>

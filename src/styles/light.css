@@ -52,7 +52,7 @@ QMenuBar {
     }
 
 QMenu {
-    background-color: #f5f5f5;
+    background-color: #ffffff;
     color: #2d2d2d;
     border: 1px solid #d0d0d0;
 }
@@ -65,7 +65,7 @@ QMenu {
     QMenu::separator {
         height: 1px;
         background-color: #d0d0d0;
-        margin: 5px 0;
+        margin: 0.2em 0;
     }
 
 QToolBar {
@@ -224,29 +224,38 @@ EditorTabWidget::pane {
     background-color: #f5f5f5;
 }
 
-EditorTabWidget QTabBar::tab {
-    background-color: #ffffff;
-    color: #2d2d2d;
-    padding: 5px 15px;
-    margin-right: 2px;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border: 1px solid #d0d0d0;
-    border-bottom: none;
-}
+    EditorTabWidget QTabBar::tab {
+        background-color: #ffffff;
+        color: #2d2d2d;
+        padding: 5px 5px 2px 5px;
+        margin: 0px 3px 0px 0px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+        border: 1px solid #d0d0d0;
+        border-bottom: none;
+    }
 
-EditorTabWidget QTabBar::tab:selected {
-    background-color: #f5f5f5;
-    border-bottom: 2px solid #007acc;
-}
+    EditorTabWidget QTabBar::close-button {
+        image: url(:/images/close.svg);
+        margin-right: 3px;
+    }
 
-EditorTabWidget QTabBar::tab:hover {
-    background-color: #e3e3e3;
-}
+    EditorTabWidget QTabBar::close-button:pressed {
+        padding: 1px -1px -1px 1px;
+    }
 
-EditorTabWidget QTabBar::tab:!selected {
-    margin-top: 2px;
-}
+    EditorTabWidget QTabBar::tab:selected {
+        background-color: #f5f5f5;
+        border-bottom: 2px solid #007acc;
+    }
+
+    EditorTabWidget QTabBar::tab:hover {
+        background-color: #e3e3e3;
+    }
+
+    EditorTabWidget QTabBar::tab:!selected {
+        margin-top: 2px;
+    }
 
 /* Индикатор изменённого файла (звёздочка) */
 EditorTabWidget QTabBar::tab:modified {

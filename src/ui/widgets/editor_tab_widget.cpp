@@ -61,6 +61,7 @@ void EditorTabWidget::addEditorTab(const QString& path, LispEditor* editor)
 
     int index = addTab(editor, filename);
     setTabToolTip(index, path);
+
     m_pathToIndex[path] = index;
     m_indexToPath[index] = path;
     setCurrentIndex(index);
