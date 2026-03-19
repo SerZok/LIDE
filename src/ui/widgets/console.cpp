@@ -1,4 +1,4 @@
-#include "console.h"
+﻿#include "console.h"
 
 #include <QScrollBar>
 #include <QMenu>
@@ -21,6 +21,8 @@ Console::Console(QWidget* parent)
 {
 	setupConsole();
 	startLispProcess();
+	appendPrompt();
+	m_waitingForInput = true;
 }
 
 Console::~Console()
@@ -87,7 +89,7 @@ bool Console::startLispProcess()
 	m_process->setProcessChannelMode(QProcess::MergedChannels);
 
 	QStringList args;
-	args << "--noinform" << "--disable-debugger"; // оставляем интерактивность, без автоматического выхода
+	args << "--noinform";// << "--disable-debugger"; // оставляем интерактивность, без автоматического выхода
 
 	m_process->start(exePath, args);
 
@@ -146,10 +148,6 @@ void Console::sendCommand(const QString& command)
 
 	if (bracketCount > 0) {
 		appendOutput("Количество закрывающихся скобок меньше открывающихся!", true, true);
-
-		// Помечаем, что готовы принять ввод и выставляем prompt осторожно
-		m_waitingForInput = true;
-		appendPrompt();
 	}
 	else {
 		// Отправляем команду в процесс
@@ -174,6 +172,7 @@ void Console::sendCurrentLine()
 
 void Console::sendCode(const QString& code)
 {
+	clear();
 	if (!code.isEmpty()) {
 		sendCommand(code);
 	}
@@ -321,14 +320,11 @@ void Console::contextMenuEvent(QContextMenuEvent* event)
 void Console::onProcessStarted()
 {
 	qDebug() << "Lisp process started";
-	appendPrompt();
-	m_waitingForInput = true;
 }
 
 void Console::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-	QString msg = QString("Lisp process finished with code %1\n").arg(exitCode);
-	appendOutput(msg, true, true);
+	startLispProcess();
 }
 
 void Console::onProcessError(QProcess::ProcessError error)
@@ -362,7 +358,9 @@ void Console::onReadyReadStandardOutput()
 	QByteArray data = m_process->readAllStandardOutput();
 	QString output = QString::fromUtf8(data);
 	if (output != "* ") {
-		appendOutput(output, false, true);
+		appendOutput(output, false);
+		m_waitingForInput = true;
+		appendPrompt();
 	}
 }
 
