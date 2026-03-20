@@ -176,6 +176,19 @@ void MainWindow::setupMenuBar()
 
     // View
     auto* viewMenu = menuBar()->addMenu(tr("&Вид"));
+    auto* fullScreenAction = new QAction(tr("Полноэкранный режим"), this);
+    fullScreenAction->setShortcut(QKeySequence::FullScreen);
+    fullScreenAction->setCheckable(true);
+    fullScreenAction->setChecked(isFullScreen());
+    connect(fullScreenAction, &QAction::triggered, this, [this](bool checked) {
+        if (checked)
+            showFullScreen();
+        else
+            showNormal();
+        });
+    addAction(fullScreenAction);
+    viewMenu->addAction(fullScreenAction);
+    viewMenu->addSeparator();
     for (auto it = m_dockNames.begin(); it != m_dockNames.end(); ++it) {
         auto* dock = it.key();
         auto* action = viewMenu->addAction(it.value());
@@ -212,15 +225,11 @@ void MainWindow::setupMenuBar()
     auto* toolsMenu = menuBar()->addMenu(tr("&Настройки"));
     auto styleMenu = toolsMenu->addMenu(tr("Тема..."));
 
-    // Создаём группу для взаимного исключения
     auto* themeGroup = new QActionGroup(this);
-
     m_lightStyleAction = styleMenu->addAction(QIcon(":/icons/images/light-theme.svg"), tr("Светлая"));
     m_lightStyleAction->setActionGroup(themeGroup);
-
     m_darkStyleAction = styleMenu->addAction(QIcon(":/icons/images/dark-theme.svg"), tr("Тёмная"));
     m_darkStyleAction->setActionGroup(themeGroup);
-
     connect(themeGroup, &QActionGroup::triggered, this, [this](QAction* action) {
         QString theme = (action == m_lightStyleAction) ? "light" : "dark";
         loadTheme(theme);
@@ -374,10 +383,10 @@ void MainWindow::createProject() {
 
     if (parentPath.isEmpty()) return;
 
-    // ИМЯ проекта(папки)
-    QString projectName = QInputDialog::getText(this, tr("Новый проект"), tr("Название проекта:")
-    );
-
+    QString projectName = QInputDialog::getText(
+        this,
+        tr("Новый проект"),
+        tr("Название проекта:"));
     if (!projectName.isEmpty()) {
         QString newPath = parentPath + "/" + projectName;
         QDir dir;

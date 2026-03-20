@@ -294,12 +294,6 @@ bool LispEditor::loadFile(const QString& fileName)
     setPlainText(in.readAll());
 
     m_ignoreChanges = false;
-
-    // Закрываем предыдущий
-    //if (!m_currentFile.isEmpty()) {
-    //    emit fileClosed(m_currentFile);
-    //}
-
     m_currentFile = fileName;
     document()->setModified(false);
 

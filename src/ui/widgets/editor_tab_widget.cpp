@@ -1,6 +1,7 @@
 #include "editor_tab_widget.h"
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QShortCut>
 
 EditorTabWidget::EditorTabWidget(QWidget* parent)
     : QTabWidget(parent)
@@ -8,6 +9,8 @@ EditorTabWidget::EditorTabWidget(QWidget* parent)
     setTabsClosable(true);
     setMovable(true);
 
+    QShortcut* closeShortcut = new QShortcut(QKeySequence::Close, this);
+    connect(closeShortcut, &QShortcut::activated, this, &EditorTabWidget::closeCurrentTab);
     connect(this, &QTabWidget::tabCloseRequested, this, &EditorTabWidget::onTabCloseRequested);
     connect(this, &QTabWidget::currentChanged, this, &EditorTabWidget::onCurrentChanged);
 }
@@ -24,17 +27,13 @@ LispEditor* EditorTabWidget::editorAt(int index) const
 
 bool EditorTabWidget::openFile(const QString& path)
 {
-    // Проверяем, не открыт ли уже файл
     int existingIndex = findTabByPath(path);
     if (existingIndex != -1) {
         setCurrentIndex(existingIndex);
         return true;
     }
 
-    // Создаём новый редактор
     auto* editor = new LispEditor(this);
-
-    // Подключаем сигналы редактора
     connect(editor, &LispEditor::fileModifiedChanged, this, &EditorTabWidget::onEditorModifiedChanged);
     connect(editor, &LispEditor::fileSaved, this, &EditorTabWidget::onEditorSaved);
     connect(editor, &LispEditor::fileClosed, this, &EditorTabWidget::onFileClosed);
@@ -43,8 +42,6 @@ bool EditorTabWidget::openFile(const QString& path)
         delete editor;
         return false;
     }
-
-    // Добавляем вкладку
     addEditorTab(path, editor);
 
     emit fileOpened(path);
@@ -99,8 +96,6 @@ void EditorTabWidget::onTabCloseRequested(int index)
     QString path = m_indexToPath.value(index);
 
     int currentTabBeforeClose = currentIndex();
-
-    // Удаляем маппинги
     m_pathToIndex.remove(path);
     m_indexToPath.remove(index);
 
