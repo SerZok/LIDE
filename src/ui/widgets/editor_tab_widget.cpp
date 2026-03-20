@@ -56,19 +56,14 @@ void EditorTabWidget::addEditorTab(const QString& path, LispEditor* editor)
     QFileInfo info(path);
     QString filename = info.fileName();
 
-    bool wasBlocked = signalsBlocked();
-    this->blockSignals(true);
-
     int index = addTab(editor, filename);
     setTabToolTip(index, path);
-
-    m_pathToIndex[path] = index;
-    m_indexToPath[index] = path;
     setCurrentIndex(index);
 
-    this->blockSignals(wasBlocked);
+    updateMappings();
 
-    emit currentChanged(index);
+    emit currentFileChanged(path);
+    emit currentEditorChanged(editor);
 }
 
 int EditorTabWidget::findTabByPath(const QString& path) const
@@ -81,7 +76,6 @@ void EditorTabWidget::onTabCloseRequested(int index)
     auto* editor = editorAt(index);
     if (!editor) return;
 
-    // Проверяем, сохранён ли файл
     if (editor->isModified()) {
         QString path = m_indexToPath.value(index);
         QFileInfo info(path);
@@ -90,10 +84,12 @@ void EditorTabWidget::onTabCloseRequested(int index)
             tr("Закрыть файл"),
             tr("Файл %1 не сохранён.\nСохранить перед закрытием?")
             .arg(info.fileName()),
-            QMessageBox::Save | QMessageBox::Abort | QMessageBox::Cancel);
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
 
         if (reply == QMessageBox::Save) {
-            editor->saveFile();
+            if (!editor->saveFile()) {
+                return;
+            }
         }
         else if (reply == QMessageBox::Cancel) {
             return;
@@ -101,21 +97,53 @@ void EditorTabWidget::onTabCloseRequested(int index)
     }
 
     QString path = m_indexToPath.value(index);
-    emit fileClosed(path);
 
+    int currentTabBeforeClose = currentIndex();
+
+    // Удаляем маппинги
     m_pathToIndex.remove(path);
     m_indexToPath.remove(index);
 
     removeTab(index);
+    updateMappings();
+    emit fileClosed(path);
+
+    if (currentTabBeforeClose != index) {
+        int newIndex = currentTabBeforeClose;
+        if (currentTabBeforeClose > index && newIndex > 0) {
+            newIndex = currentTabBeforeClose - 1;
+        }
+        if (newIndex >= 0 && newIndex < count()) {
+            setCurrentIndex(newIndex);
+        }
+    }
+}
+
+void EditorTabWidget::updateMappings()
+{
+    m_pathToIndex.clear();
+    m_indexToPath.clear();
+
+    for (int i = 0; i < count(); ++i) {
+        LispEditor* editor = editorAt(i);
+        if (editor) {
+            QString path = editor->currentFile();
+            if (!path.isEmpty()) {
+                m_pathToIndex[path] = i;
+                m_indexToPath[i] = path;
+            }
+        }
+    }
 }
 
 void EditorTabWidget::onCurrentChanged(int index)
 {
-    if (index >= 0 && m_indexToPath.contains(index)) {
-        emit currentFileChanged(m_indexToPath[index]);
+    if (index >= 0 && index < count() && m_indexToPath.contains(index)) {
+        QString path = m_indexToPath[index];
+        emit currentFileChanged(path);
         emit currentEditorChanged(editorAt(index));
     }
-    else {
+    else if (index == -1 || count() == 0) {
         emit currentFileChanged(QString());
         emit currentEditorChanged(nullptr);
     }
@@ -142,9 +170,14 @@ void EditorTabWidget::onFileClosed(const QString& path)
 {
     int index = findTabByPath(path);
     if (index != -1) {
-        m_pathToIndex.remove(path);
-        m_indexToPath.remove(index);
-        removeTab(index);
+        LispEditor* editor = editorAt(index);
+        if (editor && editor->currentFile() == path) {
+            qDebug() << "Removing tab at index:" << index;
+            m_pathToIndex.remove(path);
+            m_indexToPath.remove(index);
+            removeTab(index);
+            updateMappings();
+        }
     }
 }
 
@@ -179,7 +212,13 @@ void EditorTabWidget::saveAll()
 QStringList EditorTabWidget::openedFiles() {
     QStringList files;
     for (int i = 0; i < count(); ++i) {
-        files.emplace_back(editorAt(i)->currentFile());
+        LispEditor* editor = editorAt(i);
+        if (editor) {
+            QString file = editor->currentFile();
+            if (!file.isEmpty()) {
+                files.append(file);
+            }
+        }
     }
     return files;
 }

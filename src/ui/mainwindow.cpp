@@ -196,7 +196,7 @@ void MainWindow::setupMenuBar()
     // Run menu
     auto* runMenu = menuBar()->addMenu(tr("&Запуск"));
     runMenu->addSeparator();
-    m_startReplAction = runMenu->addAction(QIcon(":/icons/images/start.svg"), tr("Запустить REPL"));
+    m_startReplAction = runMenu->addAction(QIcon(":/icons/images/start.svg"), tr("Запустить REPL"), QKeySequence(Qt::Key_F5));
     m_startReplAction->setEnabled(false);
 
     connect(m_startReplAction, &QAction::triggered, this, [this]() {

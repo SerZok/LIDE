@@ -82,30 +82,24 @@ void LispEditor::highlightMatchingBrackets()
         }
     }
 
-    // Проверяем, не находимся ли мы в конце документа
     if (position >= document()->characterCount() - 1) {
         setExtraSelections(QList<QTextEdit::ExtraSelection>());
         return;
     }
 
-    // Получаем символ под курсором
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
     QString selectedText = cursor.selectedText();
-
     if (selectedText.isEmpty()) {
         setExtraSelections(QList<QTextEdit::ExtraSelection>());
         return;
     }
 
     QChar currentChar = selectedText.at(0);
-
-    // Если символ не скобка - выходим
     if (currentChar != '(' && currentChar != ')') {
         setExtraSelections(QList<QTextEdit::ExtraSelection>());
         return;
     }
 
-    // Проверяем, не в комментарии ли сама скобка
     if (isPositionInComment(position)) {
         setExtraSelections(QList<QTextEdit::ExtraSelection>());
         return;
@@ -121,9 +115,7 @@ void LispEditor::highlightMatchingBrackets()
 
     // Ищем парную скобку
     int matchPos = findMatchingBracket(position, currentChar == '(');
-
     if (matchPos != -1) {
-        // Проверяем, не в комментарии ли найденная скобка
         if (!isPositionInComment(matchPos)) {
             // Подсвечиваем область между скобками
             QTextEdit::ExtraSelection regionSelection;
@@ -304,9 +296,9 @@ bool LispEditor::loadFile(const QString& fileName)
     m_ignoreChanges = false;
 
     // Закрываем предыдущий
-    if (!m_currentFile.isEmpty()) {
-        emit fileClosed(m_currentFile);
-    }
+    //if (!m_currentFile.isEmpty()) {
+    //    emit fileClosed(m_currentFile);
+    //}
 
     m_currentFile = fileName;
     document()->setModified(false);

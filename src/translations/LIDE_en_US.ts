@@ -27,12 +27,12 @@
 <context>
     <name>Console</name>
     <message>
-        <location filename="../ui/widgets/console.cpp" line="306"/>
+        <location filename="../ui/widgets/console.cpp" line="305"/>
         <source>Clear Console</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console.cpp" line="312"/>
+        <location filename="../ui/widgets/console.cpp" line="311"/>
         <source>Copy Output</source>
         <translation type="unfinished"></translation>
     </message>
@@ -40,12 +40,12 @@
 <context>
     <name>EditorTabWidget</name>
     <message>
-        <location filename="../ui/widgets/editor_tab_widget.cpp" line="90"/>
+        <location filename="../ui/widgets/editor_tab_widget.cpp" line="84"/>
         <source>Закрыть файл</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/editor_tab_widget.cpp" line="91"/>
+        <location filename="../ui/widgets/editor_tab_widget.cpp" line="85"/>
         <source>Файл %1 не сохранён.
 Сохранить перед закрытием?</source>
         <translation type="unfinished"></translation>
@@ -54,19 +54,19 @@
 <context>
     <name>LispEditor</name>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="294"/>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="339"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="286"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="331"/>
         <source>Ошибка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="295"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="287"/>
         <source>Не удалось открыть файл %1:
 %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_edit.cpp" line="340"/>
+        <location filename="../ui/widgets/lisp_edit.cpp" line="332"/>
         <source>Не удалось сохранить файл %1</source>
         <translation type="unfinished"></translation>
     </message>
