@@ -23,5 +23,7 @@
         <file>images/save-all.svg</file>
         <file>images/start.svg</file>
         <file>images/undo.svg</file>
+        <file>images/restart.svg</file>
+        <file>images/force-start.svg</file>
     </qresource>
 </RCC>

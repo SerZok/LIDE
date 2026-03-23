@@ -1,0 +1,21 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100.000000" height="100.000000" fill="none">
+	<defs>
+		<g id="pixso_custom_effect_3">
+			<effect x="0.000000" y="4.000000" visibility="visible" fill="rgb(0,0,0)" fill-opacity="0.25" effectType="dropShadow" stdDeviation="4" radius="0" />
+		</g>
+		<filter id="filter_3" width="81.020035" height="80.000000" x="8.979961" y="14.000000" filterUnits="userSpaceOnUse" customEffect="url(#pixso_custom_effect_3)" color-interpolation-filters="sRGB">
+			<feFlood flood-opacity="0" result="BackgroundImageFix" />
+			<feOffset dx="0.000000" dy="4.000000" in="SourceAlpha" />
+			<feGaussianBlur stdDeviation="1.33333337" />
+			<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0 " />
+			<feBlend result="effect_dropShadow_1" in2="BackgroundImageFix" mode="normal" />
+			<feBlend result="shape" in="SourceGraphic" in2="effect_dropShadow_1" mode="normal" />
+		</filter>
+	</defs>
+	<rect id="Размер1" width="100.000000" height="100.000000" x="0.000000" y="0.000000" fill="rgb(255,255,255)" fill-opacity="0" />
+	<circle id="Эллипс 1" cx="50" cy="50" r="50" fill="rgb(8,43,0)" />
+	<circle id="Эллипс 1" cx="50" cy="50" r="49" stroke="rgb(0,237,17)" stroke-width="2.000000" />
+	<g filter="url(#filter_3)">
+		<path id="Эллипс 2" d="M60 33.4286C60 49.9971 46.5685 60 30 60C13.4315 60 0 46.5685 0 30C0 13.4315 13.4315 0 30 0C30 0 38.5168 0.362416 45.5168 5.36242L46.2857 7.28584M48 5.36242L46.2857 7.28584L43.7143 10.7143L49.7143 12L48 5.36242Z" fill-rule="evenodd" stroke="rgb(0,255,26)" stroke-width="12.000000" transform="matrix(-1.18956e-07,-1,1,-1.18956e-07,20,80)" />
+	</g>
+</svg>

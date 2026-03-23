@@ -49,11 +49,8 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="text">
-      <string/>
-     </property>
      <property name="pixmap">
-      <pixmap resource="../resources.qrc">:/images/logo.svg</pixmap>
+      <pixmap resource="../resources.qrc">:/icons/images/logo.svg</pixmap>
      </property>
      <property name="scaledContents">
       <bool>false</bool>

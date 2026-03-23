@@ -9,12 +9,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/about_dialog.ui" line="94"/>
+        <location filename="../ui/about_dialog.ui" line="91"/>
         <source>**LIDE** - интегрированная среда разработки для языка программирования LISP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/about_dialog.ui" line="121"/>
+        <location filename="../ui/about_dialog.ui" line="118"/>
         <source>Версия:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -112,7 +112,7 @@
     </message>
     <message>
         <location filename="../ui/mainwindow.cpp" line="79"/>
-        <location filename="../ui/mainwindow.cpp" line="397"/>
+        <location filename="../ui/mainwindow.cpp" line="445"/>
         <source>Ошибка</source>
         <translation type="unfinished"></translation>
     </message>
@@ -182,6 +182,22 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../ui/mainwindow.cpp" line="216"/>
+        <source>Запустить</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.cpp" line="218"/>
+        <source>Отправить текущий код в REPL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.cpp" line="226"/>
+        <location filename="../ui/mainwindow.cpp" line="228"/>
+        <source>Перезапустить SBCL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../ui/mainwindow.cpp" line="137"/>
         <source>Скопировать</source>
         <translation type="unfinished"></translation>
@@ -202,109 +218,114 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="178"/>
+        <location filename="../ui/mainwindow.cpp" line="182"/>
         <source>&amp;Вид</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="179"/>
+        <location filename="../ui/mainwindow.cpp" line="183"/>
         <source>Полноэкранный режим</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="210"/>
+        <location filename="../ui/mainwindow.cpp" line="214"/>
         <source>&amp;Запуск</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="212"/>
-        <source>Запустить REPL</source>
+        <location filename="../ui/mainwindow.cpp" line="235"/>
+        <source>Принудительный запуск</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="222"/>
-        <source>Очистить REPL</source>
+        <location filename="../ui/mainwindow.cpp" line="237"/>
+        <source>Перезапуск SBCL и отправка текущего кода</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="225"/>
+        <location filename="../ui/mainwindow.cpp" line="247"/>
         <source>&amp;Настройки</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="226"/>
+        <location filename="../ui/mainwindow.cpp" line="248"/>
         <source>Тема...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="229"/>
+        <location filename="../ui/mainwindow.cpp" line="251"/>
         <source>Светлая</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="231"/>
+        <location filename="../ui/mainwindow.cpp" line="253"/>
         <source>Тёмная</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="239"/>
+        <location filename="../ui/mainwindow.cpp" line="261"/>
         <source>&amp;Справка</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="240"/>
+        <location filename="../ui/mainwindow.cpp" line="262"/>
         <source>О программе</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="249"/>
+        <location filename="../ui/mainwindow.cpp" line="271"/>
         <source>Панель инструментов</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="276"/>
+        <location filename="../ui/mainwindow.cpp" line="294"/>
+        <source>Line: %1, Col: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.cpp" line="303"/>
         <source>Дерево проекта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="283"/>
+        <location filename="../ui/mainwindow.cpp" line="310"/>
         <source>Консоль LISP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="295"/>
-        <location filename="../ui/mainwindow.cpp" line="309"/>
+        <location filename="../ui/mainwindow.cpp" line="322"/>
+        <location filename="../ui/mainwindow.cpp" line="336"/>
         <source>Дерево проекта - %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="296"/>
-        <location filename="../ui/mainwindow.cpp" line="310"/>
+        <location filename="../ui/mainwindow.cpp" line="323"/>
+        <location filename="../ui/mainwindow.cpp" line="337"/>
         <source>Текущий проект: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="371"/>
+        <location filename="../ui/mainwindow.cpp" line="419"/>
         <source>Открыть проект</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="380"/>
+        <location filename="../ui/mainwindow.cpp" line="428"/>
         <source>Выберите папку для нового проекта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="388"/>
+        <location filename="../ui/mainwindow.cpp" line="436"/>
         <source>Новый проект</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="389"/>
+        <location filename="../ui/mainwindow.cpp" line="437"/>
         <source>Название проекта:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="397"/>
+        <location filename="../ui/mainwindow.cpp" line="445"/>
         <source>Не удалось создать проект</source>
         <translation type="unfinished"></translation>
     </message>
