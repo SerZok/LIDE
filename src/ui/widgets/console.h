@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QTextEdit>
 #include <QProcess>
@@ -22,6 +22,7 @@ public:
     // Отправка команд
     void sendCommand(const QString& command);
     void sendCurrentLine();  // Отправить текущую строку
+    void sendCode(const QString& code); // Отправить код 'code'
     void sendSelectedText(); // Отправить выделенный текст
 
 protected:
@@ -48,11 +49,17 @@ private:
     QString m_prompt;
     bool m_waitingForInput;
 
+    // Позиция, от которой можно редактировать (после prompt)
+    int m_editableStart;
+
     void setupConsole();
-    void appendOutput(const QString& text, bool isError = false);
+    void appendOutput(const QString& text, bool isError = false, bool isNotice = false);
     void appendPrompt();
     QString getCurrentLine() const;
-    void clearCurrentLine();
     void insertFromHistory(int direction); // -1 назад, +1 вперёд
     void setupContextMenu();
+
+    // Вспомогательные
+    void ensureCursorInEditableArea();
+    bool cursorBeforeEditable() const;
 };

@@ -1,7 +1,11 @@
 #pragma once
 
+#include <QFileSystemWatcher>
 #include <QPlainTextEdit>
+#include <QTimer>
 #include <QWidget>
+
+#include "ui/components/lisp_highlighter.h"
 
 class QPaintEvent;
 class QResizeEvent;
@@ -16,26 +20,55 @@ public:
 
     // Методы для работы с файлами
     bool loadFile(const QString& fileName);
-    bool saveFile(const QString& fileName);
+    bool saveFile();
+    bool saveFileAs(const QString& fileName);
+
     QString currentFile() const { return m_currentFile; }
     bool isModified() const { return document()->isModified(); }
 
+signals:
+    void fileChangedExternally(const QString& path);
+    void fileSaved(const QString& path);
+    void fileLoaded(const QString& path);
+    void fileModifiedChanged(const QString& path, bool modified);
+    void fileClosed(const QString& path);
+
 protected:
-    // Переопределяем для нумерации строк
     void resizeEvent(QResizeEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
 
 private slots:
+    void highlightMatchingBrackets();
     void updateLineNumberAreaWidth(int newBlockCount);
     void highlightCurrentLine();
     void updateLineNumberArea(const QRect& rect, int dy);
 
+    void onFileChanged(const QString& path);
+    void onTextChanged();
+    void askForReload();
+
 private:
     class LineNumberArea;
-    LineNumberArea* m_lineNumberArea;
+
     QString m_currentFile;
+    QFileSystemWatcher* m_fileWatcher;
+    LineNumberArea* m_lineNumberArea;
+    QTimer* m_reloadTimer;
+    bool m_ignoreChanges;
+    LispHighlighter* m_highlighter;
+    QTextCharFormat m_matchedBracketFormat;
+    QTextCharFormat m_mismatchedBracketFormat;
 
     int lineNumberAreaWidth() const;
+
+    void setupWatcher();
+    void updateWatcher();
+    bool reloadFile();
+
+    int findMatchingBracket(int startPos, bool forward) const;
+    void matchBrackets(const QTextCursor& cursor);
+    bool isPositionInComment(int position) const;
+
 };
 
 // Нумерация строк

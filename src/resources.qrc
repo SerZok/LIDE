@@ -2,5 +2,28 @@
     <qresource prefix="/">
         <file>styles/dark.css</file>
         <file>styles/light.css</file>
+        <file>styles/colors/dark.colors</file>
+        <file>styles/colors/light.colors</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file>images/close.svg</file>
+        <file>images/copy.svg</file>
+        <file>images/cut.svg</file>
+        <file>images/dark-theme.svg</file>
+        <file>images/info.svg</file>
+        <file>images/light-theme.svg</file>
+        <file>images/logo.ico</file>
+        <file>images/logo.svg</file>
+        <file>images/new-file.svg</file>
+        <file>images/open-file.svg</file>
+        <file>images/open-project.svg</file>
+        <file>images/paste.svg</file>
+        <file>images/redo.svg</file>
+        <file>images/save.svg</file>
+        <file>images/save-all.svg</file>
+        <file>images/start.svg</file>
+        <file>images/undo.svg</file>
+        <file>images/restart.svg</file>
+        <file>images/force-start.svg</file>
     </qresource>
 </RCC>

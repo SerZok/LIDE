@@ -7,12 +7,13 @@
 #include <QHeaderView>
 #include <QInputDialog>
 #include <QStandardPaths>
-#include <QSettings>
+#include <QDockWidget>
 
 // ==================[ ProjectTree ]==================
 ProjectTree::ProjectTree(QWidget* parent)
     : QTreeView(parent)
     , m_model(new QFileSystemModel(this))
+    , m_delegate(new ProjectTreeDelegate(this))
     , m_newFileAction(nullptr)
     , m_newFolderAction(nullptr)
     , m_openFileAction(nullptr)
@@ -20,13 +21,16 @@ ProjectTree::ProjectTree(QWidget* parent)
     m_model->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs);
     m_model->setNameFilters(QStringList() << "*.lisp" << "*.lsp" << "*.asd");
     m_model->setNameFilterDisables(false);
+    m_model->setReadOnly(false);
 
     setModel(m_model);
+    setItemDelegate(m_delegate);
 
     setAnimated(true);
     setHeaderHidden(true);
     setExpandsOnDoubleClick(false);
     setContextMenuPolicy(Qt::CustomContextMenu);
+    setEditTriggers(QAbstractItemView::EditKeyPressed);
 
     header()->hideSection(1); // Size
     header()->hideSection(2); // Type
@@ -125,7 +129,9 @@ void ProjectTree::onContextMenuRequested(const QPoint& pos)
         QAction* showInFolderAction = menu.addAction(tr("Показать в проводнике"));
 
         connect(renameAction, &QAction::triggered, [this, index]() {
-            edit(index);
+            if (index.isValid() && (m_model->flags(index) & Qt::ItemIsEditable)) {
+                edit(index);
+            }
             });
 
         connect(deleteAction, &QAction::triggered, [this, index, path]() {
@@ -158,6 +164,11 @@ void ProjectTree::onContextMenuRequested(const QPoint& pos)
                 QDir().mkdir(m_rootPath + "/" + dirName);
             }
             });
+
+        QAction* showInFolderAction = menu.addAction(tr("Показать в проводнике"));
+        connect(showInFolderAction, &QAction::triggered, [this]() {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(m_rootPath));
+            });
     }
 
     menu.exec(viewport()->mapToGlobal(pos));
@@ -179,22 +190,98 @@ void ProjectTree::keyPressEvent(QKeyEvent* event)
     QTreeView::keyPressEvent(event);
 }
 
+QModelIndex ProjectTree::findFileIndex(const QString& path)
+{
+    return m_model->index(path);
+}
+
+void ProjectTree::expandToPath(const QString& path)
+{
+    QModelIndex index = m_model->index(path);
+    if (!index.isValid()) return;
+
+    // Разворачиваем всех родителей
+    QModelIndex parent = index.parent();
+    while (parent.isValid()) {
+        expand(parent);
+        parent = parent.parent();
+    }
+}
+
+void ProjectTree::onFileLoaded(const QString& path)
+{
+    m_currentFile = path;
+    m_delegate->setCurrentFile(path);
+
+    QModelIndex index = findFileIndex(path);
+    if (index.isValid()) {
+        expandToPath(path);
+        setCurrentIndex(index);
+        scrollTo(index, QAbstractItemView::PositionAtCenter);
+        update(index);
+    }
+}
+
+void ProjectTree::onFileSaved(const QString& path)
+{
+    m_modifiedFiles.remove(path);
+    m_delegate->setModifiedFiles(m_modifiedFiles);
+
+    QModelIndex index = findFileIndex(path);
+    if (index.isValid()) {
+        update(index);
+    }
+}
+
+void ProjectTree::onFileModifiedChanged(const QString& path, bool modified)
+{
+    if (modified) {
+        m_modifiedFiles.insert(path);
+    }
+    else {
+        m_modifiedFiles.remove(path);
+    }
+    m_delegate->setModifiedFiles(m_modifiedFiles);
+
+    QModelIndex index = findFileIndex(path);
+    if (index.isValid()) {
+        update(index);
+    }
+}
+
+void ProjectTree::onFileClosed(const QString& path)
+{
+    if (m_currentFile == path) {
+        m_currentFile.clear();
+        m_delegate->setCurrentFile("");
+    }
+    m_modifiedFiles.remove(path);
+    m_delegate->setModifiedFiles(m_modifiedFiles);
+
+    QModelIndex index = findFileIndex(path);
+    if (index.isValid()) {
+        update(index);
+        if (currentIndex() == index) {
+            clearSelection();
+        }
+    }
+}
+
 void ProjectTree::saveState()
 {
-    QSettings settings("LIDE", "LIDE");
-    settings.setValue("project_tree/root_path", m_rootPath);
+    auto* settings = Settings::instance();
+    settings->setLastProjectPath(m_rootPath);
 }
 
 void ProjectTree::restoreState()
 {
-    QSettings settings("LIDE", "LIDE");
-    QString lastPath = settings.value("project_tree/root_path").toString();
+    auto* settings = Settings::instance();
+    QString lastPath = settings->lastProjectPath();
 
     if (!lastPath.isEmpty() && QDir(lastPath).exists()) {
         openProject(lastPath);
     }
     else {
-        QString documentsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-        openProject(documentsPath);
+        openProject(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
     }
 }

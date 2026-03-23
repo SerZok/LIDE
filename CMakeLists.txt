@@ -1,6 +1,17 @@
-cmake_minimum_required(VERSION 3.19)
+﻿cmake_minimum_required(VERSION 3.19)
 set (PROJECT_NAME LIDE)
-set (PROJECT_VERSION 0.1.0)
+set(PROJECT_VERSION_MAJOR 0)
+set(PROJECT_VERSION_MINOR 2)
+set(PROJECT_VERSION_PATCH 0)
+set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+
+string(TIMESTAMP BUILD_DATE "%Y-%m-%d")
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/app/version.h.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/app/version.h"
+    @ONLY
+)
 
 project(${PROJECT_NAME} 
     VERSION ${PROJECT_VERSION}
@@ -8,7 +19,9 @@ project(${PROJECT_NAME}
     LANGUAGES CXX
 )
 
-set(CMAKE_PREFIX_PATH "C:\\Qt\\6.10.2\\msvc2022_64")
+if(NOT CMAKE_PREFIX_PATH)
+    set(CMAKE_PREFIX_PATH "C:\\Qt\\6.10.2\\msvc2022_64" CACHE PATH "Qt installation path")
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -87,6 +100,10 @@ endfunction()
 generate_theme("dark")
 generate_theme("light")
 
+set(RESOURCE_FILES 
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/resources.rc
+)
+
 # Создание exe'шника
 qt_add_executable(${PROJECT_NAME} 
     MANUAL_FINALIZATION
@@ -94,6 +111,7 @@ qt_add_executable(${PROJECT_NAME}
     ${PROJECT_HEADERS}
     ${PROJECT_UIS}
     ${PROJECT_RESOURCES}
+    ${RESOURCE_FILES}
 )
 
 qt_add_translations(${PROJECT_NAME}
@@ -125,7 +143,16 @@ if(WIN32)
     # Запуск windeployqt после сборки
     find_program(WINDEPLOYQT windeployqt REQUIRED)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${WINDEPLOYQT} $<TARGET_FILE:${PROJECT_NAME}> --no-translations --verbose 0
+        COMMAND ${WINDEPLOYQT} $<TARGET_FILE:${PROJECT_NAME}> 
+        --no-translations
+        --no-translations
+        --no-network
+        --no-opengl
+        --no-quick
+        --no-compiler-runtime
+        --no-system-d3d-compiler
+        --no-system-dxc-compiler
+        --verbose 0
         COMMENT "Running windeployqt..."
     )
 
@@ -140,4 +167,23 @@ endif()
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
+endif()
+
+#================================[ РАЗВЁРТЫВАНИЕ ]================================
+if(WIN32)
+
+    install(CODE "
+        set(PROJECT_NAME \"${PROJECT_NAME}\")
+        set(PROJECT_VERSION \"${PROJECT_VERSION}\")
+        set(PROJECT_VERSION_MAJOR \"${PROJECT_VERSION_MAJOR}\")
+        set(PROJECT_VERSION_MINOR \"${PROJECT_VERSION_MINOR}\")
+        set(PROJECT_VERSION_PATCH \"${PROJECT_VERSION_PATCH}\")
+        set(WINDEPLOYQT \"${WINDEPLOYQT}\")
+        set(SETUP_DIR \"${CMAKE_CURRENT_SOURCE_DIR}/setups\")
+        set(ICON_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/src/images/logo.ico\")
+        set(ROOT_PATH \"${CMAKE_CURRENT_SOURCE_DIR}\")
+
+        include(\"${CMAKE_CURRENT_SOURCE_DIR}/install/windows_install.cmake\")
+    ")
+
 endif()
