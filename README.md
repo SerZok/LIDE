@@ -3,7 +3,7 @@
 
 ### Интегрированная среда разработки для Common Lisp (SBCL)
 
-<img width="920" height="752" alt="mainWindow" src="https://github.com/user-attachments/assets/b8818ee8-3555-46b8-897a-2bc0bc2da063" />
+<img width="916" height="752" alt="mainWindow" src="https://github.com/user-attachments/assets/deafaa09-d891-4c3d-947a-64130c8c15a6" />
 
 LIDE — это **простая** современная, легковесная IDE для Common Lisp, построенная на Qt/C++.
 Проект направлен на создание удобной среды разработки с интуитивным интерфейсом.
