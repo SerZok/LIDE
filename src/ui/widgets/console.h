@@ -28,7 +28,7 @@ public:
     void sendSelectedText(); // Отправить выделенный текст
 
     // Получить информацию о последней ошибке
-    ConsoleParser::DetailedErrorInfo getLastDetailedErrorInfo() const { return m_lastErrorInfo; }
+    SBCLMessage getLastDetailedInfo() const { return m_lastInfo; }
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;
@@ -42,12 +42,9 @@ private:
     void onReadyReadStandardError();
     void onProcessStateChanged(QProcess::ProcessState state);
 
-    // Парсинг ошибок
-    void parseAndStoreError(const QString& errorOutput);
-
 signals:
     void processStateChanged(QProcess::ProcessState state);
-    void errorOccurred(const ConsoleParser::DetailedErrorInfo& error);
+    void errorOccurred(const SBCLMessage& error);
 
 private:
     QProcess* m_process;
@@ -60,8 +57,8 @@ private:
     // Позиция, от которой можно редактировать (после prompt)
     int m_editableStart;
 
-    // Информация о последней ошибке
-    ConsoleParser::DetailedErrorInfo m_lastErrorInfo;
+    // Информация о последнем выполнении
+    SBCLMessage m_lastInfo;
 
     void setupConsole();
     void appendOutput(const QString& text, bool isError = false, bool isNotice = false);

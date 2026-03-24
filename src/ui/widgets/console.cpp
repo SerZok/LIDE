@@ -219,7 +219,7 @@ void Console::keyPressEvent(QKeyEvent* event)
 		return;
 	}
 
-	// Обрабатываем сочетания Ctrl+C — посылаем сигнал kill (на Windows нестандартно)
+	// Обрабатываем сочетания Shift+Enter — ставим перевод строки
 	if (event->key() == Qt::Key_Enter && event->modifiers() == Qt::ShiftModifier)
 	{
 		appendOutput("\n");
@@ -379,6 +379,10 @@ void Console::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
 	{
 		appendOutput("ОШИБКА: неудалось запустить ядро Lisp после его завершения!", true, true);
 	}
+	else
+	{
+		appendOutput("ПРЕДУПРЕЖДЕНИЕ: ядро Lisp было перезапущено!", true, true);
+	}
 }
 
 void Console::onProcessError(QProcess::ProcessError error)
@@ -412,12 +416,25 @@ void Console::onReadyReadStandardOutput()
 	QByteArray data = m_process->readAllStandardOutput();
 	QString output = QString::fromUtf8(data);
 	if (output != "* ") {
-		appendOutput(output, false);
+		SBCLMessage formattedData = ConsoleParser::parse(output);
+		if (formattedData.type != SBCLMessageType::Success)
+		{
+			if(formattedData.type == SBCLMessageType::ReaderError)
+				appendOutput("Ошибка ридера!\n", true);
+			if (formattedData.type == SBCLMessageType::RuntimeError)
+				appendOutput("Ошибка при выполнении!\n", true);
+			if (formattedData.type == SBCLMessageType::Unknown)
+				appendOutput("Неизвестная ошибка!\n", true);
+			if(formattedData.line)
+				appendOutput("Строка: " + formattedData.line.value() + '\n', true);
+			if(formattedData.column)
+				appendOutput("Позиция: " + formattedData.column.value() + '\n', true);
+		}
+		appendOutput(formattedData.message, false);
+		m_lastInfo = formattedData;
 		m_waitingForInput = true;
 		appendPrompt();
 	}
-
-	parseAndStoreError(output);
 }
 
 void Console::onReadyReadStandardError()
@@ -425,7 +442,6 @@ void Console::onReadyReadStandardError()
 	if (!m_process) return;
 	QByteArray data = m_process->readAllStandardError();
 	QString error = QString::fromUtf8(data);
-	parseAndStoreError(error);
 	appendOutput(error, true, true);
 }
 
@@ -525,6 +541,7 @@ void Console::appendPrompt()
 	document()->clearUndoRedoStacks(QTextDocument::UndoStack);
 	document()->clearUndoRedoStacks(QTextDocument::RedoStack);
 	qDebug() << "m_editableStart:" << m_editableStart;
+	setTextColor(Qt::white);
 }
 
 QString Console::getCurrentCommandLineText() const
@@ -574,19 +591,4 @@ bool Console::cursorBeforeEditable() const
 {
 	QTextCursor cur = textCursor();
 	return cur.position() < m_editableStart;
-}
-
-void Console::parseAndStoreError(const QString& errorOutput)
-{
-	m_lastErrorInfo = ConsoleParser::parse(errorOutput);
-
-	if (m_lastErrorInfo.hasError) {
-		qDebug() << "Error parsed:"
-			<< "File:" << m_lastErrorInfo.file
-			<< "Line:" << m_lastErrorInfo.line
-			<< "Function:" << m_lastErrorInfo.function
-			<< "Message:" << m_lastErrorInfo.message;
-
-		emit errorOccurred(m_lastErrorInfo);
-	}
 }
