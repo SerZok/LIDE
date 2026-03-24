@@ -89,7 +89,7 @@ bool Console::startLispProcess()
 	m_process->setProcessChannelMode(QProcess::MergedChannels);
 
 	QStringList args;
-	args << "--noinform";// << "--disable-debugger"; // оставляем интерактивность, без автоматического выхода
+	args << "--noinform" << "--disable-debugger"; // оставляем интерактивность, без автоматического выхода
 
 	m_process->start(exePath, args);
 
@@ -162,9 +162,9 @@ void Console::sendCommand(const QString& command)
 	}
 }
 
-void Console::sendCurrentLine()
+void Console::sendCurrentCommandLine()
 {
-	QString line = getCurrentLine();
+	QString line = getCurrentCommandLineText();
 	if (!line.isEmpty()) {
 		sendCommand(line);
 	}
@@ -189,36 +189,75 @@ void Console::sendSelectedText()
 void Console::keyPressEvent(QKeyEvent* event)
 {
 	// Обрабатываем сочетания Ctrl+C — посылаем сигнал kill (на Windows нестандартно)
-	if (event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier) {
-		if (m_process && m_process->state() == QProcess::Running) {
-			// best-effort: пытаемся корректно завершить; при необходимости заменить на платформенно-специфичное посылание SIGINT
-			m_process->kill();
+	if (event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier)
+	{
+		if (textCursor().hasSelection()) {
+			copy(); // стандартное копирование
+		}
+		else {
+			if (m_process && m_process->state() == QProcess::Running) {
+				m_process->kill(); // или лучше interrupt (см. ниже)
+			}
 		}
 		return;
 	}
 
-	// Удерживаем курсор в editable-области
-	ensureCursorInEditableArea();
+	// Обрабатываем сочетания Ctrl+X — вырезаем если область разрешённая
+	if (event->key() == Qt::Key_X && event->modifiers() == Qt::ControlModifier)
+	{
+		QTextCursor cursor = textCursor();
+
+		if (!cursor.hasSelection())
+			return;
+
+		int start = cursor.selectionStart();
+		int end = cursor.selectionEnd();
+		if (start >= m_editableStart && end >= m_editableStart)
+		{
+			QTextEdit::keyPressEvent(event);
+		}
+		return;
+	}
+
+	// Обрабатываем сочетания Ctrl+C — посылаем сигнал kill (на Windows нестандартно)
+	if (event->key() == Qt::Key_Enter && event->modifiers() == Qt::ShiftModifier)
+	{
+		appendOutput("\n");
+		return;
+	}
 
 	// Специальная обработка клавиш
 	switch (event->key()) {
 	case Qt::Key_Return:
 	case Qt::Key_Enter: {
-		if (getCurrentLine() == "clear") {
+		if (getCurrentCommandLineText() == "clear") {
 			clear();
 			appendPrompt();
 		}
 		else {
-			sendCurrentLine();
+			sendCurrentCommandLine();
 			appendOutput("\n");
 		}
 		break;
 	}
 
 	case Qt::Key_Backspace: {
-		QTextCursor cur = textCursor();
-		if (cur.position() <= m_editableStart) {
-			// Запретить удаление промпта
+		QTextCursor cursor = textCursor();
+		if (cursor.hasSelection()) {
+			int start = cursor.selectionStart();
+			int end = cursor.selectionEnd();
+			if (start >= m_editableStart && end >= m_editableStart)
+			{
+				QTextEdit::keyPressEvent(event);
+			}
+			else
+			{
+				cursor.setPosition(m_editableStart);
+				cursor.setPosition(end, QTextCursor::KeepAnchor);
+				setTextCursor(cursor);
+			}
+		}
+		else if (cursor.position() < m_editableStart + 1) {
 			return;
 		}
 		QTextEdit::keyPressEvent(event);
@@ -226,9 +265,22 @@ void Console::keyPressEvent(QKeyEvent* event)
 	}
 
 	case Qt::Key_Delete: {
-		QTextCursor cur = textCursor();
-		if (cur.position() <= m_editableStart) {
-			// Запретить удаление промпта
+		QTextCursor cursor = textCursor();
+		if (cursor.hasSelection()) {
+			int start = cursor.selectionStart();
+			int end = cursor.selectionEnd();
+			if (start >= m_editableStart && end >= m_editableStart)
+			{
+				QTextEdit::keyPressEvent(event);
+			}
+			else
+			{
+				cursor.setPosition(m_editableStart);
+				cursor.setPosition(end, QTextCursor::KeepAnchor);
+				setTextCursor(cursor);
+			}
+		}
+		else if (cursor.position() < m_editableStart) {
 			return;
 		}
 		QTextEdit::keyPressEvent(event);
@@ -256,20 +308,6 @@ void Console::keyPressEvent(QKeyEvent* event)
 		break;
 	}
 
-	case Qt::Key_PageUp: {
-		QTextCursor cur = textCursor();
-		cur.setPosition(m_editableStart);
-		setTextCursor(cur);
-		break;
-	}
-
-	case Qt::Key_PageDown: {
-		QTextCursor cur = textCursor();
-		cur.setPosition(m_editableStart);
-		setTextCursor(cur);
-		break;
-	}
-
 	case Qt::Key_Up: {
 		insertFromHistory(-1);
 		break;
@@ -277,6 +315,21 @@ void Console::keyPressEvent(QKeyEvent* event)
 
 	case Qt::Key_Down: {
 		insertFromHistory(1);
+		break;
+	}
+
+	case Qt::Key_Shift: {
+		QTextEdit::keyPressEvent(event);
+		break;
+	}
+
+	case Qt::Key_Control: {
+		QTextEdit::keyPressEvent(event);
+		break;
+	}
+
+	case Qt::Key_Alt: {
+		QTextEdit::keyPressEvent(event);
 		break;
 	}
 
@@ -288,27 +341,18 @@ void Console::keyPressEvent(QKeyEvent* event)
 	}
 }
 
-void Console::mousePressEvent(QMouseEvent* event)
-{
-	QTextCursor cursor = cursorForPosition(event->pos());
-	if (cursor.block().userState() != 1) { // 1 - маркер для editable области
-		return;
-	}
-	QTextEdit::mousePressEvent(event);
-}
-
 void Console::contextMenuEvent(QContextMenuEvent* event)
 {
 	QMenu* menu = createStandardContextMenu();
 	menu->addSeparator();
 
-	QAction* clearAction = menu->addAction(tr("Clear Console"));
+	QAction* clearAction = menu->addAction(tr("Очистить консоль"));
 	connect(clearAction, &QAction::triggered, [this]() {
 		clear();
 		appendPrompt();
 		});
 
-	QAction* copyOutputAction = menu->addAction(tr("Copy Output"));
+	QAction* copyOutputAction = menu->addAction(tr("Копировать последний вывод"));
 	connect(copyOutputAction, &QAction::triggered, [this]() {
 		// TODO: Копирует только последний вывод
 		});
@@ -319,12 +363,22 @@ void Console::contextMenuEvent(QContextMenuEvent* event)
 
 void Console::onProcessStarted()
 {
-	qDebug() << "Lisp process started";
+	qDebug() << "Ядро Lisp запущено";
 }
 
 void Console::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-	startLispProcess();
+	bool result = false;
+	int counter = 0;
+	do
+	{
+		result = startLispProcess();
+		++counter;
+	} while (!result && counter < 5);
+	if (!result && counter >= 5)
+	{
+		appendOutput("ОШИБКА: неудалось запустить ядро Lisp после его завершения!", true, true);
+	}
 }
 
 void Console::onProcessError(QProcess::ProcessError error)
@@ -349,7 +403,7 @@ void Console::onProcessError(QProcess::ProcessError error)
 	default:
 		errorMsg = "Unknown error.";
 	}
-	appendOutput("ERROR: " + errorMsg + "\n", true, true);
+	appendOutput("ERROR: " + errorMsg, true, true);
 }
 
 void Console::onReadyReadStandardOutput()
@@ -385,7 +439,7 @@ void Console::appendOutput(const QString& text, bool isError, bool isNotice)
 {
 	QTextCursor cursor = textCursor();
 	cursor.setPosition(m_editableStart);
-	QString currentCommandLine = getCurrentLine();
+	QString currentCommandLine = getCurrentCommandLineText();
 	if (isNotice)
 	{
 		// Добавляем команду в историю
@@ -412,17 +466,18 @@ void Console::appendOutput(const QString& text, bool isError, bool isNotice)
 	}
 	insertPlainText(text);
 
-	if (isNotice && !currentCommandLine.isEmpty())
+	if (isNotice)
 	{
 		m_waitingForInput = true;
 		appendPrompt();
-		insertFromHistory(-1);
+		if (!currentCommandLine.isEmpty())
+			insertFromHistory(-1);
 	}
 
 	// После добавления вывода editableStart смещается на новый конец,
 	// но prompt не добавляется автоматически здесь — это делает appendPrompt().
 	// Восстанавливаем курсор пользователя, если он был в editable-области.
-	if (userPos >= m_editableStart) {
+	if (userPos > m_editableStart) {
 		userCursor.setPosition(userPos);
 		setTextCursor(userCursor);
 	}
@@ -462,29 +517,25 @@ void Console::appendPrompt()
 	// Вставляем prompt и запоминаем позицию начала editable области
 	insertPlainText(m_prompt);
 	QTextCursor cur = textCursor();
+	moveCursor(QTextCursor::End);
 	m_editableStart = cur.position(); // после prompt
 	// Отмечаем эту строку как редактируемую
 	cur.block().setUserState(1);
 	setTextCursor(cur);
 	document()->clearUndoRedoStacks(QTextDocument::UndoStack);
 	document()->clearUndoRedoStacks(QTextDocument::RedoStack);
+	qDebug() << "m_editableStart:" << m_editableStart;
 }
 
-QString Console::getCurrentLine() const
+QString Console::getCurrentCommandLineText() const
 {
 	QTextCursor cursor = textCursor();
-	// Если курсор раньше editableStart, переместить его в конец editable
-	int pos = cursor.position();
-	if (pos < m_editableStart) {
-		// возвращаем пустую строку если курсор в истории
-		return QString();
-	}
-
 	// Выделяем от editableStart до конца строки
 	cursor.setPosition(m_editableStart);
 	cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
-	QString line = cursor.selectedText();
-	return line.trimmed();
+	QString text = cursor.selectedText();
+	qDebug() << "text:" << text;
+	return text.trimmed();
 }
 
 void Console::insertFromHistory(int direction)
@@ -514,7 +565,7 @@ void Console::ensureCursorInEditableArea()
 	if (cur.position() < m_editableStart) {
 		cur.setPosition(m_editableStart);
 		setTextCursor(cur);
-		cur.setPosition(m_editableStart + getCurrentLine().size());
+		cur.setPosition(m_editableStart + getCurrentCommandLineText().size());
 		setTextCursor(cur);
 	}
 }

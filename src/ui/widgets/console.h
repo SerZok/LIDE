@@ -22,7 +22,7 @@ public:
 
     // Отправка команд
     void sendCommand(const QString& command);
-    void sendCurrentLine();  // Отправить текущую строку
+    void sendCurrentCommandLine();  // Отправить текущую строку
     void sendCode(const QString& code); // Отправить код 'code'
     void computeCodeFile(const QString& path); // Выполнить код из файла path (с полным путём, например "/home/user/mycode.lisp")
     void sendSelectedText(); // Отправить выделенный текст
@@ -32,7 +32,6 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
     void contextMenuEvent(QContextMenuEvent* event) override;
 
 private:
@@ -67,7 +66,7 @@ private:
     void setupConsole();
     void appendOutput(const QString& text, bool isError = false, bool isNotice = false);
     void appendPrompt();
-    QString getCurrentLine() const;
+    QString getCurrentCommandLineText() const;
     void insertFromHistory(int direction); // -1 назад, +1 вперёд
     void setupContextMenu();
 
