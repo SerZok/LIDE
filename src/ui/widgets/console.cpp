@@ -362,6 +362,8 @@ void Console::onReadyReadStandardOutput()
 		m_waitingForInput = true;
 		appendPrompt();
 	}
+
+	parseAndStoreError(output);
 }
 
 void Console::onReadyReadStandardError()
@@ -369,6 +371,7 @@ void Console::onReadyReadStandardError()
 	if (!m_process) return;
 	QByteArray data = m_process->readAllStandardError();
 	QString error = QString::fromUtf8(data);
+	parseAndStoreError(error);
 	appendOutput(error, true, true);
 }
 
@@ -520,4 +523,19 @@ bool Console::cursorBeforeEditable() const
 {
 	QTextCursor cur = textCursor();
 	return cur.position() < m_editableStart;
+}
+
+void Console::parseAndStoreError(const QString& errorOutput)
+{
+	m_lastErrorInfo = ConsoleParser::parse(errorOutput);
+
+	if (m_lastErrorInfo.hasError) {
+		qDebug() << "Error parsed:"
+			<< "File:" << m_lastErrorInfo.file
+			<< "Line:" << m_lastErrorInfo.line
+			<< "Function:" << m_lastErrorInfo.function
+			<< "Message:" << m_lastErrorInfo.message;
+
+		emit errorOccurred(m_lastErrorInfo);
+	}
 }

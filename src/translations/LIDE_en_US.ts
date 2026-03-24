@@ -27,12 +27,12 @@
 <context>
     <name>Console</name>
     <message>
-        <location filename="../ui/widgets/console.cpp" line="306"/>
+        <location filename="../ui/widgets/console.cpp" line="317"/>
         <source>Clear Console</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console.cpp" line="312"/>
+        <location filename="../ui/widgets/console.cpp" line="323"/>
         <source>Copy Output</source>
         <translation type="unfinished"></translation>
     </message>

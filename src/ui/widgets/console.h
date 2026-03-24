@@ -5,6 +5,7 @@
 #include <QKeyEvent>
 #include <QDebug>
 #include <QTextBlock>
+#include "components/console_parser.h"
 
 class Console : public QTextEdit
 {
@@ -23,7 +24,11 @@ public:
     void sendCommand(const QString& command);
     void sendCurrentLine();  // Отправить текущую строку
     void sendCode(const QString& code); // Отправить код 'code'
+    void computeCodeFile(const QString& path); // Выполнить код из файла path (с полным путём, например "/home/user/mycode.lisp")
     void sendSelectedText(); // Отправить выделенный текст
+
+    // Получить информацию о последней ошибке
+    ConsoleParser::DetailedErrorInfo getLastDetailedErrorInfo() const { return m_lastErrorInfo; }
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;
@@ -38,8 +43,12 @@ private:
     void onReadyReadStandardError();
     void onProcessStateChanged(QProcess::ProcessState state);
 
+    // Парсинг ошибок
+    void parseAndStoreError(const QString& errorOutput);
+
 signals:
     void processStateChanged(QProcess::ProcessState state);
+    void errorOccurred(const ConsoleParser::DetailedErrorInfo& error);
 
 private:
     QProcess* m_process;
@@ -51,6 +60,9 @@ private:
 
     // Позиция, от которой можно редактировать (после prompt)
     int m_editableStart;
+
+    // Информация о последней ошибке
+    ConsoleParser::DetailedErrorInfo m_lastErrorInfo;
 
     void setupConsole();
     void appendOutput(const QString& text, bool isError = false, bool isNotice = false);
