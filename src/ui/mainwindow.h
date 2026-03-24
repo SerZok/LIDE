@@ -28,6 +28,7 @@ public:
     ~MainWindow();
 
     void openFiles(QStringList files);
+    void updateStatusBarPosition(int line, int col);
 
 signals:
     void themeChanged(QString& themeName);
@@ -83,8 +84,12 @@ private:
     QAction* m_pasteAction = nullptr;
 
     // Запуск
-    QAction* m_startReplAction = nullptr;
+    QAction* m_runAction = nullptr;
+    QAction* m_restartAction = nullptr;
+    QAction* m_cleanRunAction = nullptr;
 
+    // StatusBar
+    QLabel* m_positionLabel;
     
 };
 

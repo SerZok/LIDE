@@ -158,7 +158,9 @@ void MainWindow::setupMenuBar()
             m_copyAction->setEnabled(true);
             m_pasteAction->setEnabled(true);
 
-            m_startReplAction->setEnabled(true);
+            m_runAction->setEnabled(true);
+            m_restartAction->setEnabled(true);
+            m_cleanRunAction->setEnabled(true);
 
             // обновления состояния undo/redo
             connect(editor->document(), &QTextDocument::undoAvailable, m_undoAction, &QAction::setEnabled, Qt::UniqueConnection);
@@ -170,12 +172,27 @@ void MainWindow::setupMenuBar()
             m_cutAction->setEnabled(false);
             m_copyAction->setEnabled(false);
             m_pasteAction->setEnabled(false);
-            m_startReplAction->setEnabled(false);
+            m_runAction->setEnabled(false);
+            m_restartAction->setEnabled(false);
+            m_cleanRunAction->setEnabled(false);
         }
         });
 
     // View
     auto* viewMenu = menuBar()->addMenu(tr("&Вид"));
+    auto* fullScreenAction = new QAction(tr("Полноэкранный режим"), this);
+    fullScreenAction->setShortcut(QKeySequence::FullScreen);
+    fullScreenAction->setCheckable(true);
+    fullScreenAction->setChecked(isFullScreen());
+    connect(fullScreenAction, &QAction::triggered, this, [this](bool checked) {
+        if (checked)
+            showFullScreen();
+        else
+            showNormal();
+        });
+    addAction(fullScreenAction);
+    viewMenu->addAction(fullScreenAction);
+    viewMenu->addSeparator();
     for (auto it = m_dockNames.begin(); it != m_dockNames.end(); ++it) {
         auto* dock = it.key();
         auto* action = viewMenu->addAction(it.value());
@@ -196,31 +213,45 @@ void MainWindow::setupMenuBar()
     // Run menu
     auto* runMenu = menuBar()->addMenu(tr("&Запуск"));
     runMenu->addSeparator();
-    m_startReplAction = runMenu->addAction(QIcon(":/icons/images/start.svg"), tr("Запустить REPL"));
-    m_startReplAction->setEnabled(false);
-
-    connect(m_startReplAction, &QAction::triggered, this, [this]() {
-        auto code = m_tabWidget->currentEditor()->toPlainText();
-        qDebug() << code;
-        m_console->sendCode(code);
+    m_runAction = runMenu->addAction(QIcon(":/icons/images/start.svg"), tr("Запустить"), QKeySequence(Qt::Key_F5));
+    m_runAction->setEnabled(false);
+    m_runAction->setToolTip(tr("Отправить текущий код в REPL"));
+    connect(m_runAction, &QAction::triggered, this, [this]() {
+        if (m_console) {
+            auto code = m_tabWidget->currentEditor()->toPlainText();
+            m_console->sendCode(code);
+        }
         });
 
+    m_restartAction = runMenu->addAction(QIcon(":/icons/images/restart.svg"), tr("Перезапустить SBCL"), QKeySequence(Qt::CTRL | Qt::Key_R));
+    m_restartAction->setEnabled(false);
+    m_restartAction->setToolTip(tr("Перезапустить SBCL"));
+    connect(m_restartAction, &QAction::triggered, this, [this]() {
+        if (m_console){
+            m_console->startLispProcess();
+            }
+        });
 
-    runMenu->addAction(tr("Очистить REPL"));
+    m_cleanRunAction = runMenu->addAction(QIcon(":/icons/images/force-start.svg"), tr("Принудительный запуск"), QKeySequence(Qt::CTRL | Qt::Key_F5));
+    m_cleanRunAction->setEnabled(false);
+    m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и отправка текущего кода"));
+    connect(m_cleanRunAction, &QAction::triggered, this, [this]() {
+        if (m_console) {
+            m_console->startLispProcess();
+            auto code = m_tabWidget->currentEditor()->toPlainText();
+            m_console->sendCode(code);
+        }
+        });
 
     // Tools menu
     auto* toolsMenu = menuBar()->addMenu(tr("&Настройки"));
     auto styleMenu = toolsMenu->addMenu(tr("Тема..."));
 
-    // Создаём группу для взаимного исключения
     auto* themeGroup = new QActionGroup(this);
-
     m_lightStyleAction = styleMenu->addAction(QIcon(":/icons/images/light-theme.svg"), tr("Светлая"));
     m_lightStyleAction->setActionGroup(themeGroup);
-
     m_darkStyleAction = styleMenu->addAction(QIcon(":/icons/images/dark-theme.svg"), tr("Тёмная"));
     m_darkStyleAction->setActionGroup(themeGroup);
-
     connect(themeGroup, &QActionGroup::triggered, this, [this](QAction* action) {
         QString theme = (action == m_lightStyleAction) ? "light" : "dark";
         loadTheme(theme);
@@ -246,16 +277,21 @@ void MainWindow::setupToolBar() {
     m_mainToolBar->addAction(m_openFileAction);
     m_mainToolBar->addAction(m_saveFileAction);
     m_mainToolBar->addAction(m_saveFileAllAction);
-    m_mainToolBar->addAction(m_startReplAction);
     m_mainToolBar->addSeparator();
-    m_mainToolBar->addAction(m_startReplAction);
+    m_mainToolBar->addAction(m_runAction);
+    m_mainToolBar->addAction(m_restartAction);
+    m_mainToolBar->addAction(m_cleanRunAction);
 }
 
 void MainWindow::setupStatusBar()
 {
-    statusBar()->addPermanentWidget(new QLabel("Lisp"));
-    statusBar()->addPermanentWidget(new QLabel("Line: 1, Col: 1"));
-    statusBar()->showMessage("Ready");
+    m_positionLabel = new QLabel("Line: 1, Col: 1");
+    statusBar()->addPermanentWidget(m_positionLabel);
+}
+
+void MainWindow::updateStatusBarPosition(int line, int col)
+{
+    m_positionLabel->setText(tr("Line: %1, Col: %2").arg(line).arg(col));
 }
 
 void MainWindow::setupDockWidgets()
@@ -301,6 +337,27 @@ void MainWindow::setupDockWidgets()
         m_projectDock->setToolTip(tr("Текущий проект: %1").arg(info.absolutePath()));
         });
     connect(this, &MainWindow::themeChanged, Settings::instance(), &Settings::setCurrentTheme);
+
+
+    connect(m_tabWidget, &EditorTabWidget::currentEditorChanged,
+        this, [this](LispEditor* editor) {
+            if (editor) {
+                connect(editor, &LispEditor::cursorPositionChanged,
+                    this, [this, editor]() {
+                        QTextCursor cursor = editor->textCursor();
+                        int line = cursor.blockNumber() + 1;
+                        int col = cursor.columnNumber() + 1;
+                        updateStatusBarPosition(line, col);
+                    });
+
+                // Инициализация текущего редактора
+                QTextCursor cursor = editor->textCursor();
+                updateStatusBarPosition(cursor.blockNumber() + 1, cursor.columnNumber() + 1);
+            }
+            else {
+                updateStatusBarPosition(0, 0);
+            }
+        });
 }
 
 ProjectTree* MainWindow::createProjectTree()
@@ -374,10 +431,10 @@ void MainWindow::createProject() {
 
     if (parentPath.isEmpty()) return;
 
-    // ИМЯ проекта(папки)
-    QString projectName = QInputDialog::getText(this, tr("Новый проект"), tr("Название проекта:")
-    );
-
+    QString projectName = QInputDialog::getText(
+        this,
+        tr("Новый проект"),
+        tr("Название проекта:"));
     if (!projectName.isEmpty()) {
         QString newPath = parentPath + "/" + projectName;
         QDir dir;

@@ -1,0 +1,7 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100.000000" height="100.000000" fill="none">
+	<rect id="Размер1" width="100.000000" height="100.000000" x="0.000000" y="0.000000" fill="rgb(255,255,255)" fill-opacity="0" />
+	<path id="Многоугольник 1" d="M93.3013 75L6.69873 75L50 0L93.3013 75Z" fill="rgb(8,43,0)" fill-rule="evenodd" transform="matrix(0,1,-1,0,79.4599,-1.53549)" />
+	<path id="Многоугольник 1" d="M87.5278 65L93.3013 75L81.7543 75L18.2457 75L6.69873 75L12.4722 65L44.2265 10L50 0L55.7735 10L87.5278 65ZM75.9808 65L24.0192 65L50 20L75.9808 65Z" fill="rgb(0,255,26)" fill-rule="evenodd" transform="matrix(0,1,-1,0,79.4599,-1.53549)" />
+	<path id="Многоугольник 2" d="M83.9711 67.5L6.02885 67.5L45 0L83.9711 67.5Z" fill="rgb(8,43,0)" fill-rule="evenodd" transform="matrix(0,1,-1,0,100.46,3.46451)" />
+	<path id="Многоугольник 2" d="M78.1976 57.5L83.9711 67.5L72.4241 67.5L17.5759 67.5L6.02885 67.5L11.8024 57.5L39.2265 10L45 0L50.7735 10L78.1976 57.5ZM66.6506 57.5L45 20L23.3494 57.5L66.6506 57.5Z" fill="rgb(0,255,26)" fill-rule="evenodd" transform="matrix(0,1,-1,0,100.46,3.46451)" />
+</svg>

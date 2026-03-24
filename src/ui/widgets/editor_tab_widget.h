@@ -50,4 +50,5 @@ private:
     void updateTabText(int index, const QString& path, bool modified);
     int findTabByPath(const QString& path) const;
     void addEditorTab(const QString& path, LispEditor* editor);
+    void updateMappings();
 };

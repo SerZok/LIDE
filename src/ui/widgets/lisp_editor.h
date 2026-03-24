@@ -34,7 +34,6 @@ signals:
     void fileClosed(const QString& path);
 
 protected:
-    // Переопределяем для нумерации строк
     void resizeEvent(QResizeEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
 
