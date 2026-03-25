@@ -44,7 +44,6 @@ private:
 
 signals:
     void processStateChanged(QProcess::ProcessState state);
-    void errorOccurred(const SBCLMessage& error);
 
 private:
     QProcess* m_process;
@@ -53,6 +52,9 @@ private:
     int m_historyIndex;
     QString m_prompt;
     bool m_waitingForInput;
+    bool m_formatted_output_on;
+    bool m_debug_mode;
+    QString m_last_output;
 
     // Позиция, от которой можно редактировать (после prompt)
     int m_editableStart;
@@ -65,9 +67,9 @@ private:
     void appendPrompt();
     QString getCurrentCommandLineText() const;
     void insertFromHistory(int direction); // -1 назад, +1 вперёд
-    void setupContextMenu();
 
     // Вспомогательные
     void ensureCursorInEditableArea();
     bool cursorBeforeEditable() const;
+    void clear();
 };

@@ -27,13 +27,154 @@
 <context>
     <name>Console</name>
     <message>
-        <location filename="../ui/widgets/console.cpp" line="349"/>
+        <location filename="../ui/widgets/console.cpp" line="94"/>
+        <source>ОШИБКА: исполняемый файл SBCL не найден. Поместите SBCL в папку &apos;sbcl&apos; рядом с приложением или установите SBCL в систему.
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="169"/>
+        <source>ОШИБКА: количество закрывающихся скобок меньше открывающихся!
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="368"/>
+        <source>Вырезать</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="381"/>
+        <source>Копировать</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="388"/>
+        <source>Вставить</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="399"/>
+        <source>Выделить всё</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="409"/>
+        <source>Выделить весь введённый текст</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="420"/>
         <source>Очистить консоль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console.cpp" line="355"/>
+        <location filename="../ui/widgets/console.cpp" line="426"/>
         <source>Копировать последний вывод</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="432"/>
+        <source>Режим отладки SBCL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="433"/>
+        <source>Включение/отключение отладчика SBCL (требуется перезапуск ядра)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="439"/>
+        <source>Перезапуск SBCL для применения режима отладки...
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="448"/>
+        <source>ОШИБКА: не удалось перезапустить SBCL
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="452"/>
+        <source>Выводить отформатированный ответ</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="512"/>
+        <source>ОШИБКА: не удалось перезапустить ядро Lisp после %1 попыток!
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="515"/>
+        <source>ПРЕДУПРЕЖДЕНИЕ: ядро Lisp было перезапущено
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="527"/>
+        <source>Не удалось запустить процесс Lisp. Проверьте, установлен ли SBCL или находится ли он в папке приложения.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="530"/>
+        <source>Процесс Lisp аварийно завершился.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="533"/>
+        <source>Превышено время ожидания операции.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="536"/>
+        <source>Ошибка записи.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="559"/>
+        <source>Ошибка ридера!
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="561"/>
+        <source>Ошибка при выполнении!
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="563"/>
+        <source>Неизвестная ошибка!
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="565"/>
+        <source>Строка: %1
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="567"/>
+        <source>Позиция: %1
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="539"/>
+        <source>Ошибка чтения.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="542"/>
+        <source>Неизвестная ошибка.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/console.cpp" line="544"/>
+        <source>ОШИБКА: </source>
         <translation type="unfinished"></translation>
     </message>
 </context>

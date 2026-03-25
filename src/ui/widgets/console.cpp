@@ -10,6 +10,7 @@
 #include <QFileInfo>
 #include <QStandardPaths>
 #include <QDir>
+#include <QThread>
 
 Console::Console(QWidget* parent)
 	: QTextEdit(parent)
@@ -18,6 +19,9 @@ Console::Console(QWidget* parent)
 	, m_prompt("CL-USER> ")
 	, m_waitingForInput(true)
 	, m_editableStart(0)
+	, m_formatted_output_on(true)
+	, m_debug_mode(false)
+	, m_last_output("")
 {
 	setupConsole();
 	startLispProcess();
@@ -47,7 +51,14 @@ void Console::setupConsole()
 
 bool Console::startLispProcess()
 {
+	// Если процесс уже запущен, не запускаем новый
 	if (m_process && m_process->state() == QProcess::Running) {
+		qDebug() << "Lisp процесс уже запущен";
+		return true;
+	}
+
+	// Если процесс существует, но не запущен, удаляем его
+	if (m_process) {
 		stopLispProcess();
 	}
 
@@ -80,7 +91,7 @@ bool Console::startLispProcess()
 	}
 
 	if (exePath.isEmpty()) {
-		appendOutput("ERROR: SBCL executable not found. Place SBCL into 'sbcl' folder next to the application or install SBCL in the system PATH.\n", true, true);
+		appendOutput(tr("ОШИБКА: исполняемый файл SBCL не найден. Поместите SBCL в папку 'sbcl' рядом с приложением или установите SBCL в систему.\n"), true, true);
 		m_process->deleteLater();
 		m_process = nullptr;
 		return false;
@@ -89,12 +100,16 @@ bool Console::startLispProcess()
 	m_process->setProcessChannelMode(QProcess::MergedChannels);
 
 	QStringList args;
-	args << "--noinform" << "--disable-debugger"; // оставляем интерактивность, без автоматического выхода
+	args << "--noinform";
+	if (!m_debug_mode)
+	{
+		args << "--disable-debugger";
+	}
 
 	m_process->start(exePath, args);
 
 	if (!m_process->waitForStarted(3000)) {
-		appendOutput("ERROR: Failed to start SBCL within timeout.\n", true, true);
+		appendOutput("ОШИБКА: не удалось запустить SBCL в течение отведенного времени.\n", true, true);
 		m_process->terminate();
 		m_process->deleteLater();
 		m_process = nullptr;
@@ -108,16 +123,20 @@ void Console::stopLispProcess()
 {
 	if (!m_process) return;
 
+	// Отключаем сигналы, чтобы избежать лишних вызовов
 	m_process->disconnect();
+
 	if (m_process->state() == QProcess::Running) {
 		qDebug() << "Завершение Lisp процесса...";
 		m_process->terminate();
+
 		if (!m_process->waitForFinished(1000)) {
 			qDebug() << "Процесс не завершился, убиваем...";
 			m_process->kill();
 			m_process->waitForFinished(1000);
 		}
 	}
+
 	delete m_process;
 	m_process = nullptr;
 }
@@ -133,9 +152,9 @@ void Console::sendCommand(const QString& command)
 	}
 
 	if (!m_process || m_process->state() != QProcess::Running) {
-		qDebug() << "Lisp process not running. Starting...";
+		qDebug() << "Lisp процесс не запущен. Запускаем...";
 		if (!startLispProcess()) {
-			qDebug() << "Cannot send command: SBCL not available.";
+			qDebug() << "Не могу отправить команду: SBCL недоступен.";
 			return;
 		}
 	}
@@ -147,7 +166,7 @@ void Console::sendCommand(const QString& command)
 	}
 
 	if (bracketCount > 0) {
-		appendOutput("Количество закрывающихся скобок меньше открывающихся!", true, true);
+		appendOutput(tr("ОШИБКА: количество закрывающихся скобок меньше открывающихся!\n"), true, true);
 	}
 	else {
 		// Отправляем команду в процесс
@@ -257,7 +276,7 @@ void Console::keyPressEvent(QKeyEvent* event)
 				setTextCursor(cursor);
 			}
 		}
-		else if (cursor.position() < m_editableStart + 1) {
+		else if (cursor.position() <= m_editableStart) {
 			return;
 		}
 		QTextEdit::keyPressEvent(event);
@@ -343,7 +362,59 @@ void Console::keyPressEvent(QKeyEvent* event)
 
 void Console::contextMenuEvent(QContextMenuEvent* event)
 {
-	QMenu* menu = createStandardContextMenu();
+	QMenu* menu = new QMenu(this);
+
+	// Стандартные действия с учетом editable области
+	QAction* cutAction = menu->addAction(tr("Вырезать"));
+	cutAction->setShortcut(QKeySequence::Cut);
+	cutAction->setEnabled(textCursor().hasSelection() &&
+		textCursor().selectionStart() >= m_editableStart);
+	connect(cutAction, &QAction::triggered, [this]() {
+		QTextCursor cursor = textCursor();
+		if (cursor.hasSelection() &&
+			cursor.selectionStart() >= m_editableStart &&
+			cursor.selectionEnd() >= m_editableStart) {
+			cut();
+		}
+		});
+
+	QAction* copyAction = menu->addAction(tr("Копировать"));
+	copyAction->setShortcut(QKeySequence::Copy);
+	copyAction->setEnabled(textCursor().hasSelection());
+	connect(copyAction, &QAction::triggered, [this]() {
+		copy();
+		});
+
+	QAction* pasteAction = menu->addAction(tr("Вставить"));
+	pasteAction->setShortcut(QKeySequence::Paste);
+	pasteAction->setEnabled(canPaste());
+	connect(pasteAction, &QAction::triggered, [this]() {
+		ensureCursorInEditableArea();
+		paste();
+		});
+
+	menu->addSeparator();
+
+	// Выделить всё
+	QAction* selectAllAction = menu->addAction(tr("Выделить всё"));
+	selectAllAction->setShortcut(QKeySequence::SelectAll);
+	connect(selectAllAction, &QAction::triggered, [this]() {
+		QTextCursor cursor = textCursor();
+		cursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
+		cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+		setTextCursor(cursor);
+		});
+
+	// Выделить весь введённый текст
+	QAction* selectAllInputAction = menu->addAction(tr("Выделить весь введённый текст"));
+	selectAllInputAction->setShortcut(QKeySequence::SelectAll);
+	connect(selectAllInputAction, &QAction::triggered, [this]() {
+		QTextCursor cursor = textCursor();
+		cursor.setPosition(m_editableStart);
+		cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+		setTextCursor(cursor);
+		});
+
 	menu->addSeparator();
 
 	QAction* clearAction = menu->addAction(tr("Очистить консоль"));
@@ -354,7 +425,36 @@ void Console::contextMenuEvent(QContextMenuEvent* event)
 
 	QAction* copyOutputAction = menu->addAction(tr("Копировать последний вывод"));
 	connect(copyOutputAction, &QAction::triggered, [this]() {
-		// TODO: Копирует только последний вывод
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(m_last_output);
+		});
+
+	QAction* debugMode = menu->addAction(tr("Режим отладки SBCL"));
+	debugMode->setStatusTip(tr("Включение/отключение отладчика SBCL (требуется перезапуск ядра)"));
+	debugMode->setCheckable(true);
+	debugMode->setChecked(m_debug_mode);
+
+	connect(debugMode, &QAction::toggled, [this](bool checked) {
+		m_debug_mode = checked;
+		appendOutput(tr("Перезапуск SBCL для применения режима отладки...\n"), false, true);
+
+		// Останавливаем текущий процесс, если он запущен
+		if (m_process && m_process->state() == QProcess::Running) {
+			stopLispProcess();
+		}
+
+		// Запускаем новый процесс
+		if (!startLispProcess()) {
+			appendOutput(tr("ОШИБКА: не удалось перезапустить SBCL\n"), true, true);
+		}
+		});
+
+	QAction* formattedOutputAction = menu->addAction(tr("Выводить отформатированный ответ"));
+	formattedOutputAction->setCheckable(true);
+	formattedOutputAction->setChecked(m_formatted_output_on);
+
+	connect(formattedOutputAction, &QAction::toggled, [this](bool checked) {
+		m_formatted_output_on = checked;
 		});
 
 	menu->exec(event->globalPos());
@@ -368,21 +468,55 @@ void Console::onProcessStarted()
 
 void Console::onProcessFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+	Q_UNUSED(exitCode);
+	Q_UNUSED(exitStatus);
+
+	// Защита от множественных вызовов
+	static bool isRestarting = false;
+	if (isRestarting) {
+		qDebug() << "Уже выполняется перезапуск, пропускаем...";
+		return;
+	}
+
+	isRestarting = true;
+
+	// Небольшая задержка перед перезапуском
+	QThread::msleep(500);
+
 	bool result = false;
 	int counter = 0;
-	do
-	{
+	const int MAX_RETRIES = 5;
+
+	while (!result && counter < MAX_RETRIES) {
+		qDebug() << "Попытка перезапуска Lisp ядра..." << counter + 1;
+
+		// Проверяем, не запущен ли уже процесс
+		if (m_process && m_process->state() == QProcess::Running) {
+			qDebug() << "Процесс уже запущен, перезапуск не требуется";
+			result = true;
+			break;
+		}
+
 		result = startLispProcess();
-		++counter;
-	} while (!result && counter < 5);
-	if (!result && counter >= 5)
-	{
-		appendOutput("ОШИБКА: неудалось запустить ядро Lisp после его завершения!", true, true);
+
+		if (!result) {
+			counter++;
+			if (counter < MAX_RETRIES) {
+				// Увеличиваем задержку с каждой попыткой
+				QThread::msleep(500 * counter);
+			}
+		}
 	}
-	else
-	{
-		appendOutput("ПРЕДУПРЕЖДЕНИЕ: ядро Lisp было перезапущено!", true, true);
+
+	if (!result && counter >= MAX_RETRIES) {
+		appendOutput(tr("ОШИБКА: не удалось перезапустить ядро Lisp после %1 попыток!\n").arg(MAX_RETRIES), true, true);
 	}
+	else if (result) {
+		appendOutput(tr("ПРЕДУПРЕЖДЕНИЕ: ядро Lisp было перезапущено\n"), true, true);
+		appendPrompt();
+	}
+
+	isRestarting = false;
 }
 
 void Console::onProcessError(QProcess::ProcessError error)
@@ -390,24 +524,24 @@ void Console::onProcessError(QProcess::ProcessError error)
 	QString errorMsg;
 	switch (error) {
 	case QProcess::FailedToStart:
-		errorMsg = "Failed to start Lisp process. Check if SBCL is installed or bundled.";
+		errorMsg = tr("Не удалось запустить процесс Lisp. Проверьте, установлен ли SBCL или находится ли он в папке приложения.");
 		break;
 	case QProcess::Crashed:
-		errorMsg = "Lisp process crashed.";
+		errorMsg = tr("Процесс Lisp аварийно завершился.");
 		break;
 	case QProcess::Timedout:
-		errorMsg = "Operation timed out.";
+		errorMsg = tr("Превышено время ожидания операции.");
 		break;
 	case QProcess::WriteError:
-		errorMsg = "Write error.";
+		errorMsg = tr("Ошибка записи.");
 		break;
 	case QProcess::ReadError:
-		errorMsg = "Read error.";
+		errorMsg = tr("Ошибка чтения.");
 		break;
 	default:
-		errorMsg = "Unknown error.";
+		errorMsg = tr("Неизвестная ошибка.");
 	}
-	appendOutput("ERROR: " + errorMsg, true, true);
+	appendOutput(tr("ОШИБКА: ") + errorMsg, true, true);
 }
 
 void Console::onReadyReadStandardOutput()
@@ -415,26 +549,39 @@ void Console::onReadyReadStandardOutput()
 	if (!m_process) return;
 	QByteArray data = m_process->readAllStandardOutput();
 	QString output = QString::fromUtf8(data);
-	if (output != "* ") {
-		SBCLMessage formattedData = ConsoleParser::parse(output);
-		if (formattedData.type != SBCLMessageType::Success)
-		{
-			if(formattedData.type == SBCLMessageType::ReaderError)
-				appendOutput("Ошибка ридера!\n", true);
-			if (formattedData.type == SBCLMessageType::RuntimeError)
-				appendOutput("Ошибка при выполнении!\n", true);
-			if (formattedData.type == SBCLMessageType::Unknown)
-				appendOutput("Неизвестная ошибка!\n", true);
-			if(formattedData.line)
-				appendOutput("Строка: " + formattedData.line.value() + '\n', true);
-			if(formattedData.column)
-				appendOutput("Позиция: " + formattedData.column.value() + '\n', true);
-		}
-		appendOutput(formattedData.message, false);
-		m_lastInfo = formattedData;
-		m_waitingForInput = true;
-		appendPrompt();
+	if (output == "* ")
+		return;
+
+	SBCLMessage formattedData = ConsoleParser::parse(output);
+	if (formattedData.type != SBCLMessageType::Success)
+	{
+		if (formattedData.type == SBCLMessageType::ReaderError)
+			appendOutput(tr("Ошибка ридера!\n"), true);
+		if (formattedData.type == SBCLMessageType::RuntimeError)
+			appendOutput(tr("Ошибка при выполнении!\n"), true);
+		if (formattedData.type == SBCLMessageType::Unknown)
+			appendOutput(tr("Неизвестная ошибка!\n"), true);
+		if (formattedData.line.has_value())
+			appendOutput(tr("Строка: %1\n").arg(*formattedData.line), true);
+		if (formattedData.column.has_value())
+			appendOutput(tr("Позиция: %1\n").arg(*formattedData.column), true);
+
 	}
+
+	m_lastInfo = formattedData;
+
+	if ( m_formatted_output_on ) 
+	{
+		m_last_output = formattedData.message;
+		appendOutput(formattedData.message, false);
+	}
+	else
+	{
+		m_last_output = output;
+		appendOutput(output, false);
+	}
+	m_waitingForInput = true;
+	appendPrompt();
 }
 
 void Console::onReadyReadStandardError()
@@ -467,6 +614,7 @@ void Console::appendOutput(const QString& text, bool isError, bool isNotice)
 		cursor.movePosition(QTextCursor::StartOfBlock);
 		cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
 		cursor.removeSelectedText();
+		m_editableStart = cursor.position();
 	}
 	// Сохраняем позицию курсора для восстановления (если пользователь редактировал)
 	QTextCursor userCursor = textCursor();
@@ -507,47 +655,78 @@ void Console::appendPrompt()
 {
 	if (!m_waitingForInput) return;
 
-	// Проверки: не дублировать prompt, и вставлять его только после перевода строки
-	QString doc = toPlainText();
-	if (!doc.isEmpty()) {
-		if (!doc.endsWith('\n')) {
-			// Завершаем строку перед prompt, чтобы prompt был на новой строке
-			moveCursor(QTextCursor::End);
-			insertPlainText("\n");
-		}
-		else {
-			// Если уже есть prompt в конце — не добавлять
-			if (doc.endsWith(m_prompt)) {
-				// Но нужно обновить m_editableStart
-				QTextCursor cur = textCursor();
-				moveCursor(QTextCursor::End);
-				m_editableStart = textCursor().position();
-				setTextCursor(cur);
-				return;
-			}
-		}
+	QTextCursor cursor = textCursor();
+	cursor.movePosition(QTextCursor::End);
+
+	// Проверяем, пустой ли документ
+	if (document()->isEmpty()) {
+		// Если документ пустой, просто вставляем промпт
+		QTextCharFormat promptFormat;
+		promptFormat.setForeground(Qt::green);
+		cursor.insertText(m_prompt, promptFormat);
+
+		cursor.movePosition(QTextCursor::End);
+		m_editableStart = cursor.position();
+		setTextCursor(cursor);
+		setTextColor(Qt::white);
+
+		document()->clearUndoRedoStacks(QTextDocument::UndoStack);
+		document()->clearUndoRedoStacks(QTextDocument::RedoStack);
+		qDebug() << "Пустой документ, m_editableStart:" << m_editableStart;
+		return;
 	}
 
-	moveCursor(QTextCursor::End);
-	setTextColor(Qt::green);
-	// Вставляем prompt и запоминаем позицию начала editable области
-	insertPlainText(m_prompt);
-	QTextCursor cur = textCursor();
-	moveCursor(QTextCursor::End);
-	m_editableStart = cur.position(); // после prompt
-	// Отмечаем эту строку как редактируемую
-	cur.block().setUserState(1);
-	setTextCursor(cur);
+	// Проверяем последнюю строку
+	cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::KeepAnchor);
+	QString lastLine = cursor.selectedText();
+	cursor.clearSelection();
+
+	// Если промпт уже есть, обновляем позицию и выходим
+	if (lastLine == m_prompt) {
+		cursor.movePosition(QTextCursor::End);
+		m_editableStart = cursor.position();
+		qDebug() << "Промпт уже существует, m_editableStart:" << m_editableStart;
+		// Убеждаемся, что цвет для ввода белый
+		setTextColor(Qt::white);
+		return;
+	}
+
+	// Если последняя строка не пустая, добавляем перевод строки
+	if (!lastLine.isEmpty()) {
+		cursor.movePosition(QTextCursor::End);
+		cursor.insertText("\n");
+	}
+
+	// Создаем формат для промпта
+	QTextCharFormat promptFormat;
+	promptFormat.setForeground(Qt::green);
+
+	// Вставляем промпт с зеленым цветом
+	cursor.insertText(m_prompt, promptFormat);
+
+	// Обновляем позицию редактирования (после промпта)
+	cursor.movePosition(QTextCursor::End);
+	m_editableStart = cursor.position();
+
+	// Устанавливаем курсор и убеждаемся, что цвет для ввода белый
+	setTextCursor(cursor);
+	setTextColor(Qt::white);
+
 	document()->clearUndoRedoStacks(QTextDocument::UndoStack);
 	document()->clearUndoRedoStacks(QTextDocument::RedoStack);
+
 	qDebug() << "m_editableStart:" << m_editableStart;
-	setTextColor(Qt::white);
 }
 
 QString Console::getCurrentCommandLineText() const
 {
+	// Защита от выхода за границы
+	if (m_editableStart < 0 || m_editableStart > document()->characterCount()) {
+		qDebug() << "Ошибка: m_editableStart вне диапазона:" << m_editableStart;
+		return QString();
+	}
+
 	QTextCursor cursor = textCursor();
-	// Выделяем от editableStart до конца строки
 	cursor.setPosition(m_editableStart);
 	cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
 	QString text = cursor.selectedText();
@@ -559,30 +738,40 @@ void Console::insertFromHistory(int direction)
 {
 	if (m_commandHistory.isEmpty()) return;
 
+	// Защита от выхода за границы
+	if (m_editableStart < 0 || m_editableStart > document()->characterCount()) {
+		qDebug() << "Ошибка: m_editableStart вне диапазона:" << m_editableStart;
+		appendPrompt();
+		return;
+	}
+
 	if (m_historyIndex < 0) m_historyIndex = m_commandHistory.size();
 	m_historyIndex += direction;
 	m_historyIndex = qBound(0, m_historyIndex, m_commandHistory.size() - 1);
 
 	QString command = m_commandHistory[m_historyIndex];
 
-	// Заменяем текущую строку
 	QTextCursor cursor = textCursor();
 	cursor.setPosition(m_editableStart);
 	cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
 	cursor.removeSelectedText();
 	cursor.insertText(command);
-	// Помещаем курсор в конец вставленного текста
 	cursor.setPosition(m_editableStart + command.length());
 	setTextCursor(cursor);
 }
 
 void Console::ensureCursorInEditableArea()
 {
+	// Защита от выхода за границы
+	if (m_editableStart < 0 || m_editableStart > document()->characterCount()) {
+		qDebug() << "Ошибка: m_editableStart вне диапазона:" << m_editableStart;
+		appendPrompt();
+		return;
+	}
+
 	QTextCursor cur = textCursor();
 	if (cur.position() < m_editableStart) {
 		cur.setPosition(m_editableStart);
-		setTextCursor(cur);
-		cur.setPosition(m_editableStart + getCurrentCommandLineText().size());
 		setTextCursor(cur);
 	}
 }
@@ -591,4 +780,11 @@ bool Console::cursorBeforeEditable() const
 {
 	QTextCursor cur = textCursor();
 	return cur.position() < m_editableStart;
+}
+
+void Console::clear()
+{
+	QTextEdit::clear();
+	m_editableStart = 0;
+	m_waitingForInput = true;
 }
