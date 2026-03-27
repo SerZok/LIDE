@@ -215,11 +215,7 @@ void Console::sendFile(const QString& path)
 	normalizedPath.replace("\\", "/");
 
 	// Формируем команду LOAD
-	QString command = QString(
-		"(let ((result (progn"
-		"  (load (compile-file \"%1\" :print t :verbose t))"
-		"))) result)"
-	).arg(normalizedPath);
+	QString command = QString("(load \"%1\" :verbose t :print t)").arg(normalizedPath);
 
 	// Отправляем команду
 	sendCommand(command);
