@@ -1,4 +1,4 @@
-#include "editor_tab_widget.h"
+﻿#include "editor_tab_widget.h"
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QShortCut>
@@ -216,4 +216,35 @@ QStringList EditorTabWidget::openedFiles() {
         }
     }
     return files;
+}
+
+QString EditorTabWidget::currentFilePath() const
+{
+    int currentIndex = QTabWidget::currentIndex();
+    if (currentIndex >= 0 && m_indexToPath.contains(currentIndex)) {
+        return m_indexToPath[currentIndex];
+    }
+    return QString();
+}
+
+LispEditor* EditorTabWidget::editorByPath(const QString& path) const
+{
+    QString normalizedPath = QFileInfo(path).absoluteFilePath();
+
+    for (auto it = m_indexToPath.begin(); it != m_indexToPath.end(); ++it) {
+        if (QFileInfo(it.value()).absoluteFilePath() == normalizedPath) {
+            return editorAt(it.key());
+        }
+    }
+    return nullptr;
+}
+
+int EditorTabWidget::indexOf(LispEditor* editor) const
+{
+    for (int i = 0; i < count(); ++i) {
+        if (editorAt(i) == editor) {
+            return i;
+        }
+    }
+    return -1;
 }

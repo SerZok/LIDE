@@ -17,6 +17,7 @@ Console::Console(QWidget* parent)
 	, m_process(nullptr)
 	, m_historyIndex(-1)
 	, m_prompt("CL-USER> ")
+	, m_console_output_mark("SBCL: ")
 	, m_waitingForInput(true)
 	, m_editableStart(0)
 	, m_formatted_output_on(true)
@@ -66,7 +67,6 @@ bool Console::startLispProcess()
 
 	connect(m_process, &QProcess::started, this, &Console::onProcessStarted);
 	connect(m_process, &QProcess::finished, this, &Console::onProcessFinished);
-	connect(m_process, &QProcess::errorOccurred, this, &Console::onProcessError);
 	connect(m_process, &QProcess::readyReadStandardOutput, this, &Console::onReadyReadStandardOutput);
 	connect(m_process, &QProcess::readyReadStandardError, this, &Console::onReadyReadStandardError);
 	connect(m_process, &QProcess::stateChanged, this, &Console::onProcessStateChanged);
@@ -186,6 +186,11 @@ void Console::sendCurrentCommandLine()
 	QString line = getCurrentCommandLineText();
 	if (!line.isEmpty()) {
 		sendCommand(line);
+		appendOutput("\n");
+	}
+	else
+	{
+		appendPrompt( true );
 	}
 }
 
@@ -195,6 +200,29 @@ void Console::sendCode(const QString& code)
 	if (!code.isEmpty()) {
 		sendCommand(code);
 	}
+}
+
+void Console::sendFile(const QString& path)
+{
+	clear();
+	if (path.isEmpty()) {
+		appendOutput("ОШИБКА: путь к файлу не указан\n", true, true);
+		return;
+	}
+
+	// Нормализуем путь: заменяем обратные слеши на прямые
+	QString normalizedPath = path;
+	normalizedPath.replace("\\", "/");
+
+	// Формируем команду LOAD
+	QString command = QString(
+		"(let ((result (progn"
+		"  (load (compile-file \"%1\" :print t :verbose t))"
+		"))) result)"
+	).arg(normalizedPath);
+
+	// Отправляем команду
+	sendCommand(command);
 }
 
 void Console::sendSelectedText()
@@ -215,7 +243,7 @@ void Console::keyPressEvent(QKeyEvent* event)
 		}
 		else {
 			if (m_process && m_process->state() == QProcess::Running) {
-				m_process->kill(); // или лучше interrupt (см. ниже)
+				m_process->write("(sb-ext:quit)\n");
 			}
 		}
 		return;
@@ -238,10 +266,37 @@ void Console::keyPressEvent(QKeyEvent* event)
 		return;
 	}
 
-	// Обрабатываем сочетания Shift+Enter — ставим перевод строки
-	if (event->key() == Qt::Key_Enter && event->modifiers() == Qt::ShiftModifier)
+	// Обрабатываем сочетания Ctrl+A — выделить весь введёнынй текст
+	if (event->key() == Qt::Key_A && event->modifiers() == Qt::ControlModifier)
 	{
-		appendOutput("\n");
+		QTextCursor cursor = textCursor();
+		cursor.setPosition(m_editableStart);
+		cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+		setTextCursor(cursor);
+		return;
+	}
+
+	// Обрабатываем сочетания Ctrl+V — вставить
+	if (event->key() == Qt::Key_V && event->modifiers() == Qt::ControlModifier)
+	{
+		QTextCursor cursor = textCursor();
+		if (cursor.position() < m_editableStart)
+			return;
+		setTextColor(Qt::white);
+		QTextEdit::keyPressEvent(event);
+		return;
+	}
+
+	// Обрабатываем сочетания Shift+Enter — ставим перевод строки
+	if ((event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+		&& event->modifiers() == Qt::ShiftModifier)
+	{
+		// Вставляем перевод строки в текущую позицию курсора
+		QTextCursor cursor = textCursor();
+		if(cursor.position() < m_editableStart)
+			return;
+		cursor.insertText(QString("\n"));
+		event->accept();
 		return;
 	}
 
@@ -255,7 +310,6 @@ void Console::keyPressEvent(QKeyEvent* event)
 		}
 		else {
 			sendCurrentCommandLine();
-			appendOutput("\n");
 		}
 		break;
 	}
@@ -275,9 +329,10 @@ void Console::keyPressEvent(QKeyEvent* event)
 				cursor.setPosition(end, QTextCursor::KeepAnchor);
 				setTextCursor(cursor);
 			}
+			break;
 		}
 		else if (cursor.position() <= m_editableStart) {
-			return;
+			break;
 		}
 		QTextEdit::keyPressEvent(event);
 		break;
@@ -300,7 +355,7 @@ void Console::keyPressEvent(QKeyEvent* event)
 			}
 		}
 		else if (cursor.position() < m_editableStart) {
-			return;
+			break;
 		}
 		QTextEdit::keyPressEvent(event);
 		break;
@@ -308,14 +363,10 @@ void Console::keyPressEvent(QKeyEvent* event)
 
 	case Qt::Key_Left: {
 		QTextCursor cur = textCursor();
-		QTextCursor moved = cur;
-		moved.movePosition(QTextCursor::Left);
-		if (moved.position() < m_editableStart) {
-			// Переместить на начало editable-области
-			cur.setPosition(m_editableStart);
-			setTextCursor(cur);
-			return;
+		if (cur.position() <= m_editableStart && event->modifiers() != Qt::AltModifier) {
+			break;
 		}
+		cur.movePosition(QTextCursor::Left);
 		QTextEdit::keyPressEvent(event);
 		break;
 	}
@@ -355,6 +406,7 @@ void Console::keyPressEvent(QKeyEvent* event)
 	default:
 		// Ввод обычных символов: блокируем вставку в историю (курсор перемещается в конец editable-области)
 		ensureCursorInEditableArea();
+		setTextColor(Qt::white);
 		QTextEdit::keyPressEvent(event);
 		break;
 	}
@@ -555,6 +607,8 @@ void Console::onReadyReadStandardOutput()
 	SBCLMessage formattedData = ConsoleParser::parse(output);
 	if (formattedData.type != SBCLMessageType::Success)
 	{
+		if (!formattedData.file.isEmpty())
+			appendOutput(tr("Файл: %1\n").arg(formattedData.file), true);
 		if (formattedData.type == SBCLMessageType::ReaderError)
 			appendOutput(tr("Ошибка ридера!\n"), true);
 		if (formattedData.type == SBCLMessageType::RuntimeError)
@@ -568,7 +622,40 @@ void Console::onReadyReadStandardOutput()
 
 	}
 
-	m_lastInfo = formattedData;
+	// Если это ошибка с позицией
+	if (formattedData.type != SBCLMessageType::Success &&
+		formattedData.line.has_value() &&
+		formattedData.column.has_value() &&
+		!formattedData.file.isEmpty()) {
+
+		// Отправляем сигнал об ошибке
+		emit errorOccurred(
+			formattedData.file,
+			formattedData.filePosition.value(),  // позиция в файле
+			formattedData.message,
+			formattedData.line.value_or(-1),
+			formattedData.column.value_or(-1)
+		);
+	}
+
+	// Создаем формат для промпта
+	QTextCharFormat promptFormat;
+	promptFormat.setForeground(Qt::cyan);
+
+	QTextCursor cursor = textCursor();
+	cursor.movePosition(QTextCursor::End);
+
+	// Вставляем промпт с зеленым цветом
+	cursor.insertText(m_console_output_mark, promptFormat);
+
+	// Обновляем позицию редактирования (после промпта)
+	cursor.movePosition(QTextCursor::End);
+
+	// Устанавливаем курсор и убеждаемся, что цвет для ввода белый
+	setTextCursor(cursor);
+	setTextColor(Qt::white);
+
+	appendOutput("\n", false);
 
 	if ( m_formatted_output_on ) 
 	{
@@ -651,7 +738,7 @@ void Console::appendOutput(const QString& text, bool isError, bool isNotice)
 	}
 }
 
-void Console::appendPrompt()
+void Console::appendPrompt( bool force )
 {
 	if (!m_waitingForInput) return;
 
@@ -682,7 +769,7 @@ void Console::appendPrompt()
 	cursor.clearSelection();
 
 	// Если промпт уже есть, обновляем позицию и выходим
-	if (lastLine == m_prompt) {
+	if (lastLine == m_prompt && !force ) {
 		cursor.movePosition(QTextCursor::End);
 		m_editableStart = cursor.position();
 		qDebug() << "Промпт уже существует, m_editableStart:" << m_editableStart;
@@ -714,8 +801,6 @@ void Console::appendPrompt()
 
 	document()->clearUndoRedoStacks(QTextDocument::UndoStack);
 	document()->clearUndoRedoStacks(QTextDocument::RedoStack);
-
-	qDebug() << "m_editableStart:" << m_editableStart;
 }
 
 QString Console::getCurrentCommandLineText() const
@@ -730,6 +815,12 @@ QString Console::getCurrentCommandLineText() const
 	cursor.setPosition(m_editableStart);
 	cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
 	QString text = cursor.selectedText();
+
+	text.replace(QChar(0x2028), "\n");  // LINE SEPARATOR
+	text.replace(QChar(0x2029), "\n");  // PARAGRAPH SEPARATOR
+	text.replace("\r\n", "\n");         // Windows line endings
+	text.replace("\r", "\n");           // Old Mac line endings
+
 	qDebug() << "text:" << text;
 	return text.trimmed();
 }
@@ -755,6 +846,11 @@ void Console::insertFromHistory(int direction)
 	cursor.setPosition(m_editableStart);
 	cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
 	cursor.removeSelectedText();
+
+	QTextCharFormat format;
+	format.setForeground(Qt::white);
+	cursor.setCharFormat(format);
+
 	cursor.insertText(command);
 	cursor.setPosition(m_editableStart + command.length());
 	setTextCursor(cursor);

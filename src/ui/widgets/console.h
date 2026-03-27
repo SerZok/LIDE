@@ -24,11 +24,8 @@ public:
     void sendCommand(const QString& command);
     void sendCurrentCommandLine();  // Отправить текущую строку
     void sendCode(const QString& code); // Отправить код 'code'
-    void computeCodeFile(const QString& path); // Выполнить код из файла path (с полным путём, например "/home/user/mycode.lisp")
+    void sendFile(const QString& path); // Отправить файл 'path'
     void sendSelectedText(); // Отправить выделенный текст
-
-    // Получить информацию о последней ошибке
-    SBCLMessage getLastDetailedInfo() const { return m_lastInfo; }
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;
@@ -44,6 +41,8 @@ private:
 
 signals:
     void processStateChanged(QProcess::ProcessState state);
+signals:
+    void errorOccurred(const QString& file, int filePosition, const QString& message, int line, int column);
 
 private:
     QProcess* m_process;
@@ -51,6 +50,7 @@ private:
     QStringList m_commandHistory;
     int m_historyIndex;
     QString m_prompt;
+    QString m_console_output_mark;
     bool m_waitingForInput;
     bool m_formatted_output_on;
     bool m_debug_mode;
@@ -59,12 +59,9 @@ private:
     // Позиция, от которой можно редактировать (после prompt)
     int m_editableStart;
 
-    // Информация о последнем выполнении
-    SBCLMessage m_lastInfo;
-
     void setupConsole();
     void appendOutput(const QString& text, bool isError = false, bool isNotice = false);
-    void appendPrompt();
+    void appendPrompt( bool force = false);
     QString getCurrentCommandLineText() const;
     void insertFromHistory(int direction); // -1 назад, +1 вперёд
 

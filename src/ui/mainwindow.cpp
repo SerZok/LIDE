@@ -1,4 +1,4 @@
-#include <QTextEdit>
+﻿#include <QTextEdit>
 #include <QTreeWidget>
 #include <QListWidget>
 #include <QDockWidget>
@@ -217,9 +217,12 @@ void MainWindow::setupMenuBar()
     m_runAction->setEnabled(false);
     m_runAction->setToolTip(tr("Отправить текущий код в REPL"));
     connect(m_runAction, &QAction::triggered, this, [this]() {
-        if (m_console) {
-            auto code = m_tabWidget->currentEditor()->toPlainText();
-            m_console->sendCode(code);
+        if (m_console && m_tabWidget) {
+            QString filePath = m_tabWidget->currentFilePath();
+            if (!filePath.isEmpty()) {
+                m_tabWidget->currentEditor()->saveFile();
+                m_console->sendFile(filePath);
+            }
         }
         });
 
@@ -228,6 +231,7 @@ void MainWindow::setupMenuBar()
     m_restartAction->setToolTip(tr("Перезапустить SBCL"));
     connect(m_restartAction, &QAction::triggered, this, [this]() {
         if (m_console){
+            m_console->stopLispProcess();
             m_console->startLispProcess();
             }
         });
@@ -236,10 +240,14 @@ void MainWindow::setupMenuBar()
     m_cleanRunAction->setEnabled(false);
     m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и отправка текущего кода"));
     connect(m_cleanRunAction, &QAction::triggered, this, [this]() {
-        if (m_console) {
-            m_console->startLispProcess();
-            auto code = m_tabWidget->currentEditor()->toPlainText();
-            m_console->sendCode(code);
+        if (m_console && m_tabWidget) {
+            QString filePath = m_tabWidget->currentFilePath();
+            if (!filePath.isEmpty()) {
+                m_tabWidget->currentEditor()->saveFile();
+                m_console->stopLispProcess();
+                m_console->startLispProcess();
+                m_console->sendFile(filePath);
+            }
         }
         });
 
@@ -314,6 +322,10 @@ void MainWindow::setupDockWidgets()
     m_dockNames[m_ConsoleDock] = m_ConsoleDock->windowTitle();
     addDockWidget(Qt::BottomDockWidgetArea, m_ConsoleDock);
 
+    // Подключаем сигнал ошибки из консоли
+    connect(m_console, &Console::errorOccurred,
+        this, &MainWindow::onLispError);
+
     QTimer::singleShot(0, [this]() {
         if (m_projectTree && m_projectDock) {
             QString currentPath = m_projectTree->rootPath();
@@ -358,6 +370,45 @@ void MainWindow::setupDockWidgets()
                 updateStatusBarPosition(0, 0);
             }
         });
+}
+
+void MainWindow::onLispError(const QString& file, int filePosition,
+    const QString& message, int line, int column)
+{
+    if (m_tabWidget) {
+        LispEditor* editor = findEditorByFile(file);
+        if (editor) {
+            // Подсвечиваем ошибку по позиции в файле
+            editor->highlightErrorAtPosition(filePosition, message, line, column);
+
+            // Показываем сообщение об ошибке в статус-баре
+            statusBar()->showMessage(QString("Ошибка: %1 (строка %2, колонка %3)")
+                .arg(message).arg(line).arg(column), 10000);
+
+            // Переключаемся на вкладку
+            int index = m_tabWidget->indexOf(editor);
+            if (index >= 0) {
+                m_tabWidget->setCurrentIndex(index);
+            }
+        }
+    }
+}
+
+LispEditor* MainWindow::findEditorByFile(const QString& filePath)
+{
+    // Нормализуем пути для сравнения
+    QString normalizedFile = QFileInfo(filePath).absoluteFilePath();
+
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        LispEditor* editor = m_tabWidget->editorAt(i);
+        if (editor) {
+            QString editorFile = editor->currentFile();
+            if (QFileInfo(editorFile).absoluteFilePath() == normalizedFile) {
+                return editor;
+            }
+        }
+    }
+    return nullptr;
 }
 
 ProjectTree* MainWindow::createProjectTree()

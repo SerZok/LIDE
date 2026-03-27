@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QTabWidget>
 #include <QMap>
@@ -28,6 +28,12 @@ public:
 
     // Получить список всех открытых файлов
     QStringList openedFiles();
+
+    // Получить путь к файлу текущего редактора
+    QString currentFilePath() const;
+
+    LispEditor* editorByPath(const QString& path) const;
+    int indexOf(LispEditor* editor) const;
 
 signals:
     void fileOpened(const QString& path);

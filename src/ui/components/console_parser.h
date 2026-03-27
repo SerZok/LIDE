@@ -15,6 +15,8 @@ struct SBCLMessage {
     QString message;         // короткая читаемая строка
     std::optional<int> line;     // если известна позиция
     std::optional<int> column;   // если известна позиция
+    std::optional<int> filePosition;  // позиция в файле
+    QString file;                     // имя файла
 };
 
 class ConsoleParser {

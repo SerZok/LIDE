@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QFileSystemWatcher>
 #include <QPlainTextEdit>
@@ -25,6 +25,9 @@ public:
 
     QString currentFile() const { return m_currentFile; }
     bool isModified() const { return document()->isModified(); }
+    
+    void highlightErrorAtPosition(int position, const QString& message, int line, int column);
+    void clearErrorHighlight();
 
 signals:
     void fileChangedExternally(const QString& path);
@@ -38,7 +41,7 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private slots:
-    void highlightMatchingBrackets();
+    QList<QTextEdit::ExtraSelection> highlightMatchingBrackets();
     void updateLineNumberAreaWidth(int newBlockCount);
     void highlightCurrentLine();
     void updateLineNumberArea(const QRect& rect, int dy);
@@ -58,6 +61,12 @@ private:
     LispHighlighter* m_highlighter;
     QTextCharFormat m_matchedBracketFormat;
     QTextCharFormat m_mismatchedBracketFormat;
+
+    QTextEdit::ExtraSelection m_errorSelection;
+    QList<QTextEdit::ExtraSelection> m_extraSelections;
+
+    void setupSyntaxHighlighting();
+    void updateErrorHighlight();
 
     int lineNumberAreaWidth() const;
 

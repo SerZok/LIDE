@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -46,6 +46,9 @@ private:
     void setupStatusBar();
     void setupDockWidgets();
     void loadTheme(QString stylePath);
+
+    LispEditor* findEditorByFile(const QString& filePath);
+    void onLispError(const QString& file, int filePosition, const QString& message, int line, int column);
 
     ProjectTree* createProjectTree();
     Console* createConsoleLisp();
