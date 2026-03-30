@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QTextBlock>
 #include "components/console_parser.h"
+#include "QTimer"
 
 class Console : public QTextEdit
 {
@@ -25,7 +26,6 @@ public:
     void sendCurrentCommandLine();  // Отправить текущую строку
     void sendCode(const QString& code); // Отправить код 'code'
     void sendFile(const QString& path); // Отправить файл 'path'
-    void sendSelectedText(); // Отправить выделенный текст
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;
@@ -38,7 +38,6 @@ private:
     void onReadyReadStandardOutput();
     void onReadyReadStandardError();
     void onProcessStateChanged(QProcess::ProcessState state);
-
 signals:
     void processStateChanged(QProcess::ProcessState state);
 signals:
@@ -67,6 +66,5 @@ private:
 
     // Вспомогательные
     void ensureCursorInEditableArea();
-    bool cursorBeforeEditable() const;
     void clear();
 };
