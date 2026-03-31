@@ -40,11 +40,17 @@ signals:
     // Сигнал с уже распарсенным сообщением SBCL
     void sbclMessage(const SBCLMessage& message);
 
-    // Сигнал что консоль/процесс готов(а) принимать следующий ввод — Console может вставить промпт
-    void readyForInput(bool force = false);
+    // Принято новое сообщение 
+    void recievedNewOutputMessage(const QString& message);
+
+    // вставить промпт пользователя
+    void userPrompt(bool force = false);
+
+    // вставить промпт sbcl
+    void sbclPrompt();
 
     // Сигнал для указания ошибок с координатами (оставлен прежний формат)
-    void errorOccurred(const QString& file, int filePosition, const QString& message, int line, int column);
+    void errorOccurred(const QString& file, const QString& message, int line, int column);
 
     // Сигнал состояния процесса
     void processStateChanged(QProcess::ProcessState state);

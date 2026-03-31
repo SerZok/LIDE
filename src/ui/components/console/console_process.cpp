@@ -187,7 +187,7 @@ void ConsoleProcess::onProcessFinished(int exitCode, QProcess::ExitStatus exitSt
 		}
 		else if (result) {
 			emit rawOutput(tr("ПРЕДУПРЕЖДЕНИЕ: ядро Lisp было перезапущено\n"), true, true);
-			emit readyForInput();
+			emit userPrompt();
 		}
 
 		isRestarting = false;
@@ -237,47 +237,38 @@ void ConsoleProcess::onReadyReadStandardOutput()
 	// Эмитим как структурированное сообщение
 	emit sbclMessage(formattedData);
 
-	if (formattedData.type != SBCLMessageType::Success)
-	{
-		if (!formattedData.file.isEmpty())
-			emit rawOutput(tr("Файл: %1\n").arg(formattedData.file), true);
-		if (formattedData.type == SBCLMessageType::ReaderError)
-			emit rawOutput(tr("Ошибка ридера!\n"), true);
-		if (formattedData.type == SBCLMessageType::RuntimeError)
-			emit rawOutput(tr("Ошибка при выполнении!\n"), true);
-		if (formattedData.type == SBCLMessageType::Unknown)
-			emit rawOutput(tr("Неизвестная ошибка!\n"), true);
-		if (formattedData.line.has_value())
-			emit rawOutput(tr("Строка: %1\n").arg(*formattedData.line), true);
-		if (formattedData.column.has_value())
-			emit rawOutput(tr("Позиция: %1\n").arg(*formattedData.column), true);
-
-	}
-
-	if (formattedData.type == SBCLMessageType::Success && !formattedData.message.isEmpty()) {
-		emit rawOutput(formattedData.message, false, false);
-	} else {
-		// Если это ошибка/notice, передаём сообщение как заметку/ошибку
-		emit rawOutput(formattedData.message.isEmpty() ? output : formattedData.message, true, false);
-	}
-
-	// Если это сообщение с позицией ошибки — эмитим старый сигнал errorOccurred (как раньше)
+	// Если это ошибка с позицией
 	if (formattedData.type != SBCLMessageType::Success &&
 		formattedData.line.has_value() &&
 		formattedData.column.has_value() &&
 		!formattedData.file.isEmpty()) {
 
+		// Отправляем сигнал об ошибке
 		emit errorOccurred(
 			formattedData.file,
-			formattedData.filePosition.value_or(-1),
 			formattedData.message,
 			formattedData.line.value_or(-1),
 			formattedData.column.value_or(-1)
 		);
 	}
 
+	emit sbclPrompt();
+
+	emit rawOutput("\n", false);
+
+	if (m_formatted_output_on)
+	{
+		emit recievedNewOutputMessage(formattedData.message);
+		emit rawOutput(formattedData.message, false);
+	}
+	else
+	{
+		emit recievedNewOutputMessage(output);
+		emit rawOutput(output, false);
+	}
+
 	// Сообщаем, что процесс готов для следующего ввода (Console вставит промпт)
-	emit readyForInput();
+	emit userPrompt();
 
 	emit rawOutput("\n", false);
 }

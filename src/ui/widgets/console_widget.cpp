@@ -22,7 +22,11 @@ Console::Console(QWidget* parent)
 	m_console_process = new ConsoleProcess();
 	// Подключаем сигналы ConsoleProcess -> Console
 	connect(m_console_process, &ConsoleProcess::rawOutput, this, &Console::appendOutput);
-	connect(m_console_process, &ConsoleProcess::readyForInput, this, &Console::appendPrompt);
+	connect(m_console_process, &ConsoleProcess::userPrompt, this, &Console::appendPrompt);
+	connect(m_console_process, &ConsoleProcess::errorOccurred, this, [this](const QString& file, const QString& message, int line, int column) {
+		emit errorOccurred(file, message, line, column);
+		});
+
 	// sbclMessage можно использовать для дополнительной логики (открыть файл, подсветить строку и т.п.)
 	connect(m_console_process, &ConsoleProcess::sbclMessage, this, [this](const SBCLMessage& msg) {
 		// Пример: при ошибке дополнительно вывести информацию о файле
@@ -40,6 +44,31 @@ Console::Console(QWidget* parent)
 			if (msg.column.has_value())
 				appendOutput(tr("Позиция: %1\n").arg(*msg.column), true);
 		}
+		});
+
+	connect(m_console_process, &ConsoleProcess::recievedNewOutputMessage, this, [this](const QString& msg) {
+		m_last_output = msg;
+		});
+
+	connect(m_console_process, &ConsoleProcess::sbclPrompt, this, [this]() {
+		// Создаем формат для промпта
+		QTextCharFormat promptFormat;
+		promptFormat.setForeground(Qt::cyan);
+
+		QTextCursor cursor = textCursor();
+		cursor.movePosition(QTextCursor::End);
+
+		// Вставляем промпт с зеленым цветом
+		cursor.insertText(m_console_output_mark, promptFormat);
+
+		// Обновляем позицию редактирования (после промпта)
+		cursor.movePosition(QTextCursor::End);
+
+		// Устанавливаем курсор и убеждаемся, что цвет для ввода белый
+		setTextCursor(cursor);
+		setTextColor(Qt::white);
+
+		appendOutput("\n", false);
 		});
 
 	appendPrompt();

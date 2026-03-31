@@ -48,5 +48,5 @@ private:
 
 signals:
     // Сигнал для передачи ошибок с координатами (для MainWindow)
-    void errorOccurred(const QString& file, int filePosition, const QString& message, int line, int column);
+    void errorOccurred(const QString& file, const QString& message, int line, int column);
 };

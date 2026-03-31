@@ -397,7 +397,7 @@ void LispEditor::updateWatcher()
     }
 }
 
-void LispEditor::highlightErrorAtPosition(int position, const QString& message,
+void LispEditor::highlightErrorAtPosition(const QString& message,
     int line, int column)
 {
     // Очищаем предыдущую подсветку

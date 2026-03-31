@@ -48,7 +48,7 @@ private:
     void loadTheme(QString stylePath);
 
     LispEditor* findEditorByFile(const QString& filePath);
-    void onLispError(const QString& file, int filePosition, const QString& message, int line, int column);
+    void onLispError(const QString& file, const QString& message, int line, int column);
 
     ProjectTree* createProjectTree();
     Console* createConsoleLisp();

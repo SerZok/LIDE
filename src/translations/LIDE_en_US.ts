@@ -27,101 +27,101 @@
 <context>
     <name>Console</name>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="31"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="35"/>
         <source>Файл: %1
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="33"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="37"/>
         <source>Ошибка ридера!
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="35"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="39"/>
         <source>Ошибка при выполнении!
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="37"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="41"/>
         <source>Неизвестная ошибка!
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="39"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="43"/>
         <source>Строка: %1
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="41"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="45"/>
         <source>Позиция: %1
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="442"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="471"/>
         <source>Вырезать</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="455"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="484"/>
         <source>Копировать</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="462"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="491"/>
         <source>Вставить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="473"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="502"/>
         <source>Выделить всё</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="483"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="512"/>
         <source>Выделить весь введённый текст</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="494"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="523"/>
         <source>Очистить консоль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="500"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="529"/>
         <source>Копировать последний вывод</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="506"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="535"/>
         <source>Режим отладки SBCL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="507"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="536"/>
         <source>Включение/отключение отладчика SBCL (требуется перезапуск ядра)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="513"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="542"/>
         <source>Перезапуск SBCL для применения режима отладки...
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="522"/>
-        <location filename="../ui/widgets/console_widget.cpp" line="584"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="551"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="613"/>
         <source>ОШИБКА: не удалось перезапустить SBCL
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="526"/>
+        <location filename="../ui/widgets/console_widget.cpp" line="555"/>
         <source>Выводить отформатированный ответ</source>
         <translation type="unfinished"></translation>
     </message>
@@ -185,42 +185,6 @@
     <message>
         <location filename="../ui/components/console/console_process.cpp" line="220"/>
         <source>ОШИБКА: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="243"/>
-        <source>Файл: %1
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="245"/>
-        <source>Ошибка ридера!
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="247"/>
-        <source>Ошибка при выполнении!
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="249"/>
-        <source>Неизвестная ошибка!
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="251"/>
-        <source>Строка: %1
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="253"/>
-        <source>Позиция: %1
-</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -26,7 +26,7 @@ public:
     QString currentFile() const { return m_currentFile; }
     bool isModified() const { return document()->isModified(); }
     
-    void highlightErrorAtPosition(int position, const QString& message, int line, int column);
+    void highlightErrorAtPosition(const QString& message, int line, int column);
     void clearErrorHighlight();
 
 signals:

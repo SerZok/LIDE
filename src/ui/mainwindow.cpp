@@ -370,14 +370,14 @@ void MainWindow::setupDockWidgets()
         });
 }
 
-void MainWindow::onLispError(const QString& file, int filePosition,
+void MainWindow::onLispError(const QString& file,
     const QString& message, int line, int column)
 {
     if (m_tabWidget) {
         LispEditor* editor = findEditorByFile(file);
         if (editor) {
             // Подсвечиваем ошибку по позиции в файле
-            editor->highlightErrorAtPosition(filePosition, message, line, column);
+            editor->highlightErrorAtPosition(message, line, column);
 
             // Показываем сообщение об ошибке в статус-баре
             statusBar()->showMessage(QString("Ошибка: %1 (строка %2, колонка %3)")
