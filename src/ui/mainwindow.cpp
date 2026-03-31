@@ -231,8 +231,7 @@ void MainWindow::setupMenuBar()
     m_restartAction->setToolTip(tr("Перезапустить SBCL"));
     connect(m_restartAction, &QAction::triggered, this, [this]() {
         if (m_console){
-            m_console->stopLispProcess();
-            m_console->startLispProcess();
+            m_console->restartSbclProcess();
             }
         });
 
@@ -244,8 +243,7 @@ void MainWindow::setupMenuBar()
             QString filePath = m_tabWidget->currentFilePath();
             if (!filePath.isEmpty()) {
                 m_tabWidget->currentEditor()->saveFile();
-                m_console->stopLispProcess();
-                m_console->startLispProcess();
+                m_console->restartSbclProcess();
                 m_console->sendFile(filePath);
             }
         }

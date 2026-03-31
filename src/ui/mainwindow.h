@@ -6,7 +6,7 @@
 
 #include "ui/widgets/editor_tab_widget.h"
 #include "ui/widgets/project_tree.h"
-#include "ui/widgets/console/console.h"
+#include "ui/widgets/console_widget.h"
 #include "ui/about_dialog.h"
 #include "settings.h"
 
