@@ -404,6 +404,7 @@ void Console::keyPressEvent(QKeyEvent* event)
 				cursor.setPosition(end, QTextCursor::KeepAnchor);
 				setTextCursor(cursor);
 			}
+			break;
 		}
 		else if (cursor.position() < m_editableStart) {
 			break;
@@ -569,6 +570,11 @@ void Console::sendCurrentCommandLine()
 	QString line = getCurrentCommandLineText();
 	if (!line.isEmpty() && m_console_process) {
 		m_console_process->sendCommand(line);
+		// Добавляем команду в историю
+		if (!line.isEmpty()) {
+			m_commandHistory.append(line);
+			m_historyIndex = m_commandHistory.size();
+		}
 		appendOutput("\n");
 	}
 	else

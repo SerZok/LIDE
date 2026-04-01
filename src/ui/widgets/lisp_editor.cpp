@@ -403,35 +403,48 @@ void LispEditor::highlightErrorAtPosition(const QString& message,
     // Очищаем предыдущую подсветку
     clearErrorHighlight();
 
-    // Находим блок по номеру строки (line нумеруется с 1)
+    // Находим блок по номеру строки
     QTextBlock block = document()->findBlockByNumber(line - 1);
     if (!block.isValid()) {
         qDebug() << "Invalid line:" << line;
         return;
     }
 
-    // Создаём курсор для выделения
+    // Создаём курсор для выделения позиции ошибки
     QTextCursor cursor(block);
-
-    // Перемещаемся на позицию ошибки (колонка)
     int errorPosition = block.position() + (column - 1);
     cursor.setPosition(errorPosition);
-
-    // Выделяем от позиции ошибки до конца блока (строки)
     cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
 
-    // Настраиваем подсветку
-    m_errorSelection.cursor = cursor;
-    m_errorSelection.format.setBackground(QColor(255, 100, 100, 80));
-    m_errorSelection.format.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
-    m_errorSelection.format.setUnderlineColor(QColor(255, 50, 50));
-    m_errorSelection.format.setToolTip(QString("Line %1, Column %2: %3")
+    // Подсветка позиции ошибки
+    QTextEdit::ExtraSelection errorSelection;
+    errorSelection.cursor = cursor;
+    errorSelection.format.setBackground(QColor(255, 100, 100, 80));
+    errorSelection.format.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
+    errorSelection.format.setUnderlineColor(QColor(255, 50, 50));
+    errorSelection.format.setToolTip(QString("Line %1, Column %2: %3")
         .arg(line).arg(column).arg(message));
 
+    // Подсветка всей строки
+    QTextEdit::ExtraSelection lineHighlight;
+    QTextCursor lineCursor(block);
+    lineCursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+    lineHighlight.cursor = lineCursor;
+    lineHighlight.format.setBackground(QColor(255, 100, 100, 40));
+    lineHighlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+
+    // Сохраняем обе подсветки
+    m_errorSelections.clear();
+    m_errorSelections.append(errorSelection);
+    m_errorSelections.append(lineHighlight);
+    
+    // Сохраняем основную подсветку для совместимости (если нужно)
+    m_errorSelection = errorSelection;
+    
     // Применяем подсветку
     updateErrorHighlight();
 
-    // Прокручиваем к ошибке, но не выделяем как selection
+    // Прокручиваем к ошибке
     QTextCursor scrollCursor(document());
     scrollCursor.setPosition(errorPosition);
     setTextCursor(scrollCursor);
@@ -441,16 +454,13 @@ void LispEditor::highlightErrorAtPosition(const QString& message,
 void LispEditor::clearErrorHighlight()
 {
     m_errorSelection.cursor = QTextCursor();
+    m_errorSelections.clear();
     updateErrorHighlight();
 }
 
 void LispEditor::updateErrorHighlight()
 {
-    m_extraSelections.clear();
-
-    if (!m_errorSelection.cursor.isNull()) {
-        m_extraSelections.append(m_errorSelection);
-    }
-
+    // Просто копируем список подсветок
+    m_extraSelections = m_errorSelections;
     setExtraSelections(m_extraSelections);
 }

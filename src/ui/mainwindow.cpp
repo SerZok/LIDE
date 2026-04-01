@@ -221,6 +221,7 @@ void MainWindow::setupMenuBar()
             QString filePath = m_tabWidget->currentFilePath();
             if (!filePath.isEmpty()) {
                 m_tabWidget->currentEditor()->saveFile();
+                m_tabWidget->currentEditor()->clearErrorHighlight();
                 m_console->sendFile(filePath);
             }
         }
@@ -243,6 +244,7 @@ void MainWindow::setupMenuBar()
             QString filePath = m_tabWidget->currentFilePath();
             if (!filePath.isEmpty()) {
                 m_tabWidget->currentEditor()->saveFile();
+                m_tabWidget->currentEditor()->clearErrorHighlight();
                 m_console->restartSbclProcess();
                 m_console->sendFile(filePath);
             }

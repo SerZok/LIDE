@@ -254,8 +254,6 @@ void ConsoleProcess::onReadyReadStandardOutput()
 
 	emit sbclPrompt();
 
-	emit rawOutput("\n", false);
-
 	if (m_formatted_output_on)
 	{
 		emit recievedNewOutputMessage(formattedData.message);
@@ -269,8 +267,6 @@ void ConsoleProcess::onReadyReadStandardOutput()
 
 	// Сообщаем, что процесс готов для следующего ввода (Console вставит промпт)
 	emit userPrompt();
-
-	emit rawOutput("\n", false);
 }
 
 void ConsoleProcess::onReadyReadStandardError()

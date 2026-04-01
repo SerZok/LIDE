@@ -63,6 +63,7 @@ private:
     QTextCharFormat m_mismatchedBracketFormat;
 
     QTextEdit::ExtraSelection m_errorSelection;
+    QList<QTextEdit::ExtraSelection> m_errorSelections;
     QList<QTextEdit::ExtraSelection> m_extraSelections;
 
     void setupSyntaxHighlighting();
