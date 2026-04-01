@@ -25,170 +25,6 @@
     </message>
 </context>
 <context>
-    <name>Console</name>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="35"/>
-        <source>Файл: %1
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="37"/>
-        <source>Ошибка ридера!
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="39"/>
-        <source>Ошибка при выполнении!
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="41"/>
-        <source>Неизвестная ошибка!
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="43"/>
-        <source>Строка: %1
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="45"/>
-        <source>Позиция: %1
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="472"/>
-        <source>Вырезать</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="485"/>
-        <source>Копировать</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="492"/>
-        <source>Вставить</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="503"/>
-        <source>Выделить всё</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="513"/>
-        <source>Выделить весь введённый текст</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="524"/>
-        <source>Очистить консоль</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="530"/>
-        <source>Копировать последний вывод</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="536"/>
-        <source>Режим отладки SBCL</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="537"/>
-        <source>Включение/отключение отладчика SBCL (требуется перезапуск ядра)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="543"/>
-        <source>Перезапуск SBCL для применения режима отладки...
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="552"/>
-        <location filename="../ui/widgets/console_widget.cpp" line="619"/>
-        <source>ОШИБКА: не удалось перезапустить SBCL
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/widgets/console_widget.cpp" line="556"/>
-        <source>Выводить отформатированный ответ</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ConsoleProcess</name>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="64"/>
-        <source>ОШИБКА: исполняемый файл SBCL не найден. Поместите SBCL в папку &apos;sbcl&apos; рядом с приложением или установите SBCL в систему.
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="130"/>
-        <source>ОШИБКА: количество закрывающихся скобок меньше открывающихся!
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="186"/>
-        <source>ОШИБКА: не удалось перезапустить ядро Lisp после %1 попыток!
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="189"/>
-        <source>ПРЕДУПРЕЖДЕНИЕ: ядро Lisp было перезапущено
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="203"/>
-        <source>Не удалось запустить процесс Lisp. Проверьте, установлен ли SBCL или находится ли он в папке приложения.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="206"/>
-        <source>Процесс Lisp аварийно завершился.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="209"/>
-        <source>Превышено время ожидания операции.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="212"/>
-        <source>Ошибка записи.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="215"/>
-        <source>Ошибка чтения.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="218"/>
-        <source>Неизвестная ошибка.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/components/console/console_process.cpp" line="220"/>
-        <source>ОШИБКА: </source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>EditorTabWidget</name>
     <message>
         <location filename="../ui/widgets/editor_tab_widget.cpp" line="81"/>
@@ -263,7 +99,7 @@
     </message>
     <message>
         <location filename="../ui/mainwindow.cpp" line="79"/>
-        <location filename="../ui/mainwindow.cpp" line="496"/>
+        <location filename="../ui/mainwindow.cpp" line="497"/>
         <source>Ошибка</source>
         <translation type="unfinished"></translation>
     </message>
@@ -338,8 +174,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="218"/>
-        <source>Отправить текущий код в REPL</source>
+        <location filename="../ui/mainwindow.cpp" line="241"/>
+        <source>Перезапуск SBCL и запуск текущего кода</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -384,13 +220,13 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="239"/>
-        <source>Принудительный запуск</source>
+        <location filename="../ui/mainwindow.cpp" line="218"/>
+        <source>Запустить текущий код в REPL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="241"/>
-        <source>Перезапуск SBCL и отправка текущего кода</source>
+        <location filename="../ui/mainwindow.cpp" line="239"/>
+        <source>Принудительный запуск</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -429,54 +265,54 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="302"/>
+        <location filename="../ui/mainwindow.cpp" line="303"/>
         <source>Line: %1, Col: %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="311"/>
+        <location filename="../ui/mainwindow.cpp" line="312"/>
         <source>Дерево проекта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="318"/>
+        <location filename="../ui/mainwindow.cpp" line="319"/>
         <source>Консоль LISP</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/mainwindow.cpp" line="334"/>
-        <location filename="../ui/mainwindow.cpp" line="348"/>
-        <source>Дерево проекта - %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.cpp" line="335"/>
         <location filename="../ui/mainwindow.cpp" line="349"/>
+        <source>Дерево проекта - %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.cpp" line="336"/>
+        <location filename="../ui/mainwindow.cpp" line="350"/>
         <source>Текущий проект: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="470"/>
+        <location filename="../ui/mainwindow.cpp" line="471"/>
         <source>Открыть проект</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="479"/>
+        <location filename="../ui/mainwindow.cpp" line="480"/>
         <source>Выберите папку для нового проекта</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="487"/>
+        <location filename="../ui/mainwindow.cpp" line="488"/>
         <source>Новый проект</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="488"/>
+        <location filename="../ui/mainwindow.cpp" line="489"/>
         <source>Название проекта:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/mainwindow.cpp" line="496"/>
+        <location filename="../ui/mainwindow.cpp" line="497"/>
         <source>Не удалось создать проект</source>
         <translation type="unfinished"></translation>
     </message>
@@ -550,6 +386,19 @@
         <location filename="../ui/widgets/project_tree.cpp" line="139"/>
         <location filename="../ui/widgets/project_tree.cpp" line="184"/>
         <source>Удалить %1?</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ReplWidget</name>
+    <message>
+        <location filename="../ui/widgets/repl_widget.cpp" line="266"/>
+        <source>Очистить консоль</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/repl_widget.cpp" line="271"/>
+        <source>Перезапустить REPL</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

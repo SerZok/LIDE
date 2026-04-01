@@ -1,4 +1,4 @@
-﻿#include <QTextEdit>
+#include <QTextEdit>
 #include <QTreeWidget>
 #include <QListWidget>
 #include <QDockWidget>
@@ -215,7 +215,7 @@ void MainWindow::setupMenuBar()
     runMenu->addSeparator();
     m_runAction = runMenu->addAction(QIcon(":/icons/images/start.svg"), tr("Запустить"), QKeySequence(Qt::Key_F5));
     m_runAction->setEnabled(false);
-    m_runAction->setToolTip(tr("Отправить текущий код в REPL"));
+    m_runAction->setToolTip(tr("Запустить текущий код в REPL"));
     connect(m_runAction, &QAction::triggered, this, [this]() {
         if (m_console && m_tabWidget) {
             QString filePath = m_tabWidget->currentFilePath();
@@ -232,20 +232,20 @@ void MainWindow::setupMenuBar()
     m_restartAction->setToolTip(tr("Перезапустить SBCL"));
     connect(m_restartAction, &QAction::triggered, this, [this]() {
         if (m_console){
-            m_console->restartSbclProcess();
+            m_console->restart();
             }
         });
 
     m_cleanRunAction = runMenu->addAction(QIcon(":/icons/images/force-start.svg"), tr("Принудительный запуск"), QKeySequence(Qt::CTRL | Qt::Key_F5));
     m_cleanRunAction->setEnabled(false);
-    m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и отправка текущего кода"));
+    m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и запуск текущего кода"));
     connect(m_cleanRunAction, &QAction::triggered, this, [this]() {
         if (m_console && m_tabWidget) {
             QString filePath = m_tabWidget->currentFilePath();
             if (!filePath.isEmpty()) {
                 m_tabWidget->currentEditor()->saveFile();
                 m_tabWidget->currentEditor()->clearErrorHighlight();
-                m_console->restartSbclProcess();
+                m_console->restart();
                 m_console->sendFile(filePath);
             }
         }
@@ -277,6 +277,7 @@ void MainWindow::setupMenuBar()
 
 void MainWindow::setupToolBar() {
     m_mainToolBar = addToolBar(tr("Панель инструментов"));
+    m_mainToolBar->setObjectName("ToolBar");
     m_mainToolBar->setMovable(false);
     m_mainToolBar->setIconSize(QSize(24, 24));
 
@@ -323,8 +324,8 @@ void MainWindow::setupDockWidgets()
     addDockWidget(Qt::BottomDockWidgetArea, m_ConsoleDock);
 
     // Подключаем сигнал ошибки из консоли
-    connect(m_console, &Console::errorOccurred,
-        this, &MainWindow::onLispError);
+    //connect(m_console, &ReplWidget::errorOccurred,
+    //    this, &MainWindow::onLispError);
 
     QTimer::singleShot(0, [this]() {
         if (m_projectTree && m_projectDock) {
@@ -418,9 +419,9 @@ ProjectTree* MainWindow::createProjectTree()
     return m_projectTree;
 }
 
-Console* MainWindow::createConsoleLisp()
+ReplWidget* MainWindow::createConsoleLisp()
 {
-    m_console = new Console();
+    m_console = new ReplWidget();
     m_console->setObjectName("consoleLisp_1");
     return m_console;
 }

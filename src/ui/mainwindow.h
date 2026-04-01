@@ -1,4 +1,4 @@
-﻿#ifndef MAINWINDOW_H
+#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -6,7 +6,7 @@
 
 #include "ui/widgets/editor_tab_widget.h"
 #include "ui/widgets/project_tree.h"
-#include "ui/widgets/console_widget.h"
+#include "ui/widgets/repl_widget.h"
 #include "ui/about_dialog.h"
 #include "settings.h"
 
@@ -51,7 +51,7 @@ private:
     void onLispError(const QString& file, const QString& message, int line, int column);
 
     ProjectTree* createProjectTree();
-    Console* createConsoleLisp();
+    ReplWidget* createConsoleLisp();
 
     void openProject();
     void createProject();
@@ -64,7 +64,7 @@ private:
     // Основные виджеты
     EditorTabWidget* m_tabWidget;
     ProjectTree* m_projectTree;
-    Console* m_console;
+    ReplWidget* m_console;
 
     // Меню работы с файлами
     QAction* m_createFileAction = nullptr;
