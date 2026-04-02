@@ -38,13 +38,16 @@ void ReplWidget::displayMessage(const ReplMessage& msg)
         appendPrompt();
         break;
     case ReplMessageType::Result:
-        appendOutput(msg.text + "\n", false);
+        appendOutput(msg.text + "\n", msg.type);
         break;
     case ReplMessageType::Error:
-        appendOutput(msg.text + "\n", true);
+        appendOutput(msg.text + "\n", msg.type);
+        break;
+    case ReplMessageType::Warning:
+        appendOutput(msg.text + "\n", msg.type);
         break;
     case ReplMessageType::Output:
-        appendOutput(msg.text, false);
+        appendOutput(msg.text, msg.type);
         break;
     default:
         break;
@@ -62,7 +65,7 @@ void ReplWidget::sendFile(const QString& path)
 {
     clear();
     if (path.isEmpty()) {
-        appendOutput("ОШИБКА: путь к файлу не указан\n", true);
+        appendOutput("ОШИБКА: путь к файлу не указан\n", ReplMessageType::Error);
         return;
     }
 
@@ -91,9 +94,9 @@ void ReplWidget::clear()
     }
 }
 
-void ReplWidget::appendOutput(const QString& text, bool isError)
+void ReplWidget::appendOutput(const QString& text, ReplMessageType type)
 {
-    if (toPlainText().length() > 100000) {
+    if (toPlainText().length() > MAX_LINES) {
         QTextCursor cursor = textCursor();
         cursor.movePosition(QTextCursor::Start);
         cursor.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor, 1000);
@@ -103,11 +106,20 @@ void ReplWidget::appendOutput(const QString& text, bool isError)
     moveCursor(QTextCursor::End);
 
     QTextCharFormat fmt;
-    if (isError) {
+    switch (type) {
+        break;
+    case ReplMessageType::Error:
         fmt.setForeground(Qt::red);
-    }
-    else {
+        break;
+    case ReplMessageType::Warning:
+        fmt.setForeground(QColor(255, 200, 0));
+        break;
+    case ReplMessageType::Prompt:
+    case ReplMessageType::Output:
+    case ReplMessageType::Result:
+    default:
         fmt.setForeground(Qt::white);
+        break;
     }
     textCursor().insertText(text, fmt);
 
@@ -116,21 +128,21 @@ void ReplWidget::appendOutput(const QString& text, bool isError)
 
 void ReplWidget::appendPrompt()
 {
-    qDebug() << "appendPrompt called, waiting:" << m_waitingForInput << "prompt:" << m_prompt;
-
     if (!m_waitingForInput) return;
 
     moveCursor(QTextCursor::End);
-
     if (!document()->isEmpty() && !textCursor().atBlockStart()) {
         insertPlainText("\n");
     }
 
-    setTextColor(Qt::green);
+    QColor promptColor = QColor(0, 255, 0);
+    setTextColor(promptColor);
     insertPlainText(m_prompt);
 
+    setTextColor(palette().color(QPalette::Text));
+
     m_editableStart = textCursor().position();
-    setTextColor(Qt::white);
+
 }
 
 QString ReplWidget::currentLine() const
@@ -314,10 +326,15 @@ void ReplWidget::contextMenuEvent(QContextMenuEvent* event)
     QAction* clearAction = menu->addAction(tr("Очистить консоль"));
     connect(clearAction, &QAction::triggered, this, &ReplWidget::clear);
 
-    menu->addSeparator();
-
     QAction* restartAction = menu->addAction(tr("Перезапустить REPL"));
     connect(restartAction, &QAction::triggered, this, &ReplWidget::restart);
+
+    QAction* enableDebug = menu->addAction(tr("Режим отладки"));
+    enableDebug->setCheckable(true);
+    enableDebug->setChecked(m_controller->debugMode());
+    connect(enableDebug, &QAction::triggered, [this](bool checked) {
+        m_controller->setDebugMode(checked);
+        });
 
     menu->exec(event->globalPos());
     delete menu;

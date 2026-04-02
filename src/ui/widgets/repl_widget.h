@@ -50,7 +50,9 @@ private:
     bool m_waitingForInput = true;      // ожидание ввода
     QString m_prompt = "* ";     // текущий промпт
 
-    void appendOutput(const QString& text, bool isError = false);
+    const size_t MAX_LINES = 100000;
+
+    void appendOutput(const QString& text, ReplMessageType type = ReplMessageType::Result);
     void appendPrompt();
     void sendCurrentLine();
     QString currentLine() const;

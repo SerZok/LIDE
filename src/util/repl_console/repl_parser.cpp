@@ -1,10 +1,12 @@
 #include "repl_parser.h"
 
 #include <QRegularExpression>
+#include <QString>
 #include <QDebug>
 
 ReplParser::ReplParser(QObject* parent)
     : QObject(parent)
+    , m_debugMode(false)
 {
     m_timer = new QTimer(this);
     m_timer->setInterval(25); // обработка каждые 25 мс
@@ -45,6 +47,18 @@ void ReplParser::reset()
 void ReplParser::setPrompt(const QString& prompt)
 {
     m_currentPrompt = prompt;
+}
+
+void ReplParser::setDebugMode(bool enabled)
+{
+    if (m_debugMode == enabled) return;
+    m_debugMode = enabled;
+    qDebug() << "Parser debug mode:" << (enabled ? "ON" : "OFF");
+}
+
+bool ReplParser::debugMode() const
+{
+    return m_debugMode;
 }
 
 bool ReplParser::isPrompt(const QString& line) const
@@ -97,6 +111,60 @@ bool ReplParser::isTechnicalLine(const QString& line) const
 bool ReplParser::isStarValue(const QString& line) const
 {
     return QRegularExpression("^\\*\\s+").match(line).hasMatch();
+}
+
+bool ReplParser::shouldFilterCommentLine(const QString& line) const
+{
+    if (m_debugMode) return false;
+
+    QString trimmed = line.trimmed();
+    if (!trimmed.startsWith(";")) return false;
+
+    QString content = trimmed.mid(1).trimmed();
+
+    // Заголовок без имени: "Undefined variable:" (пусто после :)
+    if (content.startsWith("undefined variable:", Qt::CaseInsensitive)) {
+        QString after = content.mid(19).trimmed();
+        if (after.isEmpty() || after == ":") {
+            return true;
+        }
+    }
+
+    // Технические маркеры
+    static const QStringList filterKeywords = {
+        "compilation unit finished",
+        "in:",  // "; in: SETQ X"
+    };
+    for (const QString& kw : filterKeywords) {
+        if (content.startsWith(kw, Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+
+    // Сильно отступленные короткие имена: ";     X"
+    if (trimmed.count(';') == 1 &&  // только один ";"
+        trimmed.indexOf(';') == 0 &&
+        trimmed.mid(1).count(' ') >= 3 &&  // 3+ пробела после ";"
+        content.trimmed().length() <= 5 &&  // короткое имя
+        !content.contains(':') &&  // нет двоеточия
+        !content.contains(' ')) {  // нет пробелов внутри
+        return true;
+    }
+
+    // === ПОКАЗЫВАЕМ: важные строки ===
+    static const QStringList showKeywords = {
+        "caught warning", "caught error",
+        "undefined variable", "unbound variable",
+        "undefined function", "compilation error"
+    };
+    for (const QString& keyword : showKeywords) {
+        if (content.contains(keyword, Qt::CaseInsensitive)) {
+            return false;
+        }
+    }
+
+    // Остальное с ";" — фильтруем
+    return true;
 }
 
 ReplMessage ReplParser::parseError(const QString& line) const
@@ -153,7 +221,23 @@ void ReplParser::processLine(const QString& line)
     if (line.trimmed().isEmpty())
         return;
 
-    // Проверка на промпт
+    QString lower = line.toLower();
+    bool isError = lower.contains("error") ||
+        lower.contains("unbound variable") ||
+        lower.contains("undefined function") ||
+        lower.contains("compilation error") ||
+        lower.contains("read error");
+
+    bool isWarning = lower.contains("warning") ||
+        lower.contains("undefined variable") ||
+        lower.contains("caught");  
+
+    // Коментарии
+    if (shouldFilterCommentLine(line)) {
+        return;
+    }
+
+    // Промпт
     if (isPrompt(line)) {
         qDebug() << "Это prompt:" << line;
         ReplMessage msg;
@@ -174,23 +258,26 @@ void ReplParser::processLine(const QString& line)
         return;
     }
 
-    // Другие ошибки
-    if (line.contains("error", Qt::CaseInsensitive) ||
-        line.contains("warning", Qt::CaseInsensitive) ||
-        line.contains("caught ERROR", Qt::CaseInsensitive) ||
-        line.contains("unbound variable", Qt::CaseInsensitive) ||
-        line.contains("undefined function", Qt::CaseInsensitive)) {
-
+    if (isError || isWarning) {
         ReplMessage msg;
-        msg.type = ReplMessageType::Error;
-        msg.text = line.trimmed();
+        msg.type = isWarning ? ReplMessageType::Warning : ReplMessageType::Error;
+
+        QString displayText = line.trimmed();
+        if (!m_debugMode && displayText.startsWith(";")) {
+            displayText.remove(0, 1);
+            displayText = displayText.trimmed();
+            if (displayText.startsWith("  ")) displayText = displayText.mid(2);
+        }
+        msg.text = displayText;
+
         emit messageReady(msg);
         return;
     }
 
+    // * - результат
     if (isStarValue(line))
         return;
 
-    // Результат или обычный вывод
+    // Обычный результат
     emit messageReady(parseResult(line));
 }

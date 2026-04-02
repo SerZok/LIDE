@@ -20,6 +20,7 @@ public:
     void sendCommand(const QString& cmd);
     void interrupt();
 
+    bool debugMode();
     void setDebugMode(bool enabled);
     void setFormattedOutput(bool enabled);
 

@@ -390,25 +390,38 @@
     </message>
 </context>
 <context>
+    <name>ReplProcess</name>
+    <message>
+        <location filename="../util/repl_console/repl_process.cpp" line="129"/>
+        <source>[Принудетльное завершение]</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ReplWidget</name>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="300"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="312"/>
         <source>Копировать</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="305"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="317"/>
         <source>Вставить</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="314"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="326"/>
         <source>Очистить консоль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="319"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="329"/>
         <source>Перезапустить REPL</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/repl_widget.cpp" line="332"/>
+        <source>Режим отладки</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -81,10 +81,16 @@ void ReplController::interrupt()
     process.interrupt();
 }
 
+bool ReplController::debugMode() {
+    return m_debugMode;
+}
+
 void ReplController::setDebugMode(bool enabled)
 {
     if (m_debugMode == enabled) return;
     m_debugMode = enabled;
+
+    parser.setDebugMode(enabled);
 
     if (process.isRunning()) {
         restart();
@@ -99,6 +105,7 @@ void ReplController::setFormattedOutput(bool enabled)
 void ReplController::onProcessStarted()
 {
     parser.reset();
+    parser.setDebugMode(m_debugMode);
     emit started();
 }
 

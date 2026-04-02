@@ -126,7 +126,7 @@ void ReplProcess::interrupt()
         restart();
         });
 
-    emit errorOccurred("Process interrupted on Windows (restarted)");
+    emit errorOccurred(tr("[Принудительное завершение]"));
 #else
     // Unix: отправляем SIGINT
     ::kill(m_process.processId(), SIGINT);

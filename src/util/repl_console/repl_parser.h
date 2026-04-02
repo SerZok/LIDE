@@ -15,6 +15,9 @@ public:
     void reset();                          // сбросить состояние
     void setPrompt(const QString& prompt); // установить Prompt
 
+    void setDebugMode(bool enabled);
+    bool debugMode() const;
+
 signals:
     void messageReady(const ReplMessage& msg);
 
@@ -26,11 +29,13 @@ private:
     QString m_buffer;
     QString m_currentPrompt;
     const int maxLinesPerTick = 100;
+    bool m_debugMode = false;
 
     void processLine(const QString& line);
     bool isPrompt(const QString& line) const;
     bool isTechnicalLine(const QString& line) const;
     bool isStarValue(const QString& line) const;
+    bool shouldFilterCommentLine(const QString& line) const;
 
     ReplMessage parseError(const QString& line) const;
     ReplMessage parseResult(const QString& line) const;
