@@ -31,8 +31,6 @@ void ReplWidget::setupConnections()
 
 void ReplWidget::displayMessage(const ReplMessage& msg)
 {
-    moveCursor(QTextCursor::End);
-
     switch (msg.type) {
     case ReplMessageType::Prompt:
         m_prompt = msg.text;
@@ -86,12 +84,22 @@ void ReplWidget::clear()
 {
     QTextEdit::clear();
     m_editableStart = 0;
-    m_waitingForInput = true;
-    appendPrompt();
+
+    if (!m_prompt.isEmpty()) {
+        m_waitingForInput = true;
+        appendPrompt();
+    }
 }
 
 void ReplWidget::appendOutput(const QString& text, bool isError)
 {
+    if (toPlainText().length() > 100000) {
+        QTextCursor cursor = textCursor();
+        cursor.movePosition(QTextCursor::Start);
+        cursor.movePosition(QTextCursor::Down, QTextCursor::KeepAnchor, 1000);
+        cursor.removeSelectedText();
+    }
+
     moveCursor(QTextCursor::End);
 
     QTextCharFormat fmt;
@@ -102,10 +110,14 @@ void ReplWidget::appendOutput(const QString& text, bool isError)
         fmt.setForeground(Qt::white);
     }
     textCursor().insertText(text, fmt);
+
+    ensureCursorVisible();
 }
 
 void ReplWidget::appendPrompt()
 {
+    qDebug() << "appendPrompt called, waiting:" << m_waitingForInput << "prompt:" << m_prompt;
+
     if (!m_waitingForInput) return;
 
     moveCursor(QTextCursor::End);
@@ -136,6 +148,12 @@ QString ReplWidget::currentLine() const
 void ReplWidget::sendCurrentLine()
 {
     QString line = currentLine();
+    //if (line.isEmpty()) {
+    //    insertPlainText("\n");
+    //    emit commandEntered("");
+    //    m_waitingForInput = false;
+    //    return;
+    //}
     if (line.isEmpty()) {
         appendPrompt();
         return;
@@ -279,7 +297,6 @@ void ReplWidget::onControllerStarted()
 {
     qDebug() << "=== SBCL запущен ===";
     m_waitingForInput = true;
-    appendPrompt();
 }
 
 void ReplWidget::onControllerFinished()

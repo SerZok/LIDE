@@ -35,15 +35,21 @@ void ReplController::start()
 
 void ReplController::stop()
 {
-    if (process.isRunning()) {
-        process.stop();
-    }
+    if (!process.isRunning())
+        return;
+
+    process.stop();
 }
 
 void ReplController::restart()
 {
-    stop();
-    start();
+    if (process.isRunning()) {
+        m_restartPending = true;
+        stop();
+    }
+    else {
+        start();
+    }
 }
 
 void ReplController::sendCommand(const QString& cmd)
@@ -58,6 +64,7 @@ void ReplController::sendCommand(const QString& cmd)
         command += '\n';
     }
 
+    qDebug() << "Отправка команды: " << command;
     process.send(command);
 }
 
@@ -83,12 +90,18 @@ void ReplController::setFormattedOutput(bool enabled)
 
 void ReplController::onProcessStarted()
 {
+    parser.reset();
     emit started();
 }
 
 void ReplController::onProcessFinished()
 {
     emit finished();
+
+    if (m_restartPending) {
+        m_restartPending = false;
+        start();
+    }
 }
 
 void ReplController::onProcessError(const QString& error)

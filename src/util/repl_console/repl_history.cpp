@@ -16,8 +16,10 @@ QString ReplHistory::previous()
 
 QString ReplHistory::next()
 {
-    if (m_commands.isEmpty()) return {};
-    if (m_index < m_commands.size() - 1) m_index++;
+    if (m_index < m_commands.size())
+        m_index++;
+    if (m_index == m_commands.size())
+        return "";
     return m_commands[m_index];
 }
 

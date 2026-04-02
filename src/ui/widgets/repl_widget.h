@@ -45,7 +45,7 @@ private:
 
     int m_editableStart = 0;            // позиция начала ввода
     bool m_waitingForInput = true;      // ожидание ввода
-    QString m_prompt = "CL-USER> ";     // текущий промпт
+    QString m_prompt = "* ";     // текущий промпт
 
     void appendOutput(const QString& text, bool isError = false);
     void appendPrompt();

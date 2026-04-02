@@ -35,9 +35,7 @@ private slots:
 
 private:
     QProcess m_process;
-    QString m_pendingOutput;  // буфер для незавершённых строк
     bool m_debugMode;
 
     QString findSBCL() const;
-    void flushPending(); // Обрабатывает построчный вывод
 };

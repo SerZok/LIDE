@@ -40,6 +40,7 @@ private:
 
     bool m_debugMode = false;
     bool m_formattedOutput = true;
+    bool m_restartPending = false;
 
     void setupConnections();
 };

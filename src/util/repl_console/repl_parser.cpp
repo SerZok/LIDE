@@ -6,29 +6,40 @@
 ReplParser::ReplParser(QObject* parent)
     : QObject(parent)
 {
+    m_timer = new QTimer(this);
+    m_timer->setInterval(25); // обработка каждые 25 мс
+    connect(m_timer, &QTimer::timeout, this, &ReplParser::processBuffer);
+    m_timer->start();
+}
+
+void ReplParser::processBuffer() {
+    if (m_buffer.isEmpty()) return;
+
+    int processed = 0;
+    int pos;
+    while ((pos = m_buffer.indexOf('\n')) != -1 && processed < maxLinesPerTick) {
+        QString line = m_buffer.left(pos);
+        m_buffer.remove(0, pos + 1);
+        processLine(line);
+        processed++;
+    }
+
+    QString remaining = m_buffer.trimmed();
+    if (!remaining.isEmpty() && remaining == "*") {
+        processLine(remaining);
+        m_buffer.clear();
+    }
 }
 
 void ReplParser::pushData(const QString& chunk)
 {
     m_buffer += chunk;
-
-    // Разбираем построчно
-    int pos = 0;
-    while ((pos = m_buffer.indexOf('\n')) != -1) {
-        QString line = m_buffer.left(pos);
-        m_buffer = m_buffer.mid(pos + 1);
-
-        if (line.endsWith('\r')) {
-            line.chop(1);
-        }
-
-        processLine(line);
-    }
 }
 
 void ReplParser::reset()
 {
     m_buffer.clear();
+    m_currentPrompt.clear();
 }
 
 void ReplParser::setPrompt(const QString& prompt)
@@ -38,25 +49,24 @@ void ReplParser::setPrompt(const QString& prompt)
 
 bool ReplParser::isPrompt(const QString& line) const
 {
-    QString trimmed = line.trimmed();
+    QString t = line.trimmed();
 
-    // SBCL стандартный промпт
-    if (trimmed.startsWith("CL-USER>")) return true;
+    if (t.startsWith("CL-USER>"))
+        return true;
 
-    // Промпт после in-package (любой текст, заканчивающийся на "> ")
-    if (trimmed.endsWith("> ") && trimmed.contains(">")) {
+    if (t == "*")
+        return true;
+
+    if (t.endsWith("> ") && t.contains(">")) {
         // Проверяем, что это не часть ошибки
-        if (!trimmed.contains("error", Qt::CaseInsensitive) &&
-            !trimmed.contains("warning", Qt::CaseInsensitive)) {
+        if (!t.contains("error", Qt::CaseInsensitive) &&
+            !t.contains("warning", Qt::CaseInsensitive)) {
             return true;
         }
     }
-
+    
     // Промпт отладчика SBCL
-    if (trimmed.startsWith("debugger invoked")) return false;
-
-    // Звёздочка как промпт (в отладчике)
-    if (trimmed == "*") return true;
+    if (t.startsWith("debugger invoked")) return false;
 
     return false;
 }
@@ -82,6 +92,11 @@ bool ReplParser::isTechnicalLine(const QString& line) const
     if (QRegularExpression("^\\[\\d+\\]").match(trimmed).hasMatch()) return true;
 
     return false;
+}
+
+bool ReplParser::isStarValue(const QString& line) const
+{
+    return QRegularExpression("^\\*\\s+").match(line).hasMatch();
 }
 
 ReplMessage ReplParser::parseError(const QString& line) const
@@ -134,10 +149,13 @@ ReplMessage ReplParser::parseResult(const QString& line) const
 
 void ReplParser::processLine(const QString& line)
 {
-    if (line.isEmpty()) return;
+    qDebug() << "Парсим строку: " << line;
+    if (line.trimmed().isEmpty())
+        return;
 
-    // 1. Проверяем на промпт
+    // Проверка на промпт
     if (isPrompt(line)) {
+        qDebug() << "Это prompt:" << line;
         ReplMessage msg;
         msg.type = ReplMessageType::Prompt;
         msg.text = line.trimmed();
@@ -145,18 +163,18 @@ void ReplParser::processLine(const QString& line)
         return;
     }
 
-    // 2. Проверяем на технические строки (игнорируем)
+    // Технические строки
     if (isTechnicalLine(line)) {
         return;
     }
 
-    // 3. Проверяем на ошибку с позицией
+    // Ошибка с позицией
     if (line.contains("Line:") && line.contains("Column:")) {
         emit messageReady(parseError(line));
         return;
     }
 
-    // 4. Проверяем на другие ошибки
+    // Другие ошибки
     if (line.contains("error", Qt::CaseInsensitive) ||
         line.contains("warning", Qt::CaseInsensitive) ||
         line.contains("caught ERROR", Qt::CaseInsensitive) ||
@@ -170,6 +188,9 @@ void ReplParser::processLine(const QString& line)
         return;
     }
 
-    // 5. Всё остальное — результат или обычный вывод
+    if (isStarValue(line))
+        return;
+
+    // Результат или обычный вывод
     emit messageReady(parseResult(line));
 }

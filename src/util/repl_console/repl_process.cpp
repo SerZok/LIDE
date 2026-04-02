@@ -68,7 +68,7 @@ bool ReplProcess::start(const QString& sbclPath, bool debugMode)
         args << "--disable-debugger";  // Отключаем отладчик для обычного режима
     }
 
-    m_process.setProcessChannelMode(QProcess::MergedChannels);
+    m_process.setProcessChannelMode(QProcess::SeparateChannels);
     m_process.setWorkingDirectory(QFileInfo(exePath).absolutePath());
     m_process.start(exePath, args);
 
@@ -87,18 +87,14 @@ void ReplProcess::stop()
 
     qDebug() << "Stopping SBCL process...";
 
-    // Отключаем сигналы, чтобы избежать лишних вызовов
-    disconnect(&m_process, nullptr, this, nullptr);
-
     m_process.terminate();
+
     if (!m_process.waitForFinished(1000)) {
         qDebug() << "Process didn't terminate, killing...";
         m_process.kill();
         m_process.waitForFinished(1000);
     }
-
-    emit finished();
-}
+}   
 
 void ReplProcess::restart()
 {
@@ -115,7 +111,6 @@ void ReplProcess::send(const QString& data)
 
     QByteArray bytes = data.toUtf8();
     m_process.write(bytes);
-    m_process.waitForBytesWritten(100);
 }
 
 void ReplProcess::interrupt()
@@ -147,10 +142,10 @@ bool ReplProcess::isRunning() const
 void ReplProcess::onReadyReadStandardOutput()
 {
     QByteArray data = m_process.readAllStandardOutput();
-    if (data.isEmpty()) return;
-
-    m_pendingOutput += QString::fromUtf8(data);
-    flushPending();
+    if (!data.isEmpty()) {
+        //qDebug() << "Сырые данные: " << data;
+        emit stdoutData(QString::fromUtf8(data));
+    }
 }
 
 void ReplProcess::onReadyReadStandardError()
@@ -158,6 +153,7 @@ void ReplProcess::onReadyReadStandardError()
     QByteArray data = m_process.readAllStandardError();
     if (data.isEmpty()) return;
 
+    qDebug() << "Сырое значение(ошибка): " << data;
     QString error = QString::fromUtf8(data);
     emit stderrData(error);
 }
@@ -168,13 +164,6 @@ void ReplProcess::onProcessFinished(int exitCode, QProcess::ExitStatus status)
     Q_UNUSED(status);
 
     qDebug() << "SBCL process finished";
-
-    // Если остались данные в буфере — отправляем их
-    if (!m_pendingOutput.isEmpty()) {
-        emit stdoutData(m_pendingOutput);
-        m_pendingOutput.clear();
-    }
-
     emit finished();
 }
 
@@ -186,7 +175,7 @@ void ReplProcess::onProcessError(QProcess::ProcessError error)
         errorMsg = "Failed to start SBCL process";
         break;
     case QProcess::Crashed:
-        errorMsg = "SBCL process crashed";
+        errorMsg = "";
         break;
     case QProcess::Timedout:
         errorMsg = "Operation timed out";
@@ -201,13 +190,6 @@ void ReplProcess::onProcessError(QProcess::ProcessError error)
         errorMsg = "Unknown error";
     }
 
+    qDebug() << "ОШИБКА процесса: " << errorMsg;
     emit errorOccurred(errorMsg);
-}
-
-void ReplProcess::flushPending()
-{
-    if (!m_pendingOutput.isEmpty()) {
-        emit stdoutData(m_pendingOutput);
-        m_pendingOutput.clear();
-    }
 }
