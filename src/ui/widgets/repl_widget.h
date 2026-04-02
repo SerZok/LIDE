@@ -43,6 +43,9 @@ private:
     ReplHistory m_history;              // история команд
     ReplController* m_controller;        // контроллер с основной логикой
 
+    QString m_savedInput;
+    bool m_historyBrowsing = false;
+
     int m_editableStart = 0;            // позиция начала ввода
     bool m_waitingForInput = true;      // ожидание ввода
     QString m_prompt = "* ";     // текущий промпт

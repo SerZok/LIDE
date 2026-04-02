@@ -64,7 +64,15 @@ void ReplController::sendCommand(const QString& cmd)
         command += '\n';
     }
 
-    qDebug() << "Отправка команды: " << command;
+    // Нормализация переносов
+    command.replace(QChar(0x2028), "\n");
+    command.replace(QChar(0x2029), "\n");
+    command.replace("\r\n", "\n");
+
+    if (!command.endsWith('\n'))
+        command += '\n';
+
+    qDebug() << "Отправка команды:" << command;
     process.send(command);
 }
 

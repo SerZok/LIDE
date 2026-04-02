@@ -169,19 +169,37 @@ void ReplWidget::sendCurrentLine()
     insertPlainText("\n");
     emit commandEntered(line);
     m_waitingForInput = false;
+
+    m_historyBrowsing = false;
+    m_savedInput.clear();
 }
 
 void ReplWidget::insertFromHistory(int direction)
 {
+    if (!m_historyBrowsing) {
+        m_savedInput = currentLine();
+        m_historyBrowsing = true;
+    }
+
     QString cmd = (direction < 0) ? m_history.previous() : m_history.next();
-    if (cmd.isEmpty()) return;
 
     ensureCursorInEditable();
+
+    // Удаление текущего ввода
     QTextCursor cursor = textCursor();
     cursor.setPosition(m_editableStart);
-    cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+    cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
     cursor.removeSelectedText();
-    cursor.insertText(cmd);
+
+    if (cmd.isEmpty()) {
+        // дошли до конца истории → возвращаем сохранённый ввод
+        cursor.insertText(m_savedInput);
+        m_historyBrowsing = false;
+    }
+    else {
+        cursor.insertText(cmd);
+    }
+
     setTextCursor(cursor);
 }
 
@@ -277,7 +295,19 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
 
 void ReplWidget::contextMenuEvent(QContextMenuEvent* event)
 {
-    QMenu* menu = createStandardContextMenu();
+    QMenu * menu = new QMenu(this);
+
+    QAction* copyAction = menu->addAction(tr("Копировать"));
+    copyAction->setShortcut(QKeySequence::Copy);
+    copyAction->setEnabled(textCursor().hasSelection());
+    connect(copyAction, &QAction::triggered, this, &ReplWidget::copy);
+
+    QAction* pasteAction = menu->addAction(tr("Вставить"));
+    pasteAction->setShortcut(QKeySequence::Paste);
+    connect(pasteAction, &QAction::triggered, [this]() {
+        ensureCursorInEditable();
+        paste();
+        });
 
     menu->addSeparator();
 

@@ -392,12 +392,22 @@
 <context>
     <name>ReplWidget</name>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="284"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="300"/>
+        <source>Копировать</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/repl_widget.cpp" line="305"/>
+        <source>Вставить</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/widgets/repl_widget.cpp" line="314"/>
         <source>Очистить консоль</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="289"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="319"/>
         <source>Перезапустить REPL</source>
         <translation type="unfinished"></translation>
     </message>
