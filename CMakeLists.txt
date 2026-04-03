@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.19)
 set (PROJECT_NAME LIDE)
 set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 2)
@@ -59,6 +59,7 @@ file(GLOB_RECURSE PROJECT_HEADERS
 )
 
 file(GLOB_RECURSE PROJECT_UIS
+    "src/ui/dialogs/*.ui"
     "src/ui/*.ui"
     "src/*.ui"
 )

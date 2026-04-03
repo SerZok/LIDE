@@ -252,9 +252,17 @@ void MainWindow::setupMenuBar()
         });
 
     // Tools menu
-    auto* toolsMenu = menuBar()->addMenu(tr("&Настройки"));
-    auto styleMenu = toolsMenu->addMenu(tr("Тема..."));
+    auto* toolsMenu = menuBar()->addMenu(tr("&Опции"));
 
+    // > Настройки
+    auto settingsAction = toolsMenu->addAction(tr("Настройки"));
+    connect(settingsAction, &QAction::triggered, this, [this]() {
+        SettingsDialog dlg(this);
+        dlg.exec();
+        });
+
+    //  > Тема
+    auto styleMenu = toolsMenu->addMenu(tr("Тема"));
     auto* themeGroup = new QActionGroup(this);
     m_lightStyleAction = styleMenu->addAction(QIcon(":/icons/images/light-theme.svg"), tr("Светлая"));
     m_lightStyleAction->setActionGroup(themeGroup);
@@ -265,6 +273,7 @@ void MainWindow::setupMenuBar()
         loadTheme(theme);
         });
 
+
     // Справка
     auto* helpMenu = menuBar()->addMenu(tr("&Справка"));
     auto aboutAction = helpMenu->addAction(QIcon(":/icons/images/info.svg"), tr("О программе"));
@@ -272,6 +281,8 @@ void MainWindow::setupMenuBar()
         AboutDialog dlg(this);
         dlg.exec();
         });
+
+    // Надо будет добавить рукводство пользователя
 
 }
 

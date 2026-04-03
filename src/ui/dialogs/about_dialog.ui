@@ -50,7 +50,7 @@
       </sizepolicy>
      </property>
      <property name="pixmap">
-      <pixmap resource="../resources.qrc">:/icons/images/logo.svg</pixmap>
+      <pixmap resource="../../resources.qrc">:/icons/images/logo.svg</pixmap>
      </property>
      <property name="scaledContents">
       <bool>false</bool>
@@ -123,7 +123,8 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../resources.qrc"/>
+  <include location="../../resources.qrc"/>
+  <include location="../../resources.qrc"/>
  </resources>
  <connections/>
 </ui>
