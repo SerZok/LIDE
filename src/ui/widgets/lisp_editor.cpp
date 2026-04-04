@@ -1,4 +1,4 @@
-﻿#include "lisp_editor.h"
+#include "lisp_editor.h"
 
 #include <QFile>
 #include <QPainter>
@@ -383,7 +383,7 @@ bool LispEditor::reloadFile()
     if (m_currentFile.isEmpty())
         return false;
 
-    loadFile(m_currentFile);
+    return loadFile(m_currentFile);
 }
 
 void LispEditor::updateWatcher()

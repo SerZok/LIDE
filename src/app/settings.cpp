@@ -1,9 +1,16 @@
 #include "settings.h"
+
+#include <QDir>
+#include <QFile>
+#include <QTranslator>
+#include <QLibraryInfo>
 #include <QApplication>
 #include <QFontDatabase>
-#include <QDir>
+#include <QStandardPaths>
 
 Settings* Settings::m_instance = nullptr;
+static QTranslator* s_qtTranslator = nullptr;
+static QTranslator* s_appTranslator = nullptr;
 
 Settings* Settings::instance()
 {
@@ -96,16 +103,84 @@ void Settings::setOpenedFiles(const QStringList& openedFiles)
     emit settingsChanged();
 }
 
+QString Settings::currentLang() const
+{
+    return value<QString>(Key::APP_LANG, QLocale::system().name());
+}
+
+void Settings::setCurrentLang(const QString& locale)
+{
+    // Сохраняем
+    setValue(Key::APP_LANG, locale);
+
+    // Удаляем старые переводчики
+    if (s_qtTranslator) {
+        QCoreApplication::removeTranslator(s_qtTranslator);
+        delete s_qtTranslator;
+        s_qtTranslator = nullptr;
+    }
+    if (s_appTranslator) {
+        QCoreApplication::removeTranslator(s_appTranslator);
+        delete s_appTranslator;
+        s_appTranslator = nullptr;
+    }
+
+    // Qt переводы
+    s_qtTranslator = new QTranslator(qApp);
+    QString qtLocale = "qt_" + locale;
+    QString qtTranslationsDir = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+    if (s_qtTranslator->load(qtLocale, qtTranslationsDir)) {
+        QCoreApplication::installTranslator(s_qtTranslator);
+        qDebug() << qtLocale << " loaded from" << qtTranslationsDir;
+    }
+    else {
+        qDebug() << qtLocale << "NOT loaded from" << qtTranslationsDir;
+        delete s_qtTranslator;
+        s_qtTranslator = nullptr;
+    }
+
+    // App переводы
+    s_appTranslator = new QTranslator(qApp);
+    QString appDir = QCoreApplication::applicationDirPath();
+    QString appTranslationsDir = QDir(appDir).filePath("translations");
+    QString appLocale = "LIDE_" + locale + ".qm";
+
+    if (s_appTranslator->load(appLocale, appTranslationsDir)) {
+        QCoreApplication::installTranslator(s_appTranslator);
+        qDebug() << appLocale << " loaded from" << appTranslationsDir;
+    }
+    else {
+        qDebug() << appLocale << "NOT loaded from" << appTranslationsDir;
+        delete s_appTranslator;
+        s_appTranslator = nullptr;
+    }
+
+    emit settingsChanged();
+}
+
 // Theme settings
 QString Settings::currentTheme() const
 {
-    return value<QString>(Key::THEME_CURRENT, "dark");
+    return value<QString>(Key::APP_THEME, "dark");
 }
 
 void Settings::setCurrentTheme(const QString& theme)
 {
-    setValue(Key::THEME_CURRENT, theme);
-    emit themeChanged(theme);
+    setValue(Key::APP_THEME, theme);
+
+    QFile file(QString(":styles/%1.css").arg(theme));
+    if (file.open(QFile::ReadOnly)) {
+        QString styleSheet = QLatin1String(file.readAll());
+        qApp->setStyleSheet(styleSheet);
+        file.close();
+
+        emit themeChanged(theme);
+    }
+    else {
+        qDebug() << "Ошибка загрузки темы: " << theme;
+        return;
+    }
+
     emit settingsChanged();
 }
 
@@ -120,48 +195,172 @@ void Settings::setLastProjectPath(const QString& path)
     setValue(Key::PROJECT_LAST_PATH, path);
 }
 
-QStringList Settings::recentProjects() const
-{
-    return value<QStringList>(Key::PROJECT_RECENT, QStringList());
-}
+//TODO: сохранять несколько проектов
+// 
+//QStringList Settings::recentProjects() const
+//{
+//    return value<QStringList>(Key::PROJECT_RECENT, QStringList());
+//}
+//
+//void Settings::addRecentProject(const QString& path)
+//{
+//    QStringList recent = recentProjects();
+//    recent.removeAll(path);
+//    recent.prepend(path);
+//    while (recent.size() > 10) {
+//        recent.removeLast();
+//    }
+//    setValue(Key::PROJECT_RECENT, recent);
+//}
+//
+//void Settings::clearRecentProjects()
+//{
+//    m_settings.remove(Key::PROJECT_RECENT);
+//}
 
-void Settings::addRecentProject(const QString& path)
+// SBCL
+QString Settings::sbclPath() const
 {
-    QStringList recent = recentProjects();
-    recent.removeAll(path);
-    recent.prepend(path);
-    while (recent.size() > 10) {
-        recent.removeLast();
+    if (m_settings.contains(Key::SBCL_PATH)) {
+        QString saved = m_settings.value(Key::SBCL_PATH).toString();
+        if (!saved.isEmpty()) return saved;
     }
-    setValue(Key::PROJECT_RECENT, recent);
+
+    // Пробуем найти SBCL относительно исполняемого файла
+    QString appDir = QCoreApplication::applicationDirPath();
+
+#if defined(Q_OS_WIN)
+    QString bundledSbcl = QDir(appDir).filePath("SBCL/sbcl.exe");
+#else
+    QString bundledSbcl = QDir(appDir).filePath("SBCL/sbcl");
+#endif
+
+    if (QFileInfo::exists(bundledSbcl)) {
+        return bundledSbcl;
+    }
+
+    // 2. Fallback: ищем в PATH (просто "sbcl")
+    return "sbcl";
 }
 
-void Settings::clearRecentProjects()
+void Settings::setSbclPath(const QString& path)
 {
-    m_settings.remove(Key::PROJECT_RECENT);
-}
-
-// Lisp interpreter settings
-QString Settings::lispInterpreterPath() const
-{
-    return value<QString>(Key::LISP_INTERPRETER_PATH, "sbcl");
-}
-
-void Settings::setLispInterpreterPath(const QString& path)
-{
-    setValue(Key::LISP_INTERPRETER_PATH, path);
+    setValue(Key::SBCL_PATH, path);
     emit settingsChanged();
 }
 
-QStringList Settings::lispInterpreterArgs() const
+QStringList Settings::sbclArgs() const
 {
-    return value<QStringList>(Key::LISP_INTERPRETER_ARGS,
+    return value<QStringList>(Key::SBCL_ARGS,
         QStringList() << "--noinform" << "--disable-debugger");
 }
 
-void Settings::setLispInterpreterArgs(const QStringList& args)
+void Settings::setSbclArgs(const QStringList& args)
 {
-    setValue(Key::LISP_INTERPRETER_ARGS, args);
+    setValue(Key::SBCL_ARGS, args);
+    emit settingsChanged();
+}
+
+bool Settings::sbclLoadVerbose() const {
+    return value<bool>(Key::SBCL_LOAD_VERBOSE, true);
+}
+
+void Settings::setSbclLoadVerbose(bool v) {
+    setValue(Key::SBCL_LOAD_VERBOSE, v);
+    emit settingsChanged();
+}
+
+// SBCL load
+
+bool Settings::sbclLoadPrint() const {
+    return value<bool>(Key::SBCL_LOAD_PRINT, true);
+}
+
+void Settings::setSbclLoadPrint(bool v) {
+    setValue(Key::SBCL_LOAD_PRINT, v);
+    emit settingsChanged();
+}
+
+bool Settings::sbclLoadIfNotExists() const {
+    return value<bool>(Key::SBCL_LOAD_IF_NOT_EXISTS, true);
+}
+
+void Settings::setSbclLoadIfNotExists(bool v) {
+    setValue(Key::SBCL_LOAD_IF_NOT_EXISTS, v);
+    emit settingsChanged();
+}
+
+QString Settings::sbclLoadExternalFormat() const {
+    return value<QString>(Key::SBCL_LOAD_VERBOSE, ":default");
+}
+
+void Settings::setSbclLoadExternalFormat(const QString& format) {
+    setValue(Key::SBCL_LOAD_VERBOSE, format);
+    emit settingsChanged();
+}
+
+// REPL settings
+int Settings::replMaxLines() const {
+    return value<int>(Key::REPL_MAX_LINES, 100);
+}
+
+void Settings::setReplMaxLines(int n) {
+    setValue(Key::REPL_MAX_LINES, n);
+    emit settingsChanged();
+}
+
+int Settings::replParseMode() const {
+    return value<int>(Key::REPL_PARSE_MODE, 2);
+}
+
+void Settings::setReplParseMode(int mode) {
+    setValue(Key::REPL_PARSE_MODE, mode);
+    emit settingsChanged();
+}
+
+int Settings::replChunkSize() const {
+    return value<int>(Key::REPL_CHUNK_SIZE, 100);
+}
+
+void Settings::setReplChunkSize(int n) {
+    setValue(Key::REPL_CHUNK_SIZE, n);
+    emit settingsChanged();
+}
+
+bool Settings::replAutoRestart() const {
+    return value<bool>(Key::REPL_AUTO_RESTART, true);
+}
+
+void Settings::setReplAutoRestart(bool v) {
+    setValue(Key::REPL_AUTO_RESTART, v);
+    emit settingsChanged();
+}
+
+int Settings::replOutputDelay() const {
+    return value<int>(Key::REPL_OUTPUT_DELAY, 25);
+}
+
+void Settings::setReplOutputDelay(int ms) {
+    setValue(Key::REPL_OUTPUT_DELAY, ms);
+    emit settingsChanged();
+}
+
+// Project
+QString Settings::projectDefaultPath() const {
+    return value<QString>(Key::PROJECT_DEFAULT_PATH, QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+}
+
+void Settings::setProjectDefaultPath(const QString& path) {
+    setValue(Key::PROJECT_DEFAULT_PATH, path);
+    emit settingsChanged();
+}
+
+QString Settings::projectExcludeFilters() const {
+    return value<QString>(Key::PROJECT_EXCLUDE_FILTERS, "*.lisp *.lsp");
+}
+
+void Settings::setProjectExcludeFilters(const QString& filters) {
+    setValue(Key::PROJECT_EXCLUDE_FILTERS, filters);
     emit settingsChanged();
 }
 

@@ -20,7 +20,11 @@ private:
     Settings* m_settings;
     bool m_loading = false;
 
-    void setupUi();
     void loadToUi();
     void saveFromUi();
+
+	void updateSbclArgs();
+	void updateSbclLoad();
+	void onBrowseSBCLPath();
+	void onBrowseProjectPath();
 };

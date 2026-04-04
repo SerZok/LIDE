@@ -14,7 +14,6 @@ execute_process(
         "${TEMP_DIR}/${PROJECT_NAME}.exe"
         --verbose 0
         --release
-        --no-translations
         --no-network
         --no-opengl
         --no-3dcore

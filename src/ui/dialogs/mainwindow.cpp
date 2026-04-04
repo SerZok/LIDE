@@ -1,23 +1,23 @@
+#include "mainwindow.h"
+#include "ui/ui_mainwindow.h"
+
+#include <QMenu>
+#include <QFile>
+#include <QLabel>
+#include <QAction>
+#include <QLayout>
+#include <QToolBar>
+#include <QMenuBar>
+#include <QSplitter>
 #include <QTextEdit>
 #include <QTreeWidget>
 #include <QListWidget>
 #include <QDockWidget>
-#include <QMenuBar>
-#include <QMenu>
-#include <QAction>
-#include <QActionGroup>
-#include <QSplitter>
-#include <QLabel>
-#include <QFontDatabase>
 #include <QMessageBox>
-#include <QFile>
 #include <QFileDialog>
 #include <QInputDialog>
-#include <QLayout>
-#include "QToolBar"
-
-#include "mainwindow.h"
-#include "ui/ui_mainwindow.h"
+#include <QActionGroup>
+#include <QFontDatabase>
 
 MainWindow::MainWindow(QWidget* parent) :
       QMainWindow(parent)
@@ -270,7 +270,7 @@ void MainWindow::setupMenuBar()
     m_darkStyleAction->setActionGroup(themeGroup);
     connect(themeGroup, &QActionGroup::triggered, this, [this](QAction* action) {
         QString theme = (action == m_lightStyleAction) ? "light" : "dark";
-        loadTheme(theme);
+        Settings::instance()->setCurrentTheme(theme);
         });
 
 
@@ -360,8 +360,6 @@ void MainWindow::setupDockWidgets()
         m_projectDock->setWindowTitle(tr("Дерево проекта - %1").arg(info.fileName()));
         m_projectDock->setToolTip(tr("Текущий проект: %1").arg(info.absolutePath()));
         });
-    connect(this, &MainWindow::themeChanged, Settings::instance(), &Settings::setCurrentTheme);
-
 
     connect(m_tabWidget, &EditorTabWidget::currentEditorChanged,
         this, [this](LispEditor* editor) {
@@ -455,27 +453,9 @@ void MainWindow::loadAppState()
 
     restoreGeometry(settings->mainWindowGeometry());
     restoreState(settings->mainWindowState());
-    loadTheme(settings->currentTheme());
+    settings->setCurrentTheme(settings->currentTheme());
     openFiles(settings->openedFiles());
     
-}
-
-void MainWindow::loadTheme(QString theme)
-{
-    QFile file(QString(":styles/%1.css").arg(theme));
-    if (file.open(QFile::ReadOnly)) {
-        auto* settings = Settings::instance();
-        settings->setCurrentTheme(theme);
-
-        QString styleSheet = QLatin1String(file.readAll());
-        qApp->setStyleSheet(styleSheet);
-        file.close();
-
-        emit themeChanged(theme);
-    }
-    else {
-        qDebug() << "Ошибка загрузки темы:" << theme;
-    }
 }
 
 void MainWindow::openProject() {

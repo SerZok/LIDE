@@ -68,7 +68,7 @@ file(GLOB_RECURSE PROJECT_RESOURCES
     "src/*.qrc"
 )
 
-# Генерация стилей
+#================================[ Генерацией стилей ]================================
 function(generate_theme theme_name)
     set(COLORS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/colors/${theme_name}.colors")
     message(STATUS "Генерация стиля [${theme_name}] используя цвета из: ${COLORS_FILE}")
@@ -105,7 +105,7 @@ set(RESOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/resources.rc
 )
 
-# Создание exe'шника
+#================================[ Создание EXE'шника ]================================
 qt_add_executable(${PROJECT_NAME} 
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
@@ -115,13 +115,33 @@ qt_add_executable(${PROJECT_NAME}
     ${RESOURCE_FILES}
 )
 
+#================================[ ПЕРЕВОДЫ ]================================
+# Настройка lupdate (обновление .ts из исходников)
 qt_add_translations(${PROJECT_NAME}
-    TS_OUTPUT_DIRECTORY "src/translations" 
+    TS_FILE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/translations"
+    TS_FILE_NAME "LIDE"
+    QM_FILES_OUTPUT_VARIABLE QM_FILES  # сохраняем список сгенерированных .qm
 )
 
-add_dependencies(${PROJECT_NAME} update_translations)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_lrelease)
 
-# Подключение библиотек
+# Добавляем .qm в сборку (для AUTORCC / ресурсов)
+set_source_files_properties(${QM_FILES} PROPERTIES
+    OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/translations"
+)
+
+# Копируем .qm в папку рядом с exe
+foreach(qm ${QM_FILES})
+    get_filename_component(qm_name ${qm} NAME)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${qm}
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/translations/${qm_name}
+        COMMENT "Copying ${qm_name} to output directory"
+    )
+endforeach()
+
+#================================[ Подключение библиотек ]================================
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
@@ -145,8 +165,6 @@ if(WIN32)
     find_program(WINDEPLOYQT windeployqt REQUIRED)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${WINDEPLOYQT} $<TARGET_FILE:${PROJECT_NAME}> 
-        --no-translations
-        --no-translations
         --no-network
         --no-opengl
         --no-quick

@@ -33,9 +33,6 @@ public:
     void openFiles(QStringList files);
     void updateStatusBarPosition(int line, int col);
 
-signals:
-    void themeChanged(QString& themeName);
-
 private slots:
     void saveAppState();
     void loadAppState();
@@ -48,7 +45,6 @@ private:
     void setupToolBar();
     void setupStatusBar();
     void setupDockWidgets();
-    void loadTheme(QString stylePath);
 
     LispEditor* findEditorByFile(const QString& filePath);
     void onLispError(const QString& file, const QString& message, int line, int column);
