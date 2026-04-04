@@ -133,7 +133,6 @@ void Settings::setCurrentLang(const QString& locale)
     QString qtTranslationsDir = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
     if (s_qtTranslator->load(qtLocale, qtTranslationsDir)) {
         QCoreApplication::installTranslator(s_qtTranslator);
-        qDebug() << qtLocale << " loaded from" << qtTranslationsDir;
     }
     else {
         qDebug() << qtLocale << "NOT loaded from" << qtTranslationsDir;
@@ -148,13 +147,7 @@ void Settings::setCurrentLang(const QString& locale)
     QString appLocale = "LIDE_" + locale;
 
     if (s_appTranslator->load(appLocale, appTranslationsDir)) {
-        qDebug() << appLocale << " loaded from" << appTranslationsDir;
-        if (QCoreApplication::installTranslator(s_appTranslator)) {
-            qDebug() << appLocale << "sucess installed!";
-        }
-        else {
-            qDebug() << appLocale << "install error!!!";
-        }
+        QCoreApplication::installTranslator(s_appTranslator);
     }
     else {
         qDebug() << appLocale << "NOT loaded from" << appTranslationsDir;
@@ -163,9 +156,6 @@ void Settings::setCurrentLang(const QString& locale)
     }
 
     emit settingsChanged();
-
-    qDebug() << "=== Language changed to:" << locale << "===";
-    qDebug() << "Top-level widgets:" << QApplication::topLevelWidgets().size();
     retranslateAllWindows();
 }
 

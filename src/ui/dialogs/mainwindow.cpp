@@ -332,17 +332,17 @@ void MainWindow::setupDockWidgets()
     setCentralWidget(m_tabWidget);
 
     m_projectDock = new QDockWidget(tr("Дерево проекта"), this);
+    m_dockNames[m_projectDock] = tr("Дерево проекта");
     m_projectDock->setWidget(createProjectTree());
     m_projectDock->setAllowedAreas(Qt::AllDockWidgetAreas);
     m_projectDock->setObjectName("treeProject_dock");
-    m_dockNames[m_projectDock] = m_projectDock->windowTitle();
     addDockWidget(Qt::LeftDockWidgetArea, m_projectDock);
 
     m_ConsoleDock = new QDockWidget(tr("REPL"), this);
+    m_dockNames[m_ConsoleDock] = tr("REPL консоль");
     m_ConsoleDock->setWidget(createConsoleLisp());
     m_ConsoleDock->setAllowedAreas(Qt::AllDockWidgetAreas);
     m_ConsoleDock->setObjectName("console_dock");
-    m_dockNames[m_ConsoleDock] = m_ConsoleDock->windowTitle();
     addDockWidget(Qt::BottomDockWidgetArea, m_ConsoleDock);
 
     // Подключаем сигнал ошибки из консоли
@@ -354,8 +354,8 @@ void MainWindow::setupDockWidgets()
             QString currentPath = m_projectTree->rootPath();
             if (!currentPath.isEmpty()) {
                 QFileInfo info(currentPath);
-                m_projectDock->setWindowTitle(tr("Дерево проекта - %1").arg(info.fileName()));
-                m_projectDock->setToolTip(tr("Текущий проект: %1").arg(currentPath));
+                m_projectDock->setWindowTitle(tr("%1/").arg(info.fileName()));
+                m_projectDock->setToolTip(tr("%1").arg(currentPath));
             }
         }
         });
@@ -368,8 +368,8 @@ void MainWindow::setupDockWidgets()
         QFileInfo info(projectPath);
         if (!info.exists() || !info.isDir()) return;
 
-        m_projectDock->setWindowTitle(tr("Дерево проекта - %1").arg(info.fileName()));
-        m_projectDock->setToolTip(tr("Текущий проект: %1").arg(info.absolutePath()));
+        m_projectDock->setWindowTitle(tr("%1/").arg(info.fileName()));
+        m_projectDock->setToolTip(tr("%1").arg(info.absolutePath()));
         });
 
     connect(m_tabWidget, &EditorTabWidget::currentEditorChanged,
@@ -507,6 +507,8 @@ void MainWindow::updateTranslations()
     if (m_runMenu) m_runMenu->setTitle(tr("&Запуск"));
     if (m_toolsMenu) m_toolsMenu->setTitle(tr("&Опции"));
     if (m_helpMenu) m_helpMenu->setTitle(tr("&Справка"));
+    if (m_styleMenu) m_styleMenu->setTitle(tr("Тема"));
+
 
     // ── File Menu Actions ─────────────────────────────
     if (m_createFileAction) m_createFileAction->setText(tr("Новый файл..."));
@@ -545,10 +547,6 @@ void MainWindow::updateTranslations()
     // ── ToolBar ────────────────────────────────────────
     if (m_mainToolBar) m_mainToolBar->setWindowTitle(tr("Панель инструментов"));
 
-    // ── Dock Widgets ───────────────────────────────────
-    if (m_projectDock) m_projectDock->setWindowTitle(tr("Дерево проекта"));
-    if (m_ConsoleDock) m_ConsoleDock->setWindowTitle(tr("REPL"));
-
     // ── Actions по objectName ─────────
     auto setActionText = [this](QString name, const QString& text) {
 
@@ -561,23 +559,4 @@ void MainWindow::updateTranslations()
     setActionText("actionFullScreen", tr("Полноэкранный режим"));
     setActionText("actionSettings", tr("Настройки"));
     setActionText("actionAbout", tr("О программе"));
-
-    // ── Dock actions в View menu (по оригинальному заголовку) ─
-    for (auto it = m_dockNames.begin(); it != m_dockNames.end(); ++it) {
-        QDockWidget* dock = it.key();
-        QString originalTitle = it.value();
-
-        // Ищем действие, которое управляет этим доком
-        if (m_viewMenu) {
-            for (QAction* action : m_viewMenu->actions()) {
-                // Сравниваем с оригинальным заголовком (до перевода)
-                // или с текущим (если уже переведён)
-                if (action->text() == dock->windowTitle() ||
-                    action->text() == originalTitle) {
-                    action->setText(dock->windowTitle()); // уже переведённый
-                    break;
-                }
-            }
-        }
-    }
 }

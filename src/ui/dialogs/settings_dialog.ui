@@ -26,7 +26,7 @@
    <string>Настройки</string>
   </property>
   <property name="sizeGripEnabled">
-   <bool>true</bool>
+   <bool>false</bool>
   </property>
   <property name="modal">
    <bool>false</bool>
@@ -65,7 +65,7 @@
       <attribute name="title">
        <string>Основные</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_16">
+      <layout class="QGridLayout" name="gridLayout_17">
        <item row="0" column="0">
         <widget class="QGroupBox" name="general_group">
          <property name="contextMenuPolicy">
@@ -80,63 +80,10 @@
          <property name="checkable">
           <bool>false</bool>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2">
+         <layout class="QGridLayout" name="gridLayout_16">
           <item row="0" column="0">
-           <layout class="QHBoxLayout" name="lang_horziont_layout">
-            <item>
-             <widget class="QLabel" name="lang_label">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Язык</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="lang_comboBox">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer">
-              <property name="orientation">
-               <enum>Qt::Orientation::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item row="1" column="0">
-           <layout class="QHBoxLayout" name="theme_layout">
-            <item>
-             <widget class="QLabel" name="theme_label">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="text">
-               <string>Тема</string>
-              </property>
-             </widget>
-            </item>
-            <item>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="1" column="1">
              <widget class="QComboBox" name="theme_comboBox">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -152,8 +99,44 @@
               </property>
              </widget>
             </item>
-            <item>
-             <spacer name="horizontalSpacer_2">
+            <item row="0" column="0">
+             <widget class="QLabel" name="lang_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Язык</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="lang_comboBox">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="theme_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Тема</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" rowspan="2">
+             <spacer name="horizontalSpacer_3">
               <property name="orientation">
                <enum>Qt::Orientation::Horizontal</enum>
               </property>
@@ -168,7 +151,14 @@
            </layout>
           </item>
           <item row="2" column="0">
-           <layout class="QHBoxLayout" name="auto_save_every_layout">
+           <widget class="QCheckBox" name="auto_save_exit_checkBox">
+            <property name="text">
+             <string>Авто-сохранение при выходе из программы</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
              <widget class="QLabel" name="auto_save_every_label">
               <property name="sizePolicy">
@@ -178,7 +168,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Авто-сохранение каждые (мин)</string>
+               <string>Авто-сохранение (мин)</string>
               </property>
              </widget>
             </item>
@@ -199,7 +189,7 @@
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_3">
+             <spacer name="horizontalSpacer">
               <property name="orientation">
                <enum>Qt::Orientation::Horizontal</enum>
               </property>
@@ -212,13 +202,6 @@
              </spacer>
             </item>
            </layout>
-          </item>
-          <item row="3" column="0">
-           <widget class="QCheckBox" name="auto_save_exit_checkBox">
-            <property name="text">
-             <string>Авто-сохранение при выходе из программы</string>
-            </property>
-           </widget>
           </item>
          </layout>
         </widget>

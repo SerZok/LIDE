@@ -70,28 +70,36 @@ file(GLOB_RECURSE PROJECT_RESOURCES
 
 #================================[ Генерацией стилей ]================================
 function(generate_theme theme_name)
-    set(COLORS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/colors/${theme_name}.colors")
-    message(STATUS "Генерация стиля [${theme_name}] используя цвета из: ${COLORS_FILE}")
+    set(COLORS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/colors/${theme_name}_colors.css")
+    set(TEMPLATE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/template.css")
+
+    message(STATUS "Генерация стиля [${theme_name}]")
+    if(NOT EXISTS "${COLORS_FILE}")
+        message(FATAL_ERROR "Файл цветов не найден: ${COLORS_FILE}")
+    endif()
 
     file(STRINGS ${COLORS_FILE} COLOR_LINES)
 
     foreach(line ${COLOR_LINES})
-        string(STRIP "${line}" line)
-        string(REGEX REPLACE "\r$" "" line "${line}")
-        
-        if(NOT line MATCHES "^#" AND NOT line STREQUAL "")
-            string(REGEX MATCH "^([^=]+)=(.*)$" match "${line}")
-            if(CMAKE_MATCH_1)
-                set(${CMAKE_MATCH_1} ${CMAKE_MATCH_2})
-            else()
-                message(WARNING "Could not parse line: '${line}'")
-            endif()
-        endif()
+       string(STRIP "${line}" line)
+       string(REGEX REPLACE "\r$" "" line "${line}") # Убираем Windows CR
+
+       # Пропускаем пустые строки, скобки и комментарии
+       if(line STREQUAL "" OR line MATCHES "^[{}]" OR line MATCHES "^[/\\*]")
+           continue()
+       endif()
+
+       # Парсим формат: KEY = #VALUE; (с пробелами, без точки с запятой и т.д.)
+       if(line MATCHES "^([A-Za-z_][A-Za-z0-9_]*)[ \t]*=[ \t]*(#[0-9A-Fa-f]+)[ \t]*;?[ \t]*$")
+           set(${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
+       else()
+           message(WARNING "Не удалось распознать строку в ${theme_name}_colors.css: '${line}'")
+       endif()
     endforeach()
 
-    # Генерируем CSS файл в бинарную директорию
-   configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/template.css.in"
+    file(MAKE_DIRECTORY "${OUTPUT_DIR}")
+    configure_file(
+        "${TEMPLATE_FILE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/${theme_name}.css"
         @ONLY
     )

@@ -7,34 +7,34 @@
 
 /* --- Поля ввода --- */
 QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox, QDoubleSpinBox, QComboBox, QFontComboBox {
-    background-color: #ffffff;
-    color: #2d2d2d;
-    border: 1px solid #d0d0d0;
+    background-color: @BG_SECONDARY@;
+    color: @TEXT_PRIMARY@;
+    border: 1px solid @BORDER@;
     border-radius: 0.35em;
     padding: 0.1em 0.3em;
-    selection-background-color: #cde4ff;
-    selection-color: #2d2d2d;
+    selection-background-color: @SELECTION_BG@;
+    selection-color: @TEXT_PRIMARY@;
     outline: none;
 }
 
     QLineEdit:focus, QTextEdit:focus{
-        border-color: #007acc;
+        border-color: @ACCENT@;
     }
 
     QLineEdit[readOnly="true"], QTextEdit[readOnly="true"], QPlainTextEdit[readOnly="true"] {
-        background-color: #f5f5f5;
-        color: #a0a0a0;
-        border-color: #d0d0d0;
+        background-color: @BG_PRIMARY@;
+        color: @TEXT_DISABLED@;
+        border-color: @BORDER@;
     }
 
         QLineEdit[readOnly="true"]:focus, QTextEdit[readOnly="true"]:focus, QPlainTextEdit[readOnly="true"]:focus {
-            border-color: #d0d0d0;
+            border-color: @BORDER@;
         }
 
         /* Приглушённое выделение (текст всё ещё можно копировать) */
         QLineEdit[readOnly="true"]::selection, QTextEdit[readOnly="true"]::selection, QPlainTextEdit[readOnly="true"]::selection {
-            background-color: #e3e3e3;
-            color: #404040;
+            background-color: @BG_TERTIARY@;
+            color: @TEXT_SECONDARY@;
         }
 
     /* === Кнопки спинбоксов и комбобокса === */
@@ -82,31 +82,31 @@ QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox, QDoubleSpinBox, QComboBox, QFont
     QSpinBox::up-button:hover, QSpinBox::down-button:hover,
     QDoubleSpinBox::up-button:hover, QDoubleSpinBox::down-button:hover,
     QComboBox::drop-down:hover {
-        background-color: #e3e3e3;
+        background-color: @BG_TERTIARY@;
         border-radius: 0.2em;
     }
 
     QSpinBox::up-button:pressed, QSpinBox::down-button:pressed,
     QDoubleSpinBox::up-button:pressed, QDoubleSpinBox::down-button:pressed,
     QComboBox::drop-down:pressed {
-        background-color: #f5f5f5;
+        background-color: @BG_PRIMARY@;
     }
 
     QComboBox QAbstractItemView {
-        background-color: #ffffff;
-        color: #2d2d2d;
-        selection-background-color: #e3e3e3;
-        selection-color: #2d2d2d;
-        border: 0.04em solid #d0d0d0;
+        background-color: @BG_SECONDARY@;
+        color: @TEXT_PRIMARY@;
+        selection-background-color: @BG_TERTIARY@;
+        selection-color: @TEXT_PRIMARY@;
+        border: 0.04em solid @BORDER@;
         outline: none;
         padding: 0.2em;
     }
 
 /* --- Кнопки --- */
 QPushButton, QToolButton {
-    background-color: #ffffff;
-    color: #2d2d2d;
-    border: 0.05em solid #d0d0d0;
+    background-color: @BG_SECONDARY@;
+    color: @TEXT_PRIMARY@;
+    border: 0.05em solid @BORDER@;
     border-radius: 0.35em;
     padding: 0.1em 0.3em;
     min-height: 1.2em;
@@ -114,12 +114,12 @@ QPushButton, QToolButton {
 }
 
     QPushButton:hover, QToolButton:hover {
-        background-color: #e3e3e3;
-        border-color: #e0e0e0;
+        background-color: @BG_TERTIARY@;
+        border-color: @BORDER_LIGHT@;
     }
 
     QPushButton:pressed, QToolButton:pressed {
-        background-color: #f5f5f5;
+        background-color: @BG_PRIMARY@;
         padding: 0.25em 0.25em 0px 0.1em;
     }
 /* QToolButton в тулбарах обычно прозрачный */
@@ -131,12 +131,12 @@ QToolBar QToolButton {
 }
 
     QToolBar QToolButton:hover {
-        background-color: #e3e3e3;
+        background-color: @BG_TERTIARY@;
     }
 
 /* --- Чекбоксы и Радиокнопки --- */
 QCheckBox, QRadioButton {
-    color: #2d2d2d;
+    color: @TEXT_PRIMARY@;
     spacing: 0.5em;
     padding: 0.2em 0;
 }
@@ -144,18 +144,18 @@ QCheckBox, QRadioButton {
     QCheckBox::indicator, QRadioButton::indicator {
         width: 1.1em;
         height: 1.1em;
-        border: 0.04em solid #d0d0d0;
+        border: 0.04em solid @BORDER@;
         border-radius: 0.2em;
-        background-color: #ffffff;
+        background-color: @BG_SECONDARY@;
     }
 
         QCheckBox::indicator:checked, QRadioButton::indicator:checked {
-            background-color: #007acc;
-            border-color: #007acc;
+            background-color: @ACCENT@;
+            border-color: @ACCENT@;
         }
 
         QCheckBox::indicator:hover, QRadioButton::indicator:hover {
-            border-color: #1c97ff;
+            border-color: @ACCENT_HOVER@;
         }
 
     QRadioButton::indicator {
@@ -165,12 +165,12 @@ QCheckBox, QRadioButton {
 
 /* --- Группировка --- */
 QGroupBox {
-    border: 0.04em solid #d0d0d0;
+    border: 0.04em solid @BORDER@;
     border-radius: 0.45em;
     margin-top: 0.3em;
     padding-top: 0.5em;
     padding-left: 0.2em;
-    color: #2d2d2d;
+    color: @TEXT_PRIMARY@;
 }
 
     QGroupBox::title {
@@ -178,7 +178,7 @@ QGroupBox {
         left: 0.6em;
         padding: 0 0.5em;
         font-weight: bold;
-        border: 0.08em solid #d0d0d0;
+        border: 0.08em solid @BORDER@;
         border-radius: 0.3em;
     }
 
@@ -189,8 +189,8 @@ QTabBar {
 }
 
     QTabBar::tab {
-        background-color: #ffffff;
-        color: #404040;
+        background-color: @BG_SECONDARY@;
+        color: @TEXT_SECONDARY@;
         padding: 0.3em 0.5em;
         margin: 0 0.15em 0 0;
         border: 0.08em solid transparent;
@@ -200,25 +200,25 @@ QTabBar {
     }
 
         QTabBar::tab:selected {
-            background-color: #f5f5f5;
-            color: #2d2d2d;
-            border: 0.08em solid #d0d0d0;
-            border-bottom-color: #007acc;
+            background-color: @BG_PRIMARY@;
+            color: @TEXT_PRIMARY@;
+            border: 0.08em solid @BORDER@;
+            border-bottom-color: @ACCENT@;
             border-bottom-width: 0.15em;
             font-weight: bold;
         }
 
         QTabBar::tab:hover:!selected {
-            background-color: #e3e3e3;
-            color: #2d2d2d;
+            background-color: @BG_TERTIARY@;
+            color: @TEXT_PRIMARY@;
         }
 
 /* ==========================================================================
    КОНТЕЙНЕРЫ И ОКНА
    ========================================================================== */
 QMainWindow, QDialog {
-    background-color: #f5f5f5;
-    color: #2d2d2d;
+    background-color: @BG_PRIMARY@;
+    color: @TEXT_PRIMARY@;
 }
 
 QDialog {
@@ -226,80 +226,80 @@ QDialog {
 }
 
     QDialog QLabel {
-        color: #2d2d2d;
+        color: @TEXT_PRIMARY@;
     }
 
 QMenuBar {
-    background-color: #ffffff;
-    color: #2d2d2d;
-    border-bottom: 0.08em solid #d0d0d0;
+    background-color: @BG_SECONDARY@;
+    color: @TEXT_PRIMARY@;
+    border-bottom: 0.08em solid @BORDER@;
     padding: 0.1em 0;
     font-size: 10pt;
 }
 
     QMenuBar::item:selected, QMenuBar::item:pressed {
-        background-color: #e3e3e3;
+        background-color: @BG_TERTIARY@;
     }
 
 QMenu {
-    background-color: #ffffff;
-    color: #2d2d2d;
-    border: 0.08em solid #d0d0d0;
+    background-color: @BG_SECONDARY@;
+    color: @TEXT_PRIMARY@;
+    border: 0.08em solid @BORDER@;
     padding: 0.1em;
 }
 
     QMenu::item:selected {
-        background-color: #e3e3e3;
-        color: #2d2d2d;
+        background-color: @BG_TERTIARY@;
+        color: @TEXT_PRIMARY@;
     }
 
     QMenu::separator {
         height: 0.08em;
-        background-color: #d0d0d0;
+        background-color: @BORDER@;
         margin: 0.2em 0;
     }
 
 QToolBar {
-    background-color: #ffffff;
+    background-color: @BG_SECONDARY@;
     border: none;
     spacing: 0.2em;
     padding: 0.15em;
 }
 
 QDockWidget {
-    background-color: #f5f5f5;
-    color: #2d2d2d;
+    background-color: @BG_PRIMARY@;
+    color: @TEXT_PRIMARY@;
     border: none;
 }
 
     QDockWidget::title {
-        background-color: #ffffff;
+        background-color: @BG_SECONDARY@;
         padding-left: 0.4em;
-        border: 0.08em solid #d0d0d0;
+        border: 0.08em solid @BORDER@;
     }
 
     QDockWidget::close-button, QDockWidget::float-button {
-        background-color: #c0c0c0;
+        background-color: @SCROLLBAR@;
         width: 1.1em;
         height: 1.1em;
         border-radius: 0.5em;
     }
 
         QDockWidget::close-button:hover, QDockWidget::float-button:hover {
-            background-color: #2d2d2d;
+            background-color: @TEXT_PRIMARY@;
         }
 
 QStatusBar {
-    background-color: #f5f5f5;
-    color: #2d2d2d;
+    background-color: @BG_PRIMARY@;
+    color: @TEXT_PRIMARY@;
     font-weight: bold;
-    border-top: 0.15em solid #d0d0d0;
+    border-top: 0.15em solid @BORDER@;
 }
 
     QStatusBar QLabel {
-        color: #2d2d2d;
+        color: @TEXT_PRIMARY@;
         padding: 0 0.6em;
-        border-right: 0.08em solid #d0d0d0;
+        border-right: 0.08em solid @BORDER@;
     }
 
         QStatusBar QLabel:last-child {
@@ -310,13 +310,13 @@ QStatusBar {
    ВИДЖЕТЫ IDE
    ========================================================================== */
 LispEditor {
-    background-color: #ffffff;
-    color: #1e1e1e;
+    background-color: @EDITOR_BG@;
+    color: @EDITOR_TEXT@;
     font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
     font-size: 12pt;
-    selection-background-color: #cde4ff;
-    selection-color: #2d2d2d;
-    border: 0.08em solid #d0d0d0;
+    selection-background-color: @SELECTION_BG@;
+    selection-color: @TEXT_PRIMARY@;
+    border: 0.08em solid @BORDER@;
 }
 
     LispEditor QWidget {
@@ -325,33 +325,33 @@ LispEditor {
     }
 
 #LineNumberArea {
-    background-color: #f0f0f0;
-    color: #6a6a6a;
+    background-color: @LINENUMBER_BG@;
+    color: @LINENUMBER_TEXT@;
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 10pt;
-    border-right: 0.08em solid #d0d0d0;
+    border-right: 0.08em solid @BORDER@;
 }
 
     #LineNumberArea[current-line="true"] {
-        color: #2d2d2d;
+        color: @TEXT_PRIMARY@;
         font-weight: bold;
     }
 
 ProjectTree {
-    color: #1e1e1e;
-    background-color: #f5f5f5;
-    border: 0.08em solid #d0d0d0;
+    color: @EDITOR_TEXT@;
+    background-color: @BG_PRIMARY@;
+    border: 0.08em solid @BORDER@;
     outline: none;
 }
 
     ProjectTree::item:selected {
-        background-color: #cde4ff;
+        background-color: @SELECTION_BG@;
         border: none;
     }
 
 ReplWidget {
-    background-color: #ffffff; /* Исправлен хардкод */
-    color: #1e1e1e; /* Исправлен хардкод */
+    background-color: @EDITOR_BG@; /* Исправлен хардкод */
+    color: @EDITOR_TEXT@; /* Исправлен хардкод */
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 11pt;
     border: none;
@@ -360,26 +360,26 @@ ReplWidget {
 /* --- EditorTabWidget --- */
 EditorTabWidget::pane {
     border: none;
-    background-color: #f5f5f5;
+    background-color: @BG_PRIMARY@;
 }
 
 EditorTabWidget QTabBar::tab {
-    background-color: #ffffff;
+    background-color: @BG_SECONDARY@;
     padding: 0.3em 0.4em 0.15em 0.4em;
     margin: 0 0.2em 0 0;
-    border: 0.08em solid #d0d0d0;
+    border: 0.08em solid @BORDER@;
     border-bottom: none;
     border-top-left-radius: 0.3em;
     border-top-right-radius: 0.3em;
 }
 
     EditorTabWidget QTabBar::tab:selected {
-        background-color: #f5f5f5;
-        border-bottom: 0.15em solid #007acc;
+        background-color: @BG_PRIMARY@;
+        border-bottom: 0.15em solid @ACCENT@;
     }
 
     EditorTabWidget QTabBar::tab:hover {
-        background-color: #e3e3e3;
+        background-color: @BG_TERTIARY@;
     }
 
     EditorTabWidget QTabBar::tab:!selected {
@@ -424,23 +424,23 @@ SettingsDialog {
         SettingsDialog QTabBar::tab {
             padding: 0.6em 0.2em;
             margin: 0em 0.3em;
-            border: 0.08em solid #d0d0d0;
+            border: 0.08em solid @BORDER@;
             border-radius: 0;
         }
 
             SettingsDialog QTabBar::tab:selected {
                 margin: 0;
-                background-color: #f5f5f5;
-                color: #2d2d2d;
-                border: 0.08em solid #d0d0d0;
-                border-right: 0.15em solid #007acc;
+                background-color: @BG_PRIMARY@;
+                color: @TEXT_PRIMARY@;
+                border: 0.08em solid @BORDER@;
+                border-right: 0.15em solid @ACCENT@;
                 border-top-right-radius: 0.3em;
                 border-bottom-right-radius: 0.3em;
             }
 
             SettingsDialog QTabBar::tab:hover:!selected {
-                background-color: #e3e3e3;
-                color: #2d2d2d;
+                background-color: @BG_TERTIARY@;
+                color: @TEXT_PRIMARY@;
             }
 
     SettingsDialog QScrollArea, SettingsDialog QScrollArea > QWidget, SettingsDialog QScrollArea > QWidget > QWidget {
@@ -450,7 +450,7 @@ SettingsDialog {
 
     SettingsDialog QDialogButtonBox {
         background-color: transparent;
-        border-top: 0.08em solid #d0d0d0;
+        border-top: 0.08em solid @BORDER@;
         padding-top: 0.8em;
         margin-top: 0.5em;
     }
@@ -463,25 +463,25 @@ SettingsDialog {
    СКРОЛЛБАРЫ
    ========================================================================== */
 QScrollBar:vertical {
-    background-color: #ffffff;
-    border: 1px solid #d0d0d0;
+    background-color: @BG_SECONDARY@;
+    border: 1px solid @BORDER@;
     width: 0.6em;
     margin: 0px;
 }
 
 QScrollBar::handle:vertical {
-    background-color: #c0c0c0;
+    background-color: @SCROLLBAR@;
     border-radius: 0.3em;
     min-height: 30px;
     margin: 0px;
 }
 
     QScrollBar::handle:vertical:hover {
-        background-color: #a0a0a0;
+        background-color: @SCROLLBAR_HOVER@;
     }
 
     QScrollBar::handle:vertical:pressed {
-        background-color: #a0a0a0;
+        background-color: @SCROLLBAR_HOVER@;
     }
 
 QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical {
@@ -496,25 +496,25 @@ QScrollBar::sub-page:vertical, QScrollBar::add-page:vertical {
 
 /* Горизонтальный скроллбар */
 QScrollBar:horizontal {
-    background-color: #ffffff;
+    background-color: @BG_SECONDARY@;
     height: 0.6em;
     margin: 0px;
     border: none;
 }
 
 QScrollBar::handle:horizontal {
-    background-color: #c0c0c0;
+    background-color: @SCROLLBAR@;
     border-radius: 0.3em;
     min-width: 30px;
     margin: 0px;
 }
 
     QScrollBar::handle:horizontal:hover {
-        background-color: #a0a0a0;
+        background-color: @SCROLLBAR_HOVER@;
     }
 
     QScrollBar::handle:horizontal:pressed {
-        background-color: #a0a0a0;
+        background-color: @SCROLLBAR_HOVER@;
     }
 
 QScrollBar::sub-line:horizontal, QScrollBar::add-line:horizontal {
@@ -529,6 +529,6 @@ QScrollBar::sub-page:horizontal, QScrollBar::add-page:horizontal {
 
 /* Отступ для горизонтального скроллбара с учётом LineNumberArea */
 QAbstractScrollArea::corner {
-    background-color: #f0f0f0;
+    background-color: @LINENUMBER_BG@;
     border: none;
 }

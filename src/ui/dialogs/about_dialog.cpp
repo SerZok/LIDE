@@ -21,7 +21,6 @@ AboutDialog::~AboutDialog() = default;
 
 void AboutDialog::changeEvent(QEvent* event) {
 	if (event->type() == QEvent::LanguageChange) {
-		qDebug() << metaObject()->className() << "received LanguageChange";
 		ui.retranslateUi(this);
 	}
 
