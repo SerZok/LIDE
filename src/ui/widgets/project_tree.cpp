@@ -47,6 +47,7 @@ ProjectTree::~ProjectTree()
     saveState();
 }
 
+
 bool ProjectTree::openProject(const QString& path)
 {
     QFileInfo info(path);

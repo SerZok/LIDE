@@ -2,6 +2,8 @@
 
 #include <QDir>
 #include <QFile>
+#include <QDialog>
+#include <QMainWindow>
 #include <QTranslator>
 #include <QLibraryInfo>
 #include <QApplication>
@@ -143,11 +145,16 @@ void Settings::setCurrentLang(const QString& locale)
     s_appTranslator = new QTranslator(qApp);
     QString appDir = QCoreApplication::applicationDirPath();
     QString appTranslationsDir = QDir(appDir).filePath("translations");
-    QString appLocale = "LIDE_" + locale + ".qm";
+    QString appLocale = "LIDE_" + locale;
 
     if (s_appTranslator->load(appLocale, appTranslationsDir)) {
-        QCoreApplication::installTranslator(s_appTranslator);
         qDebug() << appLocale << " loaded from" << appTranslationsDir;
+        if (QCoreApplication::installTranslator(s_appTranslator)) {
+            qDebug() << appLocale << "sucess installed!";
+        }
+        else {
+            qDebug() << appLocale << "install error!!!";
+        }
     }
     else {
         qDebug() << appLocale << "NOT loaded from" << appTranslationsDir;
@@ -156,7 +163,24 @@ void Settings::setCurrentLang(const QString& locale)
     }
 
     emit settingsChanged();
+
+    qDebug() << "=== Language changed to:" << locale << "===";
+    qDebug() << "Top-level widgets:" << QApplication::topLevelWidgets().size();
+    retranslateAllWindows();
 }
+
+void Settings::retranslateAllWindows()
+{
+    for (QWidget* widget : QApplication::topLevelWidgets()) {
+        QEvent langEvent(QEvent::LanguageChange);
+        QCoreApplication::sendEvent(widget, &langEvent);
+
+        if (auto* mw = qobject_cast<QMainWindow*>(widget)) {
+            mw->update();
+        }
+    }
+}
+
 
 // Theme settings
 QString Settings::currentTheme() const

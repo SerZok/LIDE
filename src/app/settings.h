@@ -83,6 +83,8 @@ public:
     QString currentTheme() const;
     void setCurrentTheme(const QString& stylePath);
 
+    static void retranslateAllWindows();
+
     // Editor settings
     QFont editorFont() const;
     void setEditorFont(const QFont& font);

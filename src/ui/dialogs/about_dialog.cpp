@@ -17,6 +17,13 @@ AboutDialog::AboutDialog(QWidget *parent)
 	ui.versionLabel->setText(versionText);
 }
 
-AboutDialog::~AboutDialog()
-{
+AboutDialog::~AboutDialog() = default;
+
+void AboutDialog::changeEvent(QEvent* event) {
+	if (event->type() == QEvent::LanguageChange) {
+		qDebug() << metaObject()->className() << "received LanguageChange";
+		ui.retranslateUi(this);
+	}
+
+	QDialog::changeEvent(event);
 }

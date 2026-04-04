@@ -33,6 +33,9 @@ public:
     void openFiles(QStringList files);
     void updateStatusBarPosition(int line, int col);
 
+protected:
+    void changeEvent(QEvent* event) override;
+
 private slots:
     void saveAppState();
     void loadAppState();
@@ -40,6 +43,7 @@ private slots:
 private:
     Ui::MainWindow* ui;
     QToolBar* m_mainToolBar;
+    Settings* m_settings;
 
     void setupMenuBar();
     void setupToolBar();
@@ -55,6 +59,8 @@ private:
     void openProject();
     void createProject();
 
+    void updateTranslations();
+
     QMap<QDockWidget*, QString> m_dockNames;
 
     QDockWidget* m_projectDock = nullptr;
@@ -64,6 +70,15 @@ private:
     EditorTabWidget* m_tabWidget;
     ProjectTree* m_projectTree;
     ReplWidget* m_console;
+
+    // Меню
+    QMenu* m_fileMenu = nullptr;
+    QMenu* m_editMenu = nullptr;
+    QMenu* m_viewMenu = nullptr;
+    QMenu* m_runMenu = nullptr;
+    QMenu* m_toolsMenu = nullptr;
+    QMenu* m_helpMenu = nullptr;
+    QMenu* m_styleMenu = nullptr;
 
     // Меню работы с файлами
     QAction* m_createFileAction = nullptr;

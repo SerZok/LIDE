@@ -14,6 +14,9 @@ public:
 	SettingsDialog(QWidget*parent = nullptr);
 	~SettingsDialog();
 
+protected:
+	void changeEvent(QEvent* event) override;
+
 private:
 	Ui::SettingsDialog ui;
 
