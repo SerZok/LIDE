@@ -10,6 +10,13 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 {
 	ui.setupUi(this);
 
+    if (auto* layout = ui.console_scrollAreaContents->layout()) {
+        layout->setContentsMargins(0, 0, 0, 0);
+    }
+    if (auto* layout = ui.sbcl_scrollAreatContents->layout()) {
+        layout->setContentsMargins(0, 0, 0, 0);
+    }
+
 	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
     // ComboBox'ы
@@ -93,12 +100,14 @@ void SettingsDialog::loadToUi()
     if (themeIdx >= 0)
         ui.theme_comboBox->setCurrentIndex(themeIdx);
 
+    ui.auto_save_every_spinBox->setValue(m_settings->saveTime());
+    ui.auto_save_exit_checkBox->setChecked(m_settings->saveExit());
+
     // ── Editor ──────────────────────────────────────
-    ui.font_comboBox->setCurrentFont(m_settings->editorFont());
     ui.tabSize_spinBox->setValue(m_settings->tabSize());
     ui.showLineNum_checkBox->setChecked(m_settings->showLineNumbers());
-    // ui.checkBox_2 = auto-brackets (TODO)
-    // ui.checkBox_3 = auto-indent (TODO)
+    // auto-brackets (TODO)
+    // auto-indent (TODO)
 
     // ── Console (REPL output limits) ─────────────────
     ui.timout_spinBox->setValue(m_settings->replOutputDelay());
@@ -113,33 +122,33 @@ void SettingsDialog::loadToUi()
     ui.sbcl_path_lineEdit->setText(m_settings->sbclPath());
     ui.sbcl_auto_restart_afterCrash_checkBox->setChecked(m_settings->replAutoRestart());
 
-    int parserIdx = ui.parser_mode_comboBox->findData(m_settings->replParseMode());
+    int parserIdx = ui.parser_mode_comboBox->findData(static_cast<int>(m_settings->replParseMode()));
     if (parserIdx >= 0)
         ui.parser_mode_comboBox->setCurrentIndex(parserIdx);
 
     // ── SBCL: Аргументы ─────────────────────────────────
     QStringList args = m_settings->sbclArgs();
 
-    bool hasDebug = false;
-    bool hasNoInform = false;
+    bool hasDebug = true;
+    bool hasInform = true;
     QStringList custom;
 
     for (const QString& arg : args) {
         QString trimmed = arg.trimmed();  // убираем лишние пробелы
 
-        if (trimmed == "--debug") {
-            hasDebug = true;
+        if (trimmed == "--noinform") {
+            hasInform = false;
         }
-        else if (trimmed == "--noinform") {
-            hasNoInform = true;
+        else if (trimmed == "--disable-debugger") {
+            hasDebug = false;
         }
-        else if (trimmed != "--disable-debugger") {  // этот флаг игнорируем в UI
+        else if (trimmed.startsWith("--")) {
             custom << trimmed;
         }
     }
 
     ui.sbcl_debug_checkBox->setChecked(hasDebug);
-    ui.sbcl_no_inform_checkBox->setChecked(hasNoInform);
+    ui.sbcl_no_inform_checkBox->setChecked(hasInform);
     ui.sbcl_custom_args_textLine->setText(custom.join(" "));
 
     // Параметры загрузки файлов (SBCL LOAD)
@@ -166,9 +175,10 @@ void SettingsDialog::saveFromUi()
     // ── General ─────────────────────────────────────
     m_settings->setCurrentLang(ui.lang_comboBox->currentData().toString());
     m_settings->setCurrentTheme(ui.theme_comboBox->currentData().toString());
+    m_settings->setSaveTime(ui.auto_save_every_spinBox->value());
+    m_settings->setSaveExit(ui.auto_save_exit_checkBox->isChecked());
 
     // ── Editor ──────────────────────────────────────
-    m_settings->setEditorFont(ui.font_comboBox->currentFont());
     m_settings->setTabSize(ui.tabSize_spinBox->value());
     m_settings->setShowLineNumbers(ui.showLineNum_checkBox->isChecked());
 
@@ -184,12 +194,12 @@ void SettingsDialog::saveFromUi()
     // ── SBCL ─────────────────────────────────────────
     m_settings->setSbclPath(ui.sbcl_path_lineEdit->text());
     m_settings->setReplAutoRestart(ui.sbcl_auto_restart_afterCrash_checkBox->isChecked());
-    m_settings->setReplParseMode(ui.parser_mode_comboBox->currentData().toInt());
+    m_settings->setReplParseMode(static_cast<Settings::ParseMode>(ui.parser_mode_comboBox->currentData().toInt()));
 
-    // Формируем аргументы из чекбоксов + кастомных
+    // Аргументы из чекбоксов + кастомных
     QStringList args;
-    if (ui.sbcl_debug_checkBox->isChecked()) args << "--debug";
-    if (ui.sbcl_no_inform_checkBox->isChecked()) args << "--noinform";
+    if (!ui.sbcl_no_inform_checkBox->isChecked()) args << "--noinform";
+    if (!ui.sbcl_debug_checkBox->isChecked()) args << "--disable-debugger";
 
     QString custom = ui.sbcl_custom_args_textLine->text().trimmed();
     if (!custom.isEmpty()) {
@@ -238,10 +248,11 @@ void SettingsDialog::updateSbclArgs()
     if (m_loading) return;
 
     QStringList args;
-    if (ui.sbcl_debug_checkBox->isChecked())
-        args << "--debug";
-    if (ui.sbcl_no_inform_checkBox->isChecked())
+    //--noinform - должен быть первым
+    if (!ui.sbcl_no_inform_checkBox->isChecked())
         args << "--noinform";
+    if (!ui.sbcl_debug_checkBox->isChecked())
+        args << "--disable-debugger";
 
     QString custom = ui.sbcl_custom_args_textLine->text().trimmed();
     if (!custom.isEmpty()) {

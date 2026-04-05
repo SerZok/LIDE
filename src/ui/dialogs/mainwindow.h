@@ -44,6 +44,11 @@ private:
     Ui::MainWindow* ui;
     QToolBar* m_mainToolBar;
     Settings* m_settings;
+    QTimer* m_autoSaveTimer = nullptr;
+
+    void setupSaveTimer();
+    void triggerAutoSave();
+    void onSettingsChanged();
 
     void setupMenuBar();
     void setupToolBar();

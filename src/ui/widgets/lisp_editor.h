@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <QFileSystemWatcher>
 #include <QPlainTextEdit>
@@ -52,6 +52,7 @@ private slots:
 
 private:
     class LineNumberArea;
+    Settings* m_settings;
 
     QString m_currentFile;
     QFileSystemWatcher* m_fileWatcher;
@@ -66,6 +67,9 @@ private:
     QList<QTextEdit::ExtraSelection> m_errorSelections;
     QList<QTextEdit::ExtraSelection> m_extraSelections;
 
+    int m_cachedTabSize = 4;
+    bool m_cachedShowLineNumbers = true;
+
     void setupSyntaxHighlighting();
     void updateErrorHighlight();
 
@@ -79,6 +83,9 @@ private:
     void matchBrackets(const QTextCursor& cursor);
     bool isPositionInComment(int position) const;
 
+    void applyTabSize(int tabSize);
+    void applyShowLineNumbers(bool show);
+    void applyEditorSettings();
 };
 
 // Нумерация строк

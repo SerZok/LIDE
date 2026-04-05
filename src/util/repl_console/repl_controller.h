@@ -19,9 +19,6 @@ public:
     void restart();
     void sendCommand(const QString& cmd);
     void interrupt();
-
-    bool debugMode();
-    void setDebugMode(bool enabled);
     void setFormattedOutput(bool enabled);
 
 signals:
@@ -39,7 +36,6 @@ private:
     ReplProcess process;
     ReplParser parser;
 
-    bool m_debugMode = false;
     bool m_formattedOutput = true;
     bool m_restartPending = false;
 

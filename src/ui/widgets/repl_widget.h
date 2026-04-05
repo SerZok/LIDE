@@ -1,6 +1,7 @@
 #pragma once
 #include <QTextEdit>
 
+#include "settings.h"
 #include "util/repl_console/repl_message.h"
 #include "util/repl_console/repl_history.h"
 
@@ -42,6 +43,7 @@ protected:
 private:
     ReplHistory m_history;              // история команд
     ReplController* m_controller;        // контроллер с основной логикой
+    Settings* m_settings;
 
     QString m_savedInput;
     bool m_historyBrowsing = false;
@@ -50,7 +52,7 @@ private:
     bool m_waitingForInput = true;      // ожидание ввода
     QString m_prompt = "* ";     // текущий промпт
 
-    const size_t MAX_LINES = 100000;
+    size_t MAX_LINES;
 
     void appendOutput(const QString& text, ReplMessageType type = ReplMessageType::Result);
     void appendPrompt();

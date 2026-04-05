@@ -9,12 +9,15 @@
 
 LispEditor::LispEditor(QWidget* parent)
     : QPlainTextEdit(parent)
+    , m_settings(Settings::instance())
     , m_lineNumberArea(new LineNumberArea(this))
     , m_fileWatcher(new QFileSystemWatcher(this))
     , m_reloadTimer(new QTimer(this))
     , m_ignoreChanges(false)
     , m_highlighter(new LispHighlighter(this->document()))
 {
+    applyEditorSettings();
+
     m_lineNumberArea->setObjectName("LineNumberArea");
     setTabStopDistance(40);
     setLineWrapMode(QPlainTextEdit::NoWrap);
@@ -33,6 +36,8 @@ LispEditor::LispEditor(QWidget* parent)
     connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &LispEditor::onFileChanged);
     connect(m_reloadTimer, &QTimer::timeout, this, &LispEditor::askForReload);
     connect(this, &LispEditor::textChanged, this, &LispEditor::onTextChanged);
+
+    connect(Settings::instance(), &Settings::settingsChanged, this, &LispEditor::applyEditorSettings, Qt::UniqueConnection);
 
     updateLineNumberAreaWidth(0);
 }
@@ -257,6 +262,43 @@ void LispEditor::paintEvent(QPaintEvent* event)
     QPlainTextEdit::paintEvent(event);
 }
 
+void LispEditor::applyTabSize(int tabSize) {
+    if (tabSize == m_cachedTabSize || tabSize < 1 || tabSize > 16)
+        return;
+
+    int pixelWidth = fontMetrics().horizontalAdvance(' ') * tabSize;
+    setTabStopDistance(pixelWidth);
+    m_cachedTabSize = tabSize;
+}
+
+void LispEditor::applyShowLineNumbers(bool show) {
+    if (show == m_cachedShowLineNumbers)
+        return;
+
+    m_cachedShowLineNumbers = show;
+
+    if (show) {
+        updateLineNumberAreaWidth(0);
+        connect(this, &LispEditor::blockCountChanged, this, &LispEditor::updateLineNumberAreaWidth, Qt::UniqueConnection);
+        connect(this, &LispEditor::updateRequest, this, &LispEditor::updateLineNumberArea, Qt::UniqueConnection);
+        m_lineNumberArea->show();
+    }
+    else {
+        setViewportMargins(0, 0, 0, 0);
+        disconnect(this, &LispEditor::blockCountChanged, this, &LispEditor::updateLineNumberAreaWidth);
+        disconnect(this, &LispEditor::updateRequest, this, &LispEditor::updateLineNumberArea);
+        m_lineNumberArea->hide();
+    }
+    viewport()->update();
+}
+
+void LispEditor::applyEditorSettings() {
+    applyTabSize(m_settings->tabSize());
+    applyShowLineNumbers(m_settings->showLineNumbers());
+}
+
+
+
 // ==================[ LineNumberArea ]==================
 void LispEditor::LineNumberArea::paintEvent(QPaintEvent* event)
 {
@@ -397,8 +439,7 @@ void LispEditor::updateWatcher()
     }
 }
 
-void LispEditor::highlightErrorAtPosition(const QString& message,
-    int line, int column)
+void LispEditor::highlightErrorAtPosition(const QString& message, int line, int column)
 {
     // Очищаем предыдущую подсветку
     clearErrorHighlight();
@@ -422,8 +463,7 @@ void LispEditor::highlightErrorAtPosition(const QString& message,
     errorSelection.format.setBackground(QColor(255, 100, 100, 80));
     errorSelection.format.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
     errorSelection.format.setUnderlineColor(QColor(255, 50, 50));
-    errorSelection.format.setToolTip(QString("Line %1, Column %2: %3")
-        .arg(line).arg(column).arg(message));
+    errorSelection.format.setToolTip(QString("Line %1, Column %2: %3").arg(line).arg(column).arg(message));
 
     // Подсветка всей строки
     QTextEdit::ExtraSelection lineHighlight;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "settings.h"
+
 #include <QObject>
 #include <QString>
 #include <QProcess>
@@ -12,7 +14,7 @@ public:
     explicit ReplProcess(QObject* parent = nullptr);
     ~ReplProcess();
 
-    bool start(const QString& sbclPath = "", bool debugMode = false);
+    bool start();
     void stop();
     void restart();
 
@@ -35,7 +37,8 @@ private slots:
 
 private:
     QProcess m_process;
-    bool m_debugMode;
+    QStringList args;
+    QString sbclPath;
 
-    QString findSBCL() const;
+    Settings* m_settings;
 };

@@ -182,6 +182,20 @@ QGroupBox {
         border-radius: 0.3em;
     }
 
+QGroupBox[title=""] {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+    QGroupBox[title=""]::title {
+        height: 0;
+        padding: 0;
+        margin: 0;
+        border: none;
+        font-size: 0pt;
+        subcontrol-position: top left;
+    }
+
 /* --- Вкладки (база) --- */
 QTabBar {
     border: none;
@@ -337,17 +351,36 @@ LispEditor {
         font-weight: bold;
     }
 
+/* ==================== ProjectTree ==================== */
 ProjectTree {
     color: @EDITOR_TEXT@;
     background-color: @BG_PRIMARY@;
     border: 0.08em solid @BORDER@;
+    border-radius: 0.2em;
     outline: none;
+    padding: 0;
 }
 
-    ProjectTree::item:selected {
-        background-color: @SELECTION_BG@;
-        border: none;
+    ProjectTree:focus {
+        border-color: @BORDER@;
     }
+
+    ProjectTree::item {
+        padding: 0.1em 0.5em;
+        border: 0.06em solid transparent;
+    }
+
+        ProjectTree::item:hover {
+            background-color: @BG_TERTIARY@;
+            border-color: transparent;
+        }
+
+        ProjectTree::item:selected {
+            background-color: @SELECTION_BG@;
+            color: @TEXT_SECONDARY@;
+            border-color: transparent;
+        }
+
 
 ReplWidget {
     background-color: @EDITOR_BG@; /* Исправлен хардкод */
@@ -446,6 +479,8 @@ SettingsDialog {
     SettingsDialog QScrollArea, SettingsDialog QScrollArea > QWidget, SettingsDialog QScrollArea > QWidget > QWidget {
         background-color: transparent;
         border: none;
+        margin: 0;
+        padding: 0;
     }
 
     SettingsDialog QDialogButtonBox {
@@ -460,8 +495,8 @@ SettingsDialog {
         }
 
 /* ==========================================================================
-   СКРОЛЛБАРЫ
-   ========================================================================== */
+СКРОЛЛБАРЫ
+========================================================================== */
 QScrollBar:vertical {
     background-color: @BG_SECONDARY@;
     border: 1px solid @BORDER@;

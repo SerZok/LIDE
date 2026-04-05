@@ -8,8 +8,21 @@
 
 ReplProcess::ReplProcess(QObject* parent)
     : QObject(parent)
-    , m_debugMode(false)
+    , m_settings(Settings::instance())
 {
+    sbclPath = m_settings->sbclPath();
+    args = m_settings->sbclArgs();
+    
+    connect(m_settings, &Settings::sbclPathChanged, this, [this]() {
+        sbclPath = m_settings->sbclPath();
+        restart();
+        });
+    
+    connect(m_settings, &Settings::sbclArgsChanged, this, [this]() {
+        args = m_settings->sbclArgs();
+        restart();
+        });
+
     connect(&m_process, &QProcess::readyReadStandardOutput, this, &ReplProcess::onReadyReadStandardOutput);
     connect(&m_process, &QProcess::readyReadStandardError, this, &ReplProcess::onReadyReadStandardError);
     connect(&m_process, &QProcess::errorOccurred, this, &ReplProcess::onProcessError);
@@ -21,56 +34,17 @@ ReplProcess::~ReplProcess()
     stop();
 }
 
-QString ReplProcess::findSBCL() const
-{
-    // 1. Ищем встроенный SBCL (рядом с приложением)
-#ifdef Q_OS_WIN
-    QString bundled = QCoreApplication::applicationDirPath() + "/sbcl/sbcl.exe";
-#else
-    QString bundled = QCoreApplication::applicationDirPath() + "/sbcl/sbcl";
-#endif
-
-    if (QFile::exists(bundled)) {
-        qDebug() << "Found bundled SBCL:" << bundled;
-        return bundled;
-    }
-
-    // 2. Ищем в PATH
-    QString systemExe = QStandardPaths::findExecutable("sbcl");
-    if (!systemExe.isEmpty()) {
-        qDebug() << "Found system SBCL:" << systemExe;
-        return systemExe;
-    }
-
-    qDebug() << "SBCL not found!";
-    return QString();
-}
-
-bool ReplProcess::start(const QString& sbclPath, bool debugMode)
+bool ReplProcess::start()
 {
     if (isRunning()) {
         stop();
     }
 
-    m_debugMode = debugMode;
-
-    QString exePath = sbclPath.isEmpty() ? findSBCL() : sbclPath;
-    if (exePath.isEmpty()) {
-        emit errorOccurred("SBCL not found. Please install SBCL or place it in the 'sbcl' folder.");
-        return false;
-    }
-
-    // Аргументы запуска
-    QStringList args;
-    args << "--noinform";  // Убираем информационные сообщения
-
-    if (!m_debugMode) {
-        args << "--disable-debugger";  // Отключаем отладчик для обычного режима
-    }
+    qDebug() << "Запуск: " << sbclPath << " Аргументы: " << args;
 
     m_process.setProcessChannelMode(QProcess::SeparateChannels);
-    m_process.setWorkingDirectory(QFileInfo(exePath).absolutePath());
-    m_process.start(exePath, args);
+    m_process.setWorkingDirectory(QFileInfo(sbclPath).absolutePath());
+    m_process.start(sbclPath, args);
 
     if (!m_process.waitForStarted(3000)) {
         emit errorOccurred("Failed to start SBCL (timeout)");
@@ -99,13 +73,13 @@ void ReplProcess::stop()
 void ReplProcess::restart()
 {
     stop();
-    start("", m_debugMode);
+    start();
 }
 
 void ReplProcess::send(const QString& data)
 {
     if (!isRunning()) {
-        start("", m_debugMode);
+        start();
         return;
     }
 
@@ -175,7 +149,7 @@ void ReplProcess::onProcessError(QProcess::ProcessError error)
         errorMsg = "Failed to start SBCL process";
         break;
     case QProcess::Crashed:
-        errorMsg = "";
+        errorMsg = "Crashed";
         break;
     case QProcess::Timedout:
         errorMsg = "Operation timed out";

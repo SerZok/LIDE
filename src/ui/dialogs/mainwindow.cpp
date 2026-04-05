@@ -21,14 +21,21 @@
 
 MainWindow::MainWindow(QWidget* parent) :
       QMainWindow(parent)
-    ,ui(new Ui::MainWindow)
-    ,m_projectTree(nullptr)
-    ,m_tabWidget(nullptr)
-    ,m_settings(Settings::instance())
+    , ui(new Ui::MainWindow)
+    , m_projectTree(nullptr)
+    , m_tabWidget(nullptr)
+    , m_settings(Settings::instance())
 {
     ui->setupUi(this);
     resize(1366, 1080);
+    connect(m_settings, &Settings::settingsChanged, this, &MainWindow::onSettingsChanged);
 
+    m_autoSaveTimer = new QTimer(this);
+    m_autoSaveTimer->setSingleShot(false);
+    m_autoSaveTimer->setTimerType(Qt::VeryCoarseTimer);
+    connect(m_autoSaveTimer, &QTimer::timeout, this, &MainWindow::triggerAutoSave);
+
+    setupSaveTimer();
     setupDockWidgets();
     setupMenuBar();
     setupToolBar();
@@ -39,6 +46,24 @@ MainWindow::MainWindow(QWidget* parent) :
 
 MainWindow::~MainWindow()
 {
+    if (m_tabWidget) {
+        if (m_settings->saveExit())
+            m_tabWidget->saveAll();
+        else
+        {
+            // Спрашиваем, надо ли сохранять ?
+            if (int modCnt = m_tabWidget->modifFileCounts()) {
+                int ret = QMessageBox::question(this,
+                    tr("LIDE"),
+                    tr("Есть несохраненные файлы: %1. Сохранить?").arg(modCnt),
+                    QMessageBox::Yes | QMessageBox::No);
+
+                if (ret == QMessageBox::Yes) {
+                    m_tabWidget->saveAll();;
+                }
+            }
+        }
+    }
     saveAppState();
     delete ui;
 }
@@ -62,6 +87,29 @@ void MainWindow::openFiles(QStringList files) {
     }
 }
 
+void MainWindow::setupSaveTimer() {
+    int intervalMinutes = m_settings->saveTime();
+    int intervalMs = intervalMinutes * 60 * 1000;
+
+    if (intervalMs > 0 && m_tabWidget) {
+        m_autoSaveTimer->setInterval(intervalMs);
+        m_autoSaveTimer->start();
+    }
+    else {
+        m_autoSaveTimer->stop();
+    }
+}
+
+void MainWindow::triggerAutoSave() {
+    if (!m_tabWidget) return;
+
+    m_tabWidget->saveAll();
+}
+
+void MainWindow::onSettingsChanged() {
+    setupSaveTimer();
+}
+
 void MainWindow::setupMenuBar()
 {
     // File menu
@@ -69,7 +117,7 @@ void MainWindow::setupMenuBar()
 
     m_createFileAction = m_fileMenu->addAction(QIcon(":/icons/images/new-file.svg"), tr("Новый файл..."), QKeySequence::New);
     connect(m_createFileAction, &QAction::triggered, this, [this]() {
-        QString path = QFileDialog::getSaveFileName(this, tr("Новый файл"), m_projectTree->rootPath(), tr("Lisp файлы (*.lisp *.lsp *.asd)"));
+        QString path = QFileDialog::getSaveFileName(this, tr("Новый файл"), m_projectTree->rootPath(), tr("Lisp файлы (*.lisp *.lsp)"));
         if (!path.isEmpty()) {
             if (QFile::exists(path)) {
                 int ret = QMessageBox::question(this, tr("Файл существует"), tr("Файл %1 уже существует.\nПерезаписать?").arg(path), QMessageBox::Yes | QMessageBox::No);

@@ -1,4 +1,4 @@
-﻿#include "editor_tab_widget.h"
+#include "editor_tab_widget.h"
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QShortCut>
@@ -216,6 +216,17 @@ QStringList EditorTabWidget::openedFiles() {
         }
     }
     return files;
+}
+
+int EditorTabWidget::modifFileCounts() {
+    int modifCnt = 0;
+    for (int i = 0; i < count(); ++i) {
+        LispEditor* editor = editorAt(i);
+        if (editor && editor->isModified()) {
+            modifCnt++;
+        }
+    }
+    return modifCnt;
 }
 
 QString EditorTabWidget::currentFilePath() const

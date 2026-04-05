@@ -42,20 +42,20 @@ Save before closing?</translation>
 <context>
     <name>LispEditor</name>
     <message>
-        <location filename="../ui/widgets/lisp_editor.cpp" line="289"/>
         <location filename="../ui/widgets/lisp_editor.cpp" line="331"/>
+        <location filename="../ui/widgets/lisp_editor.cpp" line="373"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_editor.cpp" line="290"/>
+        <location filename="../ui/widgets/lisp_editor.cpp" line="332"/>
         <source>Не удалось открыть файл %1:
 %2</source>
         <translation>Failed to open file %1:
 %2</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/lisp_editor.cpp" line="332"/>
+        <location filename="../ui/widgets/lisp_editor.cpp" line="374"/>
         <source>Не удалось сохранить файл %1</source>
         <translation>Failed to save file %1</translation>
     </message>
@@ -63,59 +63,58 @@ Save before closing?</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="68"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="504"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="116"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="552"/>
         <source>&amp;Файл</source>
         <translation>&amp;File</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="70"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="514"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="118"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="562"/>
         <source>Новый файл...</source>
         <translation>New file...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="72"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="120"/>
         <source>Новый файл</source>
         <translation>New file</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="72"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="126"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="174"/>
         <source>Lisp файлы (*.lisp *.lsp *.asd)</source>
         <translation>Lisp files (*.lisp *.lsp *.asd)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="75"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="123"/>
         <source>Файл существует</source>
         <translation>File exists</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="75"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="123"/>
         <source>Файл %1 уже существует.
 Перезаписать?</source>
         <translation>The %1 file already exists.
 Overwrite it?</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="87"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="496"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="135"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="544"/>
         <source>Ошибка</source>
         <translation>Error</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="87"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="135"/>
         <source>Не удалось создать файл %1</source>
         <translation>Failed to create %1 file</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="93"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="515"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="141"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="563"/>
         <source>Открыть файл...</source>
         <translation>Open file...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="95"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="143"/>
         <source>Открытие файла</source>
         <translation>Opening a file</translation>
     </message>
@@ -124,215 +123,225 @@ Overwrite it?</translation>
         <translation type="vanished">Lisp files (* .lisp *.lsp * .asd)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="102"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="516"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="150"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="564"/>
         <source>Открыть проект...</source>
         <translation>Open a project...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="103"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="517"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="151"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="565"/>
         <source>Новый проект...</source>
         <translation>New project...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="109"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="518"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="157"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="566"/>
         <source>Сохранить</source>
         <translation>Save</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="110"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="519"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="158"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="567"/>
         <source>Сохранить все</source>
         <translation>Save all</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="111"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="520"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="159"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="568"/>
         <source>Сохранить как...</source>
         <translation>Save as...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="124"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="172"/>
         <source>Сохранение файла как...</source>
         <translation>Saving the file as...</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="137"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="558"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="185"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="606"/>
         <source>Выйти</source>
         <translation>Exit</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="141"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="505"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="189"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="553"/>
         <source>&amp;Правка</source>
         <translation>&amp;Edit</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="146"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="525"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="194"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="573"/>
         <source>Вырезать</source>
         <translation>Cut</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="225"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="531"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="273"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="579"/>
         <source>Запустить</source>
         <translation>Run</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="250"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="540"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="298"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="588"/>
         <source>Перезапуск SBCL и запуск текущего кода</source>
         <translation>Restarting SBCL and running the current code</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="264"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="508"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="312"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="556"/>
         <source>&amp;Опции</source>
         <translation>&amp;Options</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="275"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="510"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="323"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="558"/>
         <source>Тема</source>
         <translation>Theme</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="341"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="389"/>
         <source>REPL</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="342"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="390"/>
         <source>REPL консоль</source>
         <translation>REPL console</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="357"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="371"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="405"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="419"/>
         <source>%1/</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="358"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="372"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="406"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="420"/>
         <source>%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="239"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="241"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="535"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="536"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="287"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="289"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="583"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="584"/>
         <source>Перезапустить SBCL</source>
         <translation>Restart SBCL</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="145"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="526"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="193"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="574"/>
         <source>Скопировать</source>
         <translation>Copy</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="142"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="524"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="190"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="572"/>
         <source>Повтор</source>
         <translation>Redo</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="143"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="523"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="58"/>
+        <source>Есть несохраненные файлы: %1. Сохранить?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="120"/>
+        <source>Lisp файлы (*.lisp *.lsp)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="191"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="571"/>
         <source>Отмена</source>
         <translation>Undo</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="147"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="527"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="195"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="575"/>
         <source>Вставить</source>
         <translation>Paste</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="190"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="506"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="238"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="554"/>
         <source>&amp;Вид</source>
         <translation>&amp;View</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="191"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="559"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="239"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="607"/>
         <source>Полноэкранный режим</source>
         <translation>Full-screen mode</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="223"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="507"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="271"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="555"/>
         <source>&amp;Запуск</source>
         <translation>&amp;Run</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="227"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="532"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="275"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="580"/>
         <source>Запустить текущий код в REPL</source>
         <translation>Run the current code in the REPL</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="248"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="539"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="296"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="587"/>
         <source>Принудительный запуск</source>
         <translation>Forced launch</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="277"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="544"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="325"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="592"/>
         <source>Светлая</source>
         <translation>Light</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="279"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="545"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="327"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="593"/>
         <source>Тёмная</source>
         <translation>Dark</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="267"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="560"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="315"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="608"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="95"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="143"/>
         <source>Lisp файлы (* .lisp *.lsp)</source>
         <translation>Lisp files (* .lisp *.lsp)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="288"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="509"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="336"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="557"/>
         <source>&amp;Справка</source>
         <translation>&amp;Help</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="289"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="561"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="337"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="609"/>
         <source>О программе</source>
         <translation>About</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="301"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="548"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="349"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="596"/>
         <source>Панель инструментов</source>
         <translation>Toolbar</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="325"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="373"/>
         <source>Line: %1, Col: %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="334"/>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="335"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="382"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="383"/>
         <source>Дерево проекта</source>
         <translation>Project tree</translation>
     </message>
@@ -349,32 +358,33 @@ Overwrite it?</translation>
         <translation type="vanished">Current project: %1</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="470"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="518"/>
         <source>Открыть проект</source>
         <translation>Open project</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="479"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="527"/>
         <source>Выберите папку для нового проекта</source>
         <translation>Select a folder for the new project</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="487"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="535"/>
         <source>Новый проект</source>
         <translation>New project</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="488"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="536"/>
         <source>Название проекта:</source>
         <translation>Project name:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/mainwindow.cpp" line="496"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="544"/>
         <source>Не удалось создать проект</source>
         <translation>Couldn&apos;t create a project</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/mainwindow.ui" line="20"/>
+        <location filename="../ui/dialogs/mainwindow.cpp" line="57"/>
         <source>LIDE</source>
         <translation></translation>
     </message>
@@ -382,71 +392,71 @@ Overwrite it?</translation>
 <context>
     <name>ProjectTree</name>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="99"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="150"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="101"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="152"/>
         <source>Новый файл...</source>
         <translation>New file...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="100"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="151"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="102"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="153"/>
         <source>Новая папка...</source>
         <translation>New folder...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="103"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="154"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="105"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="156"/>
         <source>Новый файл</source>
         <translation>New file</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="103"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="154"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="105"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="156"/>
         <source>Название файла:</source>
         <translation>File name:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="112"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="163"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="114"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="165"/>
         <source>Новая папка</source>
         <translation>New folder</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="112"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="163"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="114"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="165"/>
         <source>Название папки:</source>
         <translation>Folder name:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="121"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="123"/>
         <source>Открыть</source>
         <translation>Open</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="127"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="129"/>
         <source>Переименовать</source>
         <translation>Rename</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="128"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="130"/>
         <source>Удалить</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="130"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="169"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="132"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="171"/>
         <source>Показать в проводнике</source>
         <translation>Show in Explorer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="139"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="184"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="141"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="186"/>
         <source>Подтверждение</source>
         <translation>Confirmation</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="140"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="185"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="142"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="187"/>
         <source>Удалить %1?</source>
         <translation>Delete %1?</translation>
     </message>
@@ -454,7 +464,7 @@ Overwrite it?</translation>
 <context>
     <name>ReplProcess</name>
     <message>
-        <location filename="../util/repl_console/repl_process.cpp" line="129"/>
+        <location filename="../util/repl_console/repl_process.cpp" line="103"/>
         <source>[Принудительное завершение]</source>
         <translation>[Forced Termination]</translation>
     </message>
@@ -462,35 +472,35 @@ Overwrite it?</translation>
 <context>
     <name>ReplWidget</name>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="312"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="316"/>
         <source>Копировать</source>
         <translation>Copy</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="317"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="321"/>
         <source>Вставить</source>
         <translation>Paste</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="326"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="330"/>
         <source>Очистить консоль</source>
         <translation>Clear console</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="329"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="333"/>
         <source>Перезапустить REPL</source>
         <translation>Restart REPL</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="332"/>
         <source>Режим отладки</source>
-        <translation>Debug mode</translation>
+        <translation type="vanished">Debug mode</translation>
     </message>
 </context>
 <context>
     <name>SettingsDialog</name>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="26"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="317"/>
         <source>Настройки</source>
         <translation>Settings</translation>
     </message>
@@ -500,78 +510,88 @@ Overwrite it?</translation>
         <translation>General</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="111"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="85"/>
+        <source>Настройки приложения</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="97"/>
         <source>Язык</source>
         <translation>Language</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="134"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="139"/>
         <source>Тема</source>
         <translation>Theme</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="171"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="164"/>
         <source>Авто-сохранение (мин)</source>
         <translation>Auto save (min)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="274"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="232"/>
+        <source>Настройки дерева проекта</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="261"/>
         <source>Фильтр файлов</source>
         <translation>File Filter</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="301"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="268"/>
+        <source>Фильтры исключений через пробел или запятую</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="292"/>
         <source>Редактор</source>
         <translation>Editor</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="313"/>
         <source>Отображение</source>
-        <translation>Display</translation>
+        <translation type="vanished">Display</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="319"/>
         <source>Шрифт</source>
-        <translation>Font</translation>
+        <translation type="vanished">Font</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="343"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="330"/>
         <source>Показывать номера строк</source>
         <translation>Show line numbers</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="372"/>
         <source>Поведение</source>
-        <translation>Behaviour</translation>
+        <translation type="vanished">Behaviour</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="378"/>
         <source>Авто-закрытие скобок</source>
-        <translation>Auto-closing brackets</translation>
+        <translation type="vanished">Auto-closing brackets</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="385"/>
         <source>Авто-отступ</source>
-        <translation>Auto-indentation</translation>
+        <translation type="vanished">Auto-indentation</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="409"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="360"/>
         <source>Консоль</source>
         <translation>Console</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="561"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="513"/>
         <source>SBCL</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="605"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="557"/>
         <source>Путь к SBCL</source>
         <translation>SBCL path</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="267"/>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="628"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="254"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="580"/>
         <source>...</source>
         <translation></translation>
     </message>
@@ -580,7 +600,7 @@ Overwrite it?</translation>
         <translation type="vanished">Auto save every (min)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="156"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="202"/>
         <source>Авто-сохранение при выходе из программы</source>
         <translation>Auto-save when exiting the program</translation>
     </message>
@@ -590,139 +610,153 @@ Overwrite it?</translation>
         <translation>Reset the default settings</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="251"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="238"/>
         <source>Путь по умолчанию</source>
         <translation>Default path</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="336"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="323"/>
         <source>Размер табов</source>
         <translation>Tab size</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="475"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="390"/>
+        <source>Ограничения</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="426"/>
         <source>Задержка вывода, мс</source>
         <translation>Output delay, ms</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="520"/>
         <source>Размер чанка</source>
-        <translation>Size of the chunk</translation>
+        <translation type="vanished">Size of the chunk</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="461"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="412"/>
         <source>Максимальное
 количество строк</source>
         <translation>Maximum
 number of rows</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="637"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="471"/>
+        <source>Размер обработки
+вывода</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="589"/>
         <source>Авто-перезапуск SBCL при его крахе</source>
         <translation>Auto restart SBCL when it crashes</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="652"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="604"/>
         <source>Режим обработки вывода</source>
         <translation>Output processing mode</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="687"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="639"/>
         <source>Аргументы работы SBCL</source>
         <translation>SBCL&apos;s arguments</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="693"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="645"/>
         <source>Режим отладки</source>
         <translation>Debugging mode</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="700"/>
         <source>Неиформативный режим</source>
-        <translation>Non-informative mode</translation>
+        <translation type="vanished">Non-informative mode</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="757"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="709"/>
         <source>Кодировка</source>
         <translation>Encoding</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="778"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="730"/>
         <source>Отображать ошибку, если файл не найден</source>
         <translation>Display an error if the file is not found</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="764"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="716"/>
         <source>Печатать результаты форм</source>
         <translation>Print the results of the forms</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="713"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="652"/>
+        <source>Информативное сообщение</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="665"/>
         <source>Доп аргументы:</source>
         <translation>Additional arguments:</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="745"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="697"/>
         <source>Параметры при загрузки файла в SBCL</source>
         <translation>Options for loading a file in SBCL</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="771"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="723"/>
         <source>Показывать прогресс загрузки</source>
         <translation>Show the download progress</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="239"/>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="226"/>
         <source>Проект</source>
         <translation>Project</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="23"/>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="30"/>
         <source>Светлая</source>
         <translation>Light</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="24"/>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="31"/>
         <source>Тёмная</source>
         <translation>Dark</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="26"/>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="33"/>
         <source>Без парсинга</source>
         <translation>Without parsing</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="27"/>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="34"/>
         <source>Простой (ключевые слова)</source>
         <translation>Simple (keywords)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="28"/>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="35"/>
         <source>Полный (с выражениями)</source>
         <translation>Full (with expressions)</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="42"/>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="49"/>
         <source>Сброс</source>
         <translation>Reset</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="43"/>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="50"/>
         <source>Сбросить настройки к значениям по умолчанию?</source>
         <translation>Reset the settings to their default values?</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="264"/>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="275"/>
         <source>Выберите папку проектов</source>
         <translation>Select the projects folder</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="277"/>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="288"/>
         <source>Выберите исполняемый файл SBCL</source>
         <translation>Select the SBCL executable file</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="279"/>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="290"/>
         <source>Executables (*)</source>
         <translation></translation>
     </message>

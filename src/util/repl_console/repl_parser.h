@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QTimer>
 
+#include "settings.h"
 #include "repl_message.h"
 
 class ReplParser : public QObject
@@ -15,8 +16,7 @@ public:
     void reset();                          // сбросить состояние
     void setPrompt(const QString& prompt); // установить Prompt
 
-    void setDebugMode(bool enabled);
-    bool debugMode() const;
+    void setParserMode(int mode);
 
 signals:
     void messageReady(const ReplMessage& msg);
@@ -25,11 +25,13 @@ private slots:
     void processBuffer();
 
 private:
+    Settings* m_settings;
+    size_t m_maxLinesPerTick;
+    Settings::ParseMode parseMode;
+
     QTimer* m_timer;
     QString m_buffer;
     QString m_currentPrompt;
-    const int maxLinesPerTick = 100;
-    bool m_debugMode = false;
 
     void processLine(const QString& line);
     bool isPrompt(const QString& line) const;

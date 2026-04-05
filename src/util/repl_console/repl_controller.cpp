@@ -25,7 +25,7 @@ void ReplController::setupConnections()
 
 void ReplController::start()
 {
-    if (!process.start("", m_debugMode)) {
+    if (!process.start()) {
         ReplMessage msg;
         msg.type = ReplMessageType::Error;
         msg.text = "Failed to start SBCL";
@@ -81,22 +81,6 @@ void ReplController::interrupt()
     process.interrupt();
 }
 
-bool ReplController::debugMode() {
-    return m_debugMode;
-}
-
-void ReplController::setDebugMode(bool enabled)
-{
-    if (m_debugMode == enabled) return;
-    m_debugMode = enabled;
-
-    parser.setDebugMode(enabled);
-
-    if (process.isRunning()) {
-        restart();
-    }
-}
-
 void ReplController::setFormattedOutput(bool enabled)
 {
     m_formattedOutput = enabled;
@@ -105,7 +89,6 @@ void ReplController::setFormattedOutput(bool enabled)
 void ReplController::onProcessStarted()
 {
     parser.reset();
-    parser.setDebugMode(m_debugMode);
     emit started();
 }
 

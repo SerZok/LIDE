@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <QTabWidget>
 #include <QMap>
@@ -28,6 +28,8 @@ public:
 
     // Получить список всех открытых файлов
     QStringList openedFiles();
+
+    int modifFileCounts();
 
     // Получить путь к файлу текущего редактора
     QString currentFilePath() const;

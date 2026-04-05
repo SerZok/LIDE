@@ -68,8 +68,10 @@ int Settings::tabSize() const
 
 void Settings::setTabSize(int size)
 {
-    setValue(Key::EDITOR_TAB_SIZE, size);
-    emit settingsChanged();
+    if (size != tabSize()) {
+        setValue(Key::EDITOR_TAB_SIZE, size);
+        emit settingsChanged();
+    }
 }
 
 bool Settings::showLineNumbers() const
@@ -79,19 +81,10 @@ bool Settings::showLineNumbers() const
 
 void Settings::setShowLineNumbers(bool show)
 {
-    setValue(Key::EDITOR_SHOW_LINE_NUMBERS, show);
-    emit settingsChanged();
-}
-
-bool Settings::wordWrap() const
-{
-    return value<bool>(Key::EDITOR_WORD_WRAP, false);
-}
-
-void Settings::setWordWrap(bool wrap)
-{
-    setValue(Key::EDITOR_WORD_WRAP, wrap);
-    emit settingsChanged();
+    if (show != showLineNumbers()) {
+        setValue(Key::EDITOR_SHOW_LINE_NUMBERS, show);
+        emit settingsChanged();
+    }
 }
 
 QStringList Settings::openedFiles() const
@@ -102,7 +95,6 @@ QStringList Settings::openedFiles() const
 void Settings::setOpenedFiles(const QStringList& openedFiles)
 {
     m_settings.setValue(Key::EDITOR_OPENED_FILES, openedFiles);
-    emit settingsChanged();
 }
 
 QString Settings::currentLang() const
@@ -112,7 +104,6 @@ QString Settings::currentLang() const
 
 void Settings::setCurrentLang(const QString& locale)
 {
-    // Сохраняем
     setValue(Key::APP_LANG, locale);
 
     // Удаляем старые переводчики
@@ -198,10 +189,32 @@ void Settings::setCurrentTheme(const QString& theme)
     emit settingsChanged();
 }
 
+int Settings::saveTime() const {
+    return value<int>(Key::SAVE_TIME, 5);
+}
+
+void Settings::setSaveTime(int saveTime) {
+    if (saveTime!= Settings::saveTime()) {
+        setValue(Key::SAVE_TIME, saveTime);
+        emit settingsChanged();
+    }
+}
+
+bool Settings::saveExit() const {
+    return value<bool>(Key::SAVE_EXIT, true);
+}
+
+void Settings::setSaveExit(bool saveExit) {
+    if (saveExit != Settings::saveExit()) {
+        setValue(Key::SAVE_EXIT, saveExit);
+        emit settingsChanged();
+    }
+}
+
 // Project settings
 QString Settings::lastProjectPath() const
 {
-    return value<QString>(Key::PROJECT_LAST_PATH, QDir::homePath());
+    return value<QString>(Key::PROJECT_LAST_PATH, "");
 }
 
 void Settings::setLastProjectPath(const QString& path)
@@ -259,8 +272,47 @@ QString Settings::sbclPath() const
 
 void Settings::setSbclPath(const QString& path)
 {
-    setValue(Key::SBCL_PATH, path);
+    QString candidate = path.trimmed();
+
+    if (candidate.isEmpty()) {
+        qWarning() << "setSbclPath: empty path rejected";
+        return;
+    }
+
+    QString appExe = QCoreApplication::applicationFilePath();
+    QFileInfo candidateInfo(candidate);
+    QFileInfo appInfo(appExe);
+
+    // Сравниваем канонические пути (разрешаем сисмволические ссылки, нормализуем / и \)
+    if (candidateInfo.exists() && appInfo.exists()) {
+        if (candidateInfo.canonicalFilePath() == appInfo.canonicalFilePath()) {
+            qWarning() << "setSbclPath: recursive path rejected:" << candidate;
+            return;
+        }
+    }
+
+    // Если путь относительный или "sbcl" (поиск в PATH) — пропускаем эту проверку
+    if (candidateInfo.isAbsolute() && candidateInfo.exists()) {
+#if defined(Q_OS_WIN)
+        bool isExecutable = candidateInfo.suffix().toLower() == "exe";
+#else
+        bool isExecutable = candidateInfo.isExecutable();
+#endif
+        if (!isExecutable) {
+            qWarning() << "setSbclPath: not executable:" << candidate;
+            return;
+        }
+    }
+
+    if (candidate == sbclPath()) {
+        return;
+    }
+
+    setValue(Key::SBCL_PATH, candidate);
+    emit sbclPathChanged();
     emit settingsChanged();
+
+    qDebug() << "SBCL path updated:" << candidate;
 }
 
 QStringList Settings::sbclArgs() const
@@ -271,8 +323,45 @@ QStringList Settings::sbclArgs() const
 
 void Settings::setSbclArgs(const QStringList& args)
 {
-    setValue(Key::SBCL_ARGS, args);
-    emit settingsChanged();
+    if (args != sbclArgs()) {
+        setValue(Key::SBCL_ARGS, args);
+        emit settingsChanged();
+        emit sbclArgsChanged();
+    }
+}
+
+QString Settings::sbclLoadArgsString() const
+{
+    QStringList args;
+
+    // :verbose
+    if (sbclLoadVerbose()) {
+        args << ":verbose t";
+    }
+    else {
+        args << ":verbose nil";
+    }
+
+    // :print
+    if (sbclLoadPrint()) {
+        args << ":print t";
+    }
+    else {
+        args << ":print nil";
+    }
+
+    // :if-does-not-exist
+    if (sbclLoadIfNotExists()) {
+        args << ":if-does-not-exist nil";
+    }
+
+    // :external-format
+    QString ef = sbclLoadExternalFormat();
+    if (!ef.isEmpty() && ef != ":default") {
+        args << QString(":external-format %1").arg(ef);
+    }
+
+    return args.isEmpty() ? QString() : " " + args.join(" ");
 }
 
 bool Settings::sbclLoadVerbose() const {
@@ -280,8 +369,11 @@ bool Settings::sbclLoadVerbose() const {
 }
 
 void Settings::setSbclLoadVerbose(bool v) {
-    setValue(Key::SBCL_LOAD_VERBOSE, v);
-    emit settingsChanged();
+    if (v != sbclLoadVerbose()) {
+        setValue(Key::SBCL_LOAD_VERBOSE, v);
+        emit settingsChanged();
+        emit sbclLoadArgsChanged();
+    }
 }
 
 // SBCL load
@@ -291,8 +383,11 @@ bool Settings::sbclLoadPrint() const {
 }
 
 void Settings::setSbclLoadPrint(bool v) {
-    setValue(Key::SBCL_LOAD_PRINT, v);
-    emit settingsChanged();
+    if (v != sbclLoadPrint()) {
+        setValue(Key::SBCL_LOAD_PRINT, v);
+        emit settingsChanged();
+        emit sbclLoadArgsChanged();
+    }
 }
 
 bool Settings::sbclLoadIfNotExists() const {
@@ -300,8 +395,11 @@ bool Settings::sbclLoadIfNotExists() const {
 }
 
 void Settings::setSbclLoadIfNotExists(bool v) {
-    setValue(Key::SBCL_LOAD_IF_NOT_EXISTS, v);
-    emit settingsChanged();
+    if (v != sbclLoadIfNotExists()) {
+        setValue(Key::SBCL_LOAD_IF_NOT_EXISTS, v);
+        emit settingsChanged();
+        emit sbclLoadArgsChanged();
+    }
 }
 
 QString Settings::sbclLoadExternalFormat() const {
@@ -309,26 +407,35 @@ QString Settings::sbclLoadExternalFormat() const {
 }
 
 void Settings::setSbclLoadExternalFormat(const QString& format) {
-    setValue(Key::SBCL_LOAD_VERBOSE, format);
-    emit settingsChanged();
+    if (format != sbclLoadExternalFormat()) {
+        setValue(Key::SBCL_LOAD_VERBOSE, format);
+        emit settingsChanged();
+        emit sbclLoadArgsChanged();
+    }
 }
 
 // REPL settings
 int Settings::replMaxLines() const {
-    return value<int>(Key::REPL_MAX_LINES, 100);
+    return value<int>(Key::REPL_MAX_LINES, 1000000);
 }
 
 void Settings::setReplMaxLines(int n) {
-    setValue(Key::REPL_MAX_LINES, n);
-    emit settingsChanged();
+    if (n != replMaxLines()) {
+        setValue(Key::REPL_MAX_LINES, n);
+        emit settingsChanged();
+        emit replMaxLineChanged();
+    }
 }
 
-int Settings::replParseMode() const {
-    return value<int>(Key::REPL_PARSE_MODE, 2);
+Settings::ParseMode Settings::replParseMode() const {
+    return static_cast<ParseMode>(value<int>(Key::REPL_PARSE_MODE, static_cast<int>(ParseMode::Simple)));
 }
 
-void Settings::setReplParseMode(int mode) {
-    setValue(Key::REPL_PARSE_MODE, mode);
+void Settings::setReplParseMode(ParseMode mode) {
+    if (replParseMode() == mode) return;
+
+    setValue(Key::REPL_PARSE_MODE, static_cast<int>(mode));
+    emit replParseModeChanged();
     emit settingsChanged();
 }
 
@@ -337,8 +444,11 @@ int Settings::replChunkSize() const {
 }
 
 void Settings::setReplChunkSize(int n) {
-    setValue(Key::REPL_CHUNK_SIZE, n);
-    emit settingsChanged();
+    if (n != replChunkSize()) {
+        setValue(Key::REPL_CHUNK_SIZE, n);
+        emit settingsChanged();
+        emit replChunkSizeChanged();
+    }
 }
 
 bool Settings::replAutoRestart() const {
@@ -346,8 +456,11 @@ bool Settings::replAutoRestart() const {
 }
 
 void Settings::setReplAutoRestart(bool v) {
-    setValue(Key::REPL_AUTO_RESTART, v);
-    emit settingsChanged();
+    if (v != replAutoRestart()) {
+        setValue(Key::REPL_AUTO_RESTART, v);
+        emit settingsChanged();
+        emit replAutoRestartChanged();
+    }
 }
 
 int Settings::replOutputDelay() const {
@@ -355,27 +468,73 @@ int Settings::replOutputDelay() const {
 }
 
 void Settings::setReplOutputDelay(int ms) {
-    setValue(Key::REPL_OUTPUT_DELAY, ms);
-    emit settingsChanged();
+    if (ms != replOutputDelay()) {
+        setValue(Key::REPL_OUTPUT_DELAY, ms);
+        emit settingsChanged();
+        emit replOutputTimeChanged();
+    }
 }
 
 // Project
-QString Settings::projectDefaultPath() const {
-    return value<QString>(Key::PROJECT_DEFAULT_PATH, QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+QString Settings::projectDefaultPath() const
+{
+    if (m_settings.contains(Key::PROJECT_DEFAULT_PATH)) {
+        QString saved = m_settings.value(Key::PROJECT_DEFAULT_PATH).toString();
+        if (!saved.isEmpty()) return saved;
+    }
+
+    // Формируем путь: Documents/LIDE
+    QString docsPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    QString defaultPath = QDir(docsPath).filePath("LIDE");
+
+    // Создаём папку, если её нет (лениво, только при первом обращении)
+    if (!QDir(defaultPath).exists()) {
+        if (QDir().mkpath(defaultPath)) {
+            qDebug() << "Created default project directory:" << defaultPath;
+        }
+        else {
+            qWarning() << "Failed to create default project directory:" << defaultPath;
+            return docsPath;
+        }
+    }
+
+    return defaultPath;
 }
 
 void Settings::setProjectDefaultPath(const QString& path) {
+    if (path == projectDefaultPath()) return;
+    
+    if (!path.isEmpty() && !QDir(path).exists()) {
+        if (!QDir().mkpath(path)) {
+            qWarning() << "Cannot create directory:" << path;
+            return;
+        }
+    }
+    
     setValue(Key::PROJECT_DEFAULT_PATH, path);
     emit settingsChanged();
 }
 
 QString Settings::projectExcludeFilters() const {
-    return value<QString>(Key::PROJECT_EXCLUDE_FILTERS, "*.lisp *.lsp");
+    return value<QString>(Key::PROJECT_EXCLUDE_FILTERS, "*.lisp; *.lsp; *.fasl");
+}
+
+QStringList Settings::projectExcludeFiltersList() const
+{
+    QString raw = projectExcludeFilters();  // "*.lisp, *.lsp; *.fasl"
+    raw.replace(',', ' ').replace(';', ' ');
+    QStringList list = raw.split(' ', Qt::SkipEmptyParts);
+
+    list.removeDuplicates();
+    return list;
 }
 
 void Settings::setProjectExcludeFilters(const QString& filters) {
-    setValue(Key::PROJECT_EXCLUDE_FILTERS, filters);
-    emit settingsChanged();
+    if (filters != projectExcludeFilters()) {
+        setValue(Key::PROJECT_EXCLUDE_FILTERS, filters);
+        emit projectFilterChanged();
+        emit settingsChanged();
+    }
 }
 
 // Window settings
@@ -407,8 +566,10 @@ QColor Settings::keywordColor() const
 
 void Settings::setKeywordColor(const QColor& color)
 {
-    setValue(Key::SYNTAX_KEYWORD, color);
-    emit settingsChanged();
+    if (color != keywordColor()) {
+        setValue(Key::SYNTAX_KEYWORD, color);
+        emit settingsChanged();
+    }
 }
 
 // ... аналогично для других цветов ...

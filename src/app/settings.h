@@ -17,11 +17,12 @@ public:
         static constexpr const char* WINDOW_GEOMETRY = "app/geometry";
         static constexpr const char* APP_LANG = "app/language";
         static constexpr const char* APP_THEME = "app/theme";
+        static constexpr const char* SAVE_TIME = "app/autosaveTime";
+        static constexpr const char* SAVE_EXIT = "app/exitSave";
 
         // Editor
         static constexpr const char* EDITOR_FONT = "editor/font";
         static constexpr const char* EDITOR_TAB_SIZE = "editor/tabSize";
-        static constexpr const char* EDITOR_WORD_WRAP = "editor/wordWrap";
         static constexpr const char* EDITOR_OPENED_FILES = "editor/openedFiles";
         static constexpr const char* EDITOR_SHOW_LINE_NUMBERS = "editor/showLineNumbers";
 
@@ -49,9 +50,6 @@ public:
         static constexpr const char* REPL_AUTO_RESTART = "repl/autoRestart";
         static constexpr const char* REPL_OUTPUT_DELAY = "repl/outputDelayMs";
 
-        // CONSOLE widget
-        static constexpr const char* CONSOLE_MAX_LINES = "console/maxLines";
-
         // Syntax highlighting colors
         static constexpr const char* SYNTAX_QUOTE = "syntax/quote";
         static constexpr const char* SYNTAX_STRING = "syntax/string";
@@ -62,6 +60,13 @@ public:
         static constexpr const char* SYNTAX_PARENTHESIS = "syntax/parenthesis";
     };
 
+    enum class ParseMode {
+        None = 0,
+        Simple = 1,
+        Full = 2
+    };
+    Q_ENUM(ParseMode);
+
     static Settings* instance();
 
     template<typename T>
@@ -69,6 +74,8 @@ public:
 
     template<typename T>
     void setValue(const QString& key, const T& value);
+
+    static void retranslateAllWindows();
 
     // App
     QByteArray mainWindowGeometry() const;
@@ -83,7 +90,11 @@ public:
     QString currentTheme() const;
     void setCurrentTheme(const QString& stylePath);
 
-    static void retranslateAllWindows();
+    int saveTime() const;
+    void setSaveTime(int saveTime);
+
+    bool saveExit() const;
+    void setSaveExit(bool saveExit);
 
     // Editor settings
     QFont editorFont() const;
@@ -94,9 +105,6 @@ public:
 
     bool showLineNumbers() const;
     void setShowLineNumbers(bool show);
-
-    bool wordWrap() const;
-    void setWordWrap(bool wrap);
 
     QStringList openedFiles() const;
     void setOpenedFiles(const QStringList& files);
@@ -109,6 +117,8 @@ public:
     void setSbclArgs(const QStringList& args);
 
     // SBCL LOAD settings
+    QString sbclLoadArgsString() const;
+
     bool sbclLoadVerbose() const;
     void setSbclLoadVerbose(bool v);
 
@@ -125,8 +135,8 @@ public:
     int replMaxLines() const;
     void setReplMaxLines(int n);
 
-    int replParseMode() const;  // 0=None, 1=Simple, 2=Full
-    void setReplParseMode(int mode);
+    ParseMode replParseMode() const;
+    void setReplParseMode(ParseMode mode);
 
     int replChunkSize() const;
     void setReplChunkSize(int n);
@@ -142,7 +152,9 @@ public:
     void setProjectDefaultPath(const QString& path);
 
     QString projectExcludeFilters() const;
+    QStringList projectExcludeFiltersList() const;
     void setProjectExcludeFilters(const QString& filters);
+
 
     QString lastProjectPath() const;
     void setLastProjectPath(const QString& path);
@@ -179,9 +191,21 @@ public:
     void remove(const QString& key);
 
 signals:
+    void settingsChanged();
+
     void editorFontChanged(const QFont& font);
     void themeChanged(const QString& theme);
-    void settingsChanged();
+    void projectFilterChanged();
+
+    void replMaxLineChanged();
+    void replChunkSizeChanged();
+    void replParseModeChanged();
+    void replAutoRestartChanged();
+    void replOutputTimeChanged();
+
+    void sbclPathChanged();
+    void sbclArgsChanged();
+    void sbclLoadArgsChanged();
 
 private:
     explicit Settings(QObject* parent = nullptr);

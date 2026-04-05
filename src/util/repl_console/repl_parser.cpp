@@ -6,10 +6,17 @@
 
 ReplParser::ReplParser(QObject* parent)
     : QObject(parent)
-    , m_debugMode(false)
+    , m_settings(Settings::instance())
 {
     m_timer = new QTimer(this);
-    m_timer->setInterval(25); // обработка каждые 25 мс
+    m_timer->setInterval(m_settings->replOutputDelay()); // обработка каждые X мс
+    m_maxLinesPerTick = m_settings->replChunkSize();
+    parseMode = m_settings->replParseMode();
+
+    connect(m_settings, &Settings::replOutputTimeChanged, this, [this]() {m_timer->setInterval(m_settings->replOutputDelay()); });
+    connect(m_settings, &Settings::replChunkSizeChanged, this, [this]() {m_maxLinesPerTick = m_settings->replChunkSize(); });
+    connect(m_settings, &Settings::replParseModeChanged, this, [this]() {parseMode = m_settings->replParseMode(); });
+
     connect(m_timer, &QTimer::timeout, this, &ReplParser::processBuffer);
     m_timer->start();
 }
@@ -19,7 +26,7 @@ void ReplParser::processBuffer() {
 
     int processed = 0;
     int pos;
-    while ((pos = m_buffer.indexOf('\n')) != -1 && processed < maxLinesPerTick) {
+    while ((pos = m_buffer.indexOf('\n')) != -1 && processed < m_maxLinesPerTick) {
         QString line = m_buffer.left(pos);
         m_buffer.remove(0, pos + 1);
         processLine(line);
@@ -47,18 +54,6 @@ void ReplParser::reset()
 void ReplParser::setPrompt(const QString& prompt)
 {
     m_currentPrompt = prompt;
-}
-
-void ReplParser::setDebugMode(bool enabled)
-{
-    if (m_debugMode == enabled) return;
-    m_debugMode = enabled;
-    qDebug() << "Parser debug mode:" << (enabled ? "ON" : "OFF");
-}
-
-bool ReplParser::debugMode() const
-{
-    return m_debugMode;
 }
 
 bool ReplParser::isPrompt(const QString& line) const
@@ -115,56 +110,57 @@ bool ReplParser::isStarValue(const QString& line) const
 
 bool ReplParser::shouldFilterCommentLine(const QString& line) const
 {
-    if (m_debugMode) return false;
+    if (parseMode == Settings::ParseMode::None) {
+        return false;
+    }
 
     QString trimmed = line.trimmed();
     if (!trimmed.startsWith(";")) return false;
 
     QString content = trimmed.mid(1).trimmed();
 
-    // Заголовок без имени: "Undefined variable:" (пусто после :)
-    if (content.startsWith("undefined variable:", Qt::CaseInsensitive)) {
-        QString after = content.mid(19).trimmed();
-        if (after.isEmpty() || after == ":") {
-            return true;
-        }
-    }
-
-    // Технические маркеры
-    static const QStringList filterKeywords = {
-        "compilation unit finished",
-        "in:",  // "; in: SETQ X"
-    };
-    for (const QString& kw : filterKeywords) {
-        if (content.startsWith(kw, Qt::CaseInsensitive)) {
-            return true;
-        }
-    }
-
-    // Сильно отступленные короткие имена: ";     X"
-    if (trimmed.count(';') == 1 &&  // только один ";"
-        trimmed.indexOf(';') == 0 &&
-        trimmed.mid(1).count(' ') >= 3 &&  // 3+ пробела после ";"
-        content.trimmed().length() <= 5 &&  // короткое имя
-        !content.contains(':') &&  // нет двоеточия
-        !content.contains(' ')) {  // нет пробелов внутри
-        return true;
-    }
-
-    // === ПОКАЗЫВАЕМ: важные строки ===
-    static const QStringList showKeywords = {
+    static const QStringList important = {
         "caught warning", "caught error",
         "undefined variable", "unbound variable",
         "undefined function", "compilation error"
     };
-    for (const QString& keyword : showKeywords) {
-        if (content.contains(keyword, Qt::CaseInsensitive)) {
+    for (const QString& kw : important) {
+        if (content.contains(kw, Qt::CaseInsensitive)) {
             return false;
         }
     }
 
-    // Остальное с ";" — фильтруем
-    return true;
+    // В режиме Simple — фильтруем только "пустые" комментарии
+    if (parseMode == Settings::ParseMode::Simple) {
+        static const QStringList technical = {
+            "compilation unit finished",
+            "in:",  // "; in: SETQ X"
+        };
+        for (const QString& kw : technical) {
+            if (content.startsWith(kw, Qt::CaseInsensitive)) {
+                return true;
+            }
+        }
+
+        // Фильтруем короткие имена с большим отступом: ";     X"
+        if (trimmed.count(';') == 1 &&
+            trimmed.indexOf(';') == 0 &&
+            trimmed.mid(1).count(' ') >= 3 &&
+            content.trimmed().length() <= 5 &&
+            !content.contains(':') &&
+            !content.contains(' ')) {
+            return true;
+        }
+
+        // Остальные комментарии показываем
+        return false;
+    }
+
+    if (parseMode == Settings::ParseMode::Full) {
+        return !content.contains("error", Qt::CaseInsensitive);
+    }
+
+    return false;
 }
 
 ReplMessage ReplParser::parseError(const QString& line) const
@@ -263,7 +259,7 @@ void ReplParser::processLine(const QString& line)
         msg.type = isWarning ? ReplMessageType::Warning : ReplMessageType::Error;
 
         QString displayText = line.trimmed();
-        if (!m_debugMode && displayText.startsWith(";")) {
+        if (parseMode != Settings::ParseMode::None && displayText.startsWith(";")) {
             displayText.remove(0, 1);
             displayText = displayText.trimmed();
             if (displayText.startsWith("  ")) displayText = displayText.mid(2);

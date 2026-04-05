@@ -8,9 +8,12 @@
 ReplWidget::ReplWidget(QWidget* parent)
     : QTextEdit(parent)
     , m_controller(new ReplController(this))
+    , m_settings(Settings::instance())
 {
     setLineWrapMode(QTextEdit::NoWrap);
     setObjectName("ReplWidget");
+
+    MAX_LINES = m_settings->replMaxLines();
 
     setupConnections();
     m_controller->start();
@@ -68,8 +71,9 @@ void ReplWidget::sendFile(const QString& path)
         appendOutput("ОШИБКА: путь к файлу не указан\n", ReplMessageType::Error);
         return;
     }
+    QString loadArgs = Settings::instance()->sbclLoadArgsString();
+    QString command = QString("(load \"%1\"%2)").arg(path, loadArgs);
 
-    QString command = QString("(load \"%1\" :verbose t :print t)").arg(path);
     emit commandEntered(command);
 }
 
@@ -328,13 +332,6 @@ void ReplWidget::contextMenuEvent(QContextMenuEvent* event)
 
     QAction* restartAction = menu->addAction(tr("Перезапустить REPL"));
     connect(restartAction, &QAction::triggered, this, &ReplWidget::restart);
-
-    QAction* enableDebug = menu->addAction(tr("Режим отладки"));
-    enableDebug->setCheckable(true);
-    enableDebug->setChecked(m_controller->debugMode());
-    connect(enableDebug, &QAction::triggered, [this](bool checked) {
-        m_controller->setDebugMode(checked);
-        });
 
     menu->exec(event->globalPos());
     delete menu;
