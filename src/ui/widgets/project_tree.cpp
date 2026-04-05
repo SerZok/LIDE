@@ -62,7 +62,10 @@ bool ProjectTree::openProject(const QString& path)
 
     QModelIndex rootIndex = m_model->index(m_rootPath);
     setRootIndex(rootIndex);
-    setCurrentIndex(rootIndex);
+    selectionModel()->setCurrentIndex(
+        rootIndex,
+        QItemSelectionModel::ClearAndSelect
+    );
     expandToDepth(1);
     scrollTo(rootIndex, QAbstractItemView::PositionAtTop);
 
@@ -195,7 +198,8 @@ void ProjectTree::keyPressEvent(QKeyEvent* event)
 
 QModelIndex ProjectTree::findFileIndex(const QString& path)
 {
-    return m_model->index(path);
+    QString normalized = QFileInfo(path).absoluteFilePath();
+    return m_model->index(normalized);
 }
 
 void ProjectTree::expandToPath(const QString& path)
@@ -219,7 +223,10 @@ void ProjectTree::onFileLoaded(const QString& path)
     QModelIndex index = findFileIndex(path);
     if (index.isValid()) {
         expandToPath(path);
-        setCurrentIndex(index);
+        selectionModel()->setCurrentIndex(
+            index,
+            QItemSelectionModel::ClearAndSelect
+        );
         scrollTo(index, QAbstractItemView::PositionAtCenter);
         update(index);
     }
