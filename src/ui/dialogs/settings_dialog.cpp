@@ -30,9 +30,9 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     ui.theme_comboBox->addItem(tr("Светлая"), "light");
     ui.theme_comboBox->addItem(tr("Тёмная"), "dark");
 
-    ui.parser_mode_comboBox->addItem(tr("Без парсинга"), 0);
-    ui.parser_mode_comboBox->addItem(tr("Простой (ключевые слова)"), 1);
-    ui.parser_mode_comboBox->addItem(tr("Полный (с выражениями)"), 2);
+    ui.parser_mode_comboBox->addItem(tr("Минимальный"), 0);
+    ui.parser_mode_comboBox->addItem(tr("Простой"), 1);
+    ui.parser_mode_comboBox->addItem(tr("Полный"), 2);
 
     ui.sbcl_file_format_comboBox->addItem("default", ":default");
     ui.sbcl_file_format_comboBox->addItem("utf-8", ":utf-8");
@@ -122,7 +122,7 @@ void SettingsDialog::loadToUi()
     ui.sbcl_path_lineEdit->setText(m_settings->sbclPath());
     ui.sbcl_auto_restart_afterCrash_checkBox->setChecked(m_settings->replAutoRestart());
 
-    int parserIdx = ui.parser_mode_comboBox->findData(static_cast<int>(m_settings->replParseMode()));
+    int parserIdx = ui.parser_mode_comboBox->findData(static_cast<int>(m_settings->replParseOutputMode()));
     if (parserIdx >= 0)
         ui.parser_mode_comboBox->setCurrentIndex(parserIdx);
 
@@ -194,7 +194,7 @@ void SettingsDialog::saveFromUi()
     // ── SBCL ─────────────────────────────────────────
     m_settings->setSbclPath(ui.sbcl_path_lineEdit->text());
     m_settings->setReplAutoRestart(ui.sbcl_auto_restart_afterCrash_checkBox->isChecked());
-    m_settings->setReplParseMode(static_cast<Settings::ParseMode>(ui.parser_mode_comboBox->currentData().toInt()));
+    m_settings->setReplOutputParseMode(static_cast<Settings::ParseOutputMode>(ui.parser_mode_comboBox->currentData().toInt()));
 
     // Аргументы из чекбоксов + кастомных
     QStringList args;

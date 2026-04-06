@@ -60,12 +60,12 @@ public:
         static constexpr const char* SYNTAX_PARENTHESIS = "syntax/parenthesis";
     };
 
-    enum class ParseMode {
+    enum class ParseOutputMode {
         Minimal = 0,
         Simple = 1,
         Full = 2
     };
-    Q_ENUM(ParseMode);
+    Q_ENUM(ParseOutputMode);
 
     static Settings* instance();
 
@@ -135,8 +135,8 @@ public:
     int replMaxLines() const;
     void setReplMaxLines(int n);
 
-    ParseMode replParseMode() const;
-    void setReplParseMode(ParseMode mode);
+    ParseOutputMode replParseOutputMode() const;
+    void setReplOutputParseMode(ParseOutputMode mode);
 
     int replChunkSize() const;
     void setReplChunkSize(int n);

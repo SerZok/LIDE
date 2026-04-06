@@ -427,12 +427,12 @@ void Settings::setReplMaxLines(int n) {
     }
 }
 
-Settings::ParseMode Settings::replParseMode() const {
-    return static_cast<ParseMode>(value<int>(Key::REPL_PARSE_MODE, static_cast<int>(ParseMode::Simple)));
+Settings::ParseOutputMode Settings::replParseOutputMode() const {
+    return static_cast<ParseOutputMode>(value<int>(Key::REPL_PARSE_MODE, static_cast<int>(ParseOutputMode::Simple)));
 }
 
-void Settings::setReplParseMode(ParseMode mode) {
-    if (replParseMode() == mode) return;
+void Settings::setReplOutputParseMode(ParseOutputMode mode) {
+    if (replParseOutputMode() == mode) return;
 
     setValue(Key::REPL_PARSE_MODE, static_cast<int>(mode));
     emit replParseModeChanged();

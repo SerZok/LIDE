@@ -379,7 +379,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>520</width>
+            <width>516</width>
             <height>393</height>
            </rect>
           </property>
@@ -532,8 +532,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>503</width>
-            <height>468</height>
+            <width>502</width>
+            <height>503</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout_13">
@@ -601,7 +601,7 @@
                    </sizepolicy>
                   </property>
                   <property name="text">
-                   <string>Режим обработки вывода</string>
+                   <string>Отображение результата</string>
                   </property>
                  </widget>
                 </item>
@@ -649,7 +649,7 @@
               <item row="1" column="0" colspan="2">
                <widget class="QCheckBox" name="sbcl_no_inform_checkBox">
                 <property name="text">
-                 <string>Информативное сообщение</string>
+                 <string>Стартовое информативное сообщение</string>
                 </property>
                </widget>
               </item>

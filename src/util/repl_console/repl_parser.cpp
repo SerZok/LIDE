@@ -11,11 +11,11 @@ ReplParser::ReplParser(QObject* parent)
     m_timer = new QTimer(this);
     m_timer->setInterval(m_settings->replOutputDelay()); // обработка каждые X мс
     m_maxLinesPerTick = m_settings->replChunkSize();
-    parseMode = m_settings->replParseMode();
+    parseMode = m_settings->replParseOutputMode();
 
     connect(m_settings, &Settings::replOutputTimeChanged, this, [this]() {m_timer->setInterval(m_settings->replOutputDelay()); });
     connect(m_settings, &Settings::replChunkSizeChanged, this, [this]() {m_maxLinesPerTick = m_settings->replChunkSize(); });
-    connect(m_settings, &Settings::replParseModeChanged, this, [this]() {parseMode = m_settings->replParseMode(); });
+    connect(m_settings, &Settings::replParseModeChanged, this, [this]() {parseMode = m_settings->replParseOutputMode(); });
 
     connect(m_timer, &QTimer::timeout, this, &ReplParser::processBuffer);
     m_timer->start();
@@ -58,24 +58,26 @@ void ReplParser::setPrompt(const QString& prompt)
 
 bool ReplParser::isPrompt(const QString& line) const
 {
-    QString t = line.trimmed();
+    const QString t = line.trimmed();
 
-    if (t.startsWith("CL-USER>"))
+    // Стандартные промпты
+    static const QStringList prompts = {
+        "CL-USER>", "CL-USER> ",
+        "*", "* ",
+        "DEBUG>", "DEBUG> "
+    };
+    for (const QString& p : prompts) {
+        if (t == p || t.startsWith(p)) return true;
+    }
+
+    // Промпты с номером уровня: [1], [2]> и т.д.
+    static QRegularExpression levelPrompt(R"(^\[\d+\]>\s*$)");
+    if (levelPrompt.match(t).hasMatch()) return true;
+
+    // Package-qualified prompts: MY-PACKAGE>
+    static QRegularExpression pkgPrompt(R"(^[A-Z0-9\-]+>\s*$)");
+    if (pkgPrompt.match(t).hasMatch() && !t.contains("error", Qt::CaseInsensitive)) {
         return true;
-
-    if (t == "*")
-        return true;
-
-    static QRegularExpression dbgPrompt("^\\d+\\]$");
-    if (dbgPrompt.match(t).hasMatch())
-        return true;
-
-    if (t.endsWith("> ") && t.contains(">")) {
-        // Проверяем, что это не часть ошибки
-        if (!t.contains("error", Qt::CaseInsensitive) &&
-            !t.contains("warning", Qt::CaseInsensitive)) {
-            return true;
-        }
     }
 
     return false;
@@ -111,7 +113,7 @@ bool ReplParser::isStarValue(const QString& line) const
 
 bool ReplParser::shouldFilterCommentLine(const QString& line) const
 {
-    if (parseMode == Settings::ParseMode::Minimal) {
+    if (parseMode == Settings::ParseOutputMode::Minimal) {
         return false;
     }
 
@@ -132,7 +134,7 @@ bool ReplParser::shouldFilterCommentLine(const QString& line) const
     }
 
     // В режиме Simple — фильтруем только "пустые" комментарии
-    if (parseMode == Settings::ParseMode::Simple) {
+    if (parseMode == Settings::ParseOutputMode::Simple) {
         static const QStringList technical = {
             "compilation unit finished",
             "in:",  // "; in: SETQ X"
@@ -157,7 +159,7 @@ bool ReplParser::shouldFilterCommentLine(const QString& line) const
         return false;
     }
 
-    if (parseMode == Settings::ParseMode::Full) {
+    if (parseMode == Settings::ParseOutputMode::Full) {
         return !content.contains("error", Qt::CaseInsensitive);
     }
 
@@ -212,86 +214,101 @@ ReplMessage ReplParser::parseResult(const QString& line) const
     return msg;
 }
 
-void ReplParser::processLine(const QString& line)
+bool ReplParser::isTechnicalOrFiltered(const QString& line) const
+{
+    const QString trimmed = line.trimmed();
+
+    // Промпты никогда не фильтруем
+    if (isPrompt(line)) return false;
+
+    // Полноэкранный режим — показываем почти всё
+    if (parseMode == Settings::ParseOutputMode::Full) {
+        return isTechnicalLine(trimmed); // только совсем мусор
+    }
+
+    // Минимальный режим — жёсткая фильтрация
+    if (parseMode == Settings::ParseOutputMode::Minimal) {
+        if (isTechnicalLine(trimmed)) return true;
+        if (trimmed.startsWith(";")) {
+            // Показываем комментарии только если там есть "error"
+            return !trimmed.contains("error", Qt::CaseInsensitive);
+        }
+        return false;
+    }
+
+    // Нормальный режим (по умолчанию)
+    if (isTechnicalLine(trimmed)) return true;
+
+    // Комментарии: скрываем только "информационные" от компилятора
+    if (trimmed.startsWith(";")) {
+        static const QStringList noise = {
+            "compilation unit finished",
+            "in:", "note:", "debugger invoked"
+        };
+        for (const QString& kw : noise) {
+            if (trimmed.contains(kw, Qt::CaseInsensitive))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+ReplMessage ReplParser::parseLineType(const QString& line) const
 {
     QString trimmed = line.trimmed();
-    if (trimmed.isEmpty())
-        return;
-
     QString lower = trimmed.toLower();
+
+    if (isPrompt(line))
+        return { ReplMessageType::Prompt, trimmed };
+
     bool isError = lower.contains("error") ||
         lower.contains("unbound variable") ||
         lower.contains("undefined function") ||
         lower.contains("compilation error") ||
         lower.contains("read error");
-
     bool isWarning = lower.contains("warning") ||
         lower.contains("undefined variable") ||
         lower.contains("caught");
 
-    // Промпт обрабатываем всегда
-    if (isPrompt(line)) {
+    if (parseMode == Settings::ParseOutputMode::Minimal) {
+        if (isError)
+            return parseError(line);
+        else
+            return parseResult(line);
+    }
+
+    if (parseMode == Settings::ParseOutputMode::Simple) {
+        if (isError || isWarning) {
+            ReplMessage msg;
+            msg.type = isWarning ? ReplMessageType::Warning : ReplMessageType::Error;
+            msg.text = trimmed;
+            return msg;
+        }
+        return parseResult(line);
+    }
+
+    // Full
+    if (line.contains("Line:") && line.contains("Column:"))
+        return parseError(line);
+
+    if (isError || isWarning) {
         ReplMessage msg;
-        msg.type = ReplMessageType::Prompt;
+        msg.type = isWarning ? ReplMessageType::Warning : ReplMessageType::Error;
         msg.text = trimmed;
-        emit messageReady(msg);
+        return msg;
+    }
+
+    return parseResult(line);
+}
+
+void ReplParser::processLine(const QString& line)
+{
+    if (line.trimmed().isEmpty())
         return;
-    }
 
-    // --- Minimal ---
-    if (parseMode == Settings::ParseMode::Minimal) {
-        if (!isStarValue(line))
-            emit messageReady(parseResult(line));
+    if (isTechnicalOrFiltered(line))
         return;
-    }
 
-    // --- Simple ---
-    if (parseMode == Settings::ParseMode::Simple) {
-        if (shouldFilterCommentLine(line) || isTechnicalLine(line))
-            return;
-
-        if (isError || isWarning) {
-            ReplMessage msg;
-            msg.type = isWarning ? ReplMessageType::Warning : ReplMessageType::Error;
-            msg.text = trimmed;
-            emit messageReady(msg);
-            return;
-        }
-
-        if (!isStarValue(line))
-            emit messageReady(parseResult(line));
-
-        return;
-    }
-
-    // --- Full ---
-    if (parseMode == Settings::ParseMode::Full) {
-        // auto-restart на unhandled condition
-        if (lower.contains("unhandled condition in") && lower.contains("disable-debugger")) {
-            ReplMessage msg;
-            msg.type = ReplMessageType::Error;
-            msg.text = trimmed;
-            emit messageReady(msg);
-            return;
-        }
-
-        if (shouldFilterCommentLine(line) || isTechnicalLine(line))
-            return;
-
-        if (line.contains("Line:") && line.contains("Column:")) {
-            emit messageReady(parseError(line));
-            return;
-        }
-
-        if (isError || isWarning) {
-            ReplMessage msg;
-            msg.type = isWarning ? ReplMessageType::Warning : ReplMessageType::Error;
-            msg.text = trimmed;
-            emit messageReady(msg);
-            return;
-        }
-
-        if (!isStarValue(line))
-            emit messageReady(parseResult(line));
-    }
+    emit messageReady(parseLineType(line));
 }

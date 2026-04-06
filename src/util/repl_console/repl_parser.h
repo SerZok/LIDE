@@ -27,7 +27,7 @@ private slots:
 private:
     Settings* m_settings;
     size_t m_maxLinesPerTick;
-    Settings::ParseMode parseMode;
+    Settings::ParseOutputMode parseMode;
 
     QTimer* m_timer;
     QString m_buffer;
@@ -38,6 +38,9 @@ private:
     bool isTechnicalLine(const QString& line) const;
     bool isStarValue(const QString& line) const;
     bool shouldFilterCommentLine(const QString& line) const;
+
+    bool isTechnicalOrFiltered(const QString& line) const;
+    ReplMessage parseLineType(const QString& line) const;
 
     ReplMessage parseError(const QString& line) const;
     ReplMessage parseResult(const QString& line) const;

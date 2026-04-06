@@ -27,12 +27,12 @@
 <context>
     <name>EditorTabWidget</name>
     <message>
-        <location filename="../ui/widgets/editor_tab_widget.cpp" line="81"/>
+        <location filename="../ui/widgets/editor_tab_widget.cpp" line="84"/>
         <source>Закрыть файл</source>
         <translation>Close file</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/editor_tab_widget.cpp" line="82"/>
+        <location filename="../ui/widgets/editor_tab_widget.cpp" line="85"/>
         <source>Файл %1 не сохранён.
 Сохранить перед закрытием?</source>
         <translation>File %1 is not saved.
@@ -244,12 +244,12 @@ Overwrite it?</translation>
     <message>
         <location filename="../ui/dialogs/mainwindow.cpp" line="58"/>
         <source>Есть несохраненные файлы: %1. Сохранить?</source>
-        <translation type="unfinished"></translation>
+        <translation>There are unsaved files: %1. Save?</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/mainwindow.cpp" line="120"/>
         <source>Lisp файлы (*.lisp *.lsp)</source>
-        <translation type="unfinished"></translation>
+        <translation>Lisp files (*.lisp *.lsp)</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/mainwindow.cpp" line="191"/>
@@ -392,71 +392,71 @@ Overwrite it?</translation>
 <context>
     <name>ProjectTree</name>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="101"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="152"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="104"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="155"/>
         <source>Новый файл...</source>
         <translation>New file...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="102"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="153"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="105"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="156"/>
         <source>Новая папка...</source>
         <translation>New folder...</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="105"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="156"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="108"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="159"/>
         <source>Новый файл</source>
         <translation>New file</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="105"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="156"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="108"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="159"/>
         <source>Название файла:</source>
         <translation>File name:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="114"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="165"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="117"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="168"/>
         <source>Новая папка</source>
         <translation>New folder</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="114"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="165"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="117"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="168"/>
         <source>Название папки:</source>
         <translation>Folder name:</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="123"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="126"/>
         <source>Открыть</source>
         <translation>Open</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="129"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="132"/>
         <source>Переименовать</source>
         <translation>Rename</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="130"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="133"/>
         <source>Удалить</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="132"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="171"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="135"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="174"/>
         <source>Показать в проводнике</source>
         <translation>Show in Explorer</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="141"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="186"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="144"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="189"/>
         <source>Подтверждение</source>
         <translation>Confirmation</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/project_tree.cpp" line="142"/>
-        <location filename="../ui/widgets/project_tree.cpp" line="187"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="145"/>
+        <location filename="../ui/widgets/project_tree.cpp" line="190"/>
         <source>Удалить %1?</source>
         <translation>Delete %1?</translation>
     </message>
@@ -464,7 +464,7 @@ Overwrite it?</translation>
 <context>
     <name>ReplProcess</name>
     <message>
-        <location filename="../util/repl_console/repl_process.cpp" line="103"/>
+        <location filename="../util/repl_console/repl_process.cpp" line="101"/>
         <source>[Принудительное завершение]</source>
         <translation>[Forced Termination]</translation>
     </message>
@@ -472,22 +472,22 @@ Overwrite it?</translation>
 <context>
     <name>ReplWidget</name>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="316"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="357"/>
         <source>Копировать</source>
         <translation>Copy</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="321"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="362"/>
         <source>Вставить</source>
         <translation>Paste</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="330"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="371"/>
         <source>Очистить консоль</source>
         <translation>Clear console</translation>
     </message>
     <message>
-        <location filename="../ui/widgets/repl_widget.cpp" line="333"/>
+        <location filename="../ui/widgets/repl_widget.cpp" line="374"/>
         <source>Перезапустить REPL</source>
         <translation>Restart REPL</translation>
     </message>
@@ -512,7 +512,7 @@ Overwrite it?</translation>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="85"/>
         <source>Настройки приложения</source>
-        <translation type="unfinished"></translation>
+        <translation>Application Settings</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="97"/>
@@ -532,7 +532,7 @@ Overwrite it?</translation>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="232"/>
         <source>Настройки дерева проекта</source>
-        <translation type="unfinished"></translation>
+        <translation>Project Tree Settings</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="261"/>
@@ -542,12 +542,22 @@ Overwrite it?</translation>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="268"/>
         <source>Фильтры исключений через пробел или запятую</source>
-        <translation type="unfinished"></translation>
+        <translation>Exclusion filters separated by spaces or commas</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="292"/>
         <source>Редактор</source>
         <translation>Editor</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="604"/>
+        <source>Отображение результата</source>
+        <translation>Displaying the result</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/settings_dialog.ui" line="652"/>
+        <source>Стартовое информативное сообщение</source>
+        <translation>The initial informative message</translation>
     </message>
     <message>
         <source>Отображение</source>
@@ -622,7 +632,7 @@ Overwrite it?</translation>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="390"/>
         <source>Ограничения</source>
-        <translation type="unfinished"></translation>
+        <translation>Limitations</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="426"/>
@@ -644,7 +654,7 @@ number of rows</translation>
         <location filename="../ui/dialogs/settings_dialog.ui" line="471"/>
         <source>Размер обработки
 вывода</source>
-        <translation type="unfinished"></translation>
+        <translation>Output processing size</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="589"/>
@@ -652,9 +662,8 @@ number of rows</translation>
         <translation>Auto restart SBCL when it crashes</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="604"/>
         <source>Режим обработки вывода</source>
-        <translation>Output processing mode</translation>
+        <translation type="vanished">Output processing mode</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="639"/>
@@ -684,11 +693,6 @@ number of rows</translation>
         <location filename="../ui/dialogs/settings_dialog.ui" line="716"/>
         <source>Печатать результаты форм</source>
         <translation>Print the results of the forms</translation>
-    </message>
-    <message>
-        <location filename="../ui/dialogs/settings_dialog.ui" line="652"/>
-        <source>Информативное сообщение</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../ui/dialogs/settings_dialog.ui" line="665"/>
@@ -721,19 +725,31 @@ number of rows</translation>
         <translation>Dark</translation>
     </message>
     <message>
-        <location filename="../ui/dialogs/settings_dialog.cpp" line="33"/>
         <source>Без парсинга</source>
-        <translation>Without parsing</translation>
+        <translation type="vanished">Without parsing</translation>
+    </message>
+    <message>
+        <source>Простой (ключевые слова)</source>
+        <translation type="vanished">Simple (keywords)</translation>
+    </message>
+    <message>
+        <source>Полный (с выражениями)</source>
+        <translation type="vanished">Full (with expressions)</translation>
+    </message>
+    <message>
+        <location filename="../ui/dialogs/settings_dialog.cpp" line="33"/>
+        <source>Минимальный</source>
+        <translation>Minimal</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/settings_dialog.cpp" line="34"/>
-        <source>Простой (ключевые слова)</source>
-        <translation>Simple (keywords)</translation>
+        <source>Простой</source>
+        <translation>Simple</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/settings_dialog.cpp" line="35"/>
-        <source>Полный (с выражениями)</source>
-        <translation>Full (with expressions)</translation>
+        <source>Полный</source>
+        <translation>Full</translation>
     </message>
     <message>
         <location filename="../ui/dialogs/settings_dialog.cpp" line="49"/>
