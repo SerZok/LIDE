@@ -34,7 +34,7 @@ void ReplParser::processBuffer() {
     }
 
     QString remaining = m_buffer.trimmed();
-    if (!remaining.isEmpty() && remaining == "*") {
+    if (!remaining.isEmpty() && isPrompt(remaining)) {
         processLine(remaining);
         m_buffer.clear();
     }
@@ -66,6 +66,10 @@ bool ReplParser::isPrompt(const QString& line) const
     if (t == "*")
         return true;
 
+    static QRegularExpression dbgPrompt("^\\d+\\]$");
+    if (dbgPrompt.match(t).hasMatch())
+        return true;
+
     if (t.endsWith("> ") && t.contains(">")) {
         // Проверяем, что это не часть ошибки
         if (!t.contains("error", Qt::CaseInsensitive) &&
@@ -73,9 +77,6 @@ bool ReplParser::isPrompt(const QString& line) const
             return true;
         }
     }
-    
-    // Промпт отладчика SBCL
-    if (t.startsWith("debugger invoked")) return false;
 
     return false;
 }
@@ -110,7 +111,7 @@ bool ReplParser::isStarValue(const QString& line) const
 
 bool ReplParser::shouldFilterCommentLine(const QString& line) const
 {
-    if (parseMode == Settings::ParseMode::None) {
+    if (parseMode == Settings::ParseMode::Minimal) {
         return false;
     }
 
@@ -213,11 +214,11 @@ ReplMessage ReplParser::parseResult(const QString& line) const
 
 void ReplParser::processLine(const QString& line)
 {
-    qDebug() << "Парсим строку: " << line;
-    if (line.trimmed().isEmpty())
+    QString trimmed = line.trimmed();
+    if (trimmed.isEmpty())
         return;
 
-    QString lower = line.toLower();
+    QString lower = trimmed.toLower();
     bool isError = lower.contains("error") ||
         lower.contains("unbound variable") ||
         lower.contains("undefined function") ||
@@ -226,54 +227,71 @@ void ReplParser::processLine(const QString& line)
 
     bool isWarning = lower.contains("warning") ||
         lower.contains("undefined variable") ||
-        lower.contains("caught");  
+        lower.contains("caught");
 
-    // Коментарии
-    if (shouldFilterCommentLine(line)) {
-        return;
-    }
-
-    // Промпт
+    // Промпт обрабатываем всегда
     if (isPrompt(line)) {
-        qDebug() << "Это prompt:" << line;
         ReplMessage msg;
         msg.type = ReplMessageType::Prompt;
-        msg.text = line.trimmed();
+        msg.text = trimmed;
         emit messageReady(msg);
         return;
     }
 
-    // Технические строки
-    if (isTechnicalLine(line)) {
+    // --- Minimal ---
+    if (parseMode == Settings::ParseMode::Minimal) {
+        if (!isStarValue(line))
+            emit messageReady(parseResult(line));
         return;
     }
 
-    // Ошибка с позицией
-    if (line.contains("Line:") && line.contains("Column:")) {
-        emit messageReady(parseError(line));
-        return;
-    }
+    // --- Simple ---
+    if (parseMode == Settings::ParseMode::Simple) {
+        if (shouldFilterCommentLine(line) || isTechnicalLine(line))
+            return;
 
-    if (isError || isWarning) {
-        ReplMessage msg;
-        msg.type = isWarning ? ReplMessageType::Warning : ReplMessageType::Error;
-
-        QString displayText = line.trimmed();
-        if (parseMode != Settings::ParseMode::None && displayText.startsWith(";")) {
-            displayText.remove(0, 1);
-            displayText = displayText.trimmed();
-            if (displayText.startsWith("  ")) displayText = displayText.mid(2);
+        if (isError || isWarning) {
+            ReplMessage msg;
+            msg.type = isWarning ? ReplMessageType::Warning : ReplMessageType::Error;
+            msg.text = trimmed;
+            emit messageReady(msg);
+            return;
         }
-        msg.text = displayText;
 
-        emit messageReady(msg);
+        if (!isStarValue(line))
+            emit messageReady(parseResult(line));
+
         return;
     }
 
-    // * - результат
-    if (isStarValue(line))
-        return;
+    // --- Full ---
+    if (parseMode == Settings::ParseMode::Full) {
+        // auto-restart на unhandled condition
+        if (lower.contains("unhandled condition in") && lower.contains("disable-debugger")) {
+            ReplMessage msg;
+            msg.type = ReplMessageType::Error;
+            msg.text = trimmed;
+            emit messageReady(msg);
+            return;
+        }
 
-    // Обычный результат
-    emit messageReady(parseResult(line));
+        if (shouldFilterCommentLine(line) || isTechnicalLine(line))
+            return;
+
+        if (line.contains("Line:") && line.contains("Column:")) {
+            emit messageReady(parseError(line));
+            return;
+        }
+
+        if (isError || isWarning) {
+            ReplMessage msg;
+            msg.type = isWarning ? ReplMessageType::Warning : ReplMessageType::Error;
+            msg.text = trimmed;
+            emit messageReady(msg);
+            return;
+        }
+
+        if (!isStarValue(line))
+            emit messageReady(parseResult(line));
+    }
 }

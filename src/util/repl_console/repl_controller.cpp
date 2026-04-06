@@ -4,6 +4,7 @@
 
 ReplController::ReplController(QObject* parent)
     : QObject(parent)
+    , m_settings(Settings::instance())
 {
     setupConnections();
 }
@@ -113,4 +114,11 @@ void ReplController::onProcessError(const QString& error)
 void ReplController::onParserMessage(const ReplMessage& msg)
 {
     emit messageReady(msg);
+
+    if (msg.type == ReplMessageType::Error && msg.text.contains("unhandled condition in --disable-debugger", Qt::CaseInsensitive) &&
+        m_settings->replAutoRestart())
+    {
+        qDebug() << "[ReplController] Критическая ошибка, перезапуск SBCL...";
+        restart();
+    }
 }

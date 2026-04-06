@@ -61,7 +61,7 @@ public:
     };
 
     enum class ParseMode {
-        None = 0,
+        Minimal = 0,
         Simple = 1,
         Full = 2
     };

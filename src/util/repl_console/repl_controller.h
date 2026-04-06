@@ -35,6 +35,7 @@ private slots:
 private:
     ReplProcess process;
     ReplParser parser;
+    Settings* m_settings;
 
     bool m_formattedOutput = true;
     bool m_restartPending = false;

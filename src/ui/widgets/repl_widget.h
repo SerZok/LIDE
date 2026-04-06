@@ -56,8 +56,10 @@ private:
 
     void appendOutput(const QString& text, ReplMessageType type = ReplMessageType::Result);
     void appendPrompt();
+    bool isFormComplete(const QString& text);
     void sendCurrentLine();
     QString currentLine() const;
+    QString currentInput() const;
     void insertFromHistory(int direction);
     void ensureCursorInEditable();
     void setupConnections();

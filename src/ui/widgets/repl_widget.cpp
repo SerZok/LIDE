@@ -38,6 +38,8 @@ void ReplWidget::displayMessage(const ReplMessage& msg)
     case ReplMessageType::Prompt:
         m_prompt = msg.text;
         m_waitingForInput = true;
+
+        setReadOnly(false);
         appendPrompt();
         break;
     case ReplMessageType::Result:
@@ -107,7 +109,9 @@ void ReplWidget::appendOutput(const QString& text, ReplMessageType type)
         cursor.removeSelectedText();
     }
 
-    moveCursor(QTextCursor::End);
+    QTextCursor cursor(document());
+    cursor.movePosition(QTextCursor::End);
+    setTextCursor(cursor);
 
     QTextCharFormat fmt;
     switch (type) {
@@ -135,9 +139,8 @@ void ReplWidget::appendPrompt()
     if (!m_waitingForInput) return;
 
     moveCursor(QTextCursor::End);
-    if (!document()->isEmpty() && !textCursor().atBlockStart()) {
+    if (!toPlainText().endsWith("\n") && !document()->isEmpty())
         insertPlainText("\n");
-    }
 
     QColor promptColor = QColor(0, 255, 0);
     setTextColor(promptColor);
@@ -149,6 +152,27 @@ void ReplWidget::appendPrompt()
 
 }
 
+bool ReplWidget::isFormComplete(const QString& text)
+{
+    int paren = 0;
+    bool inString = false;
+
+    for (QChar c : text) {
+        if (c == '"') {
+            inString = !inString;
+            continue;
+        }
+
+        if (inString)
+            continue;
+
+        if (c == '(') paren++;
+        if (c == ')') paren--;
+    }
+
+    return paren <= 0;
+}
+
 QString ReplWidget::currentLine() const
 {
     if (m_editableStart < 0 || m_editableStart > document()->characterCount()) {
@@ -158,34 +182,51 @@ QString ReplWidget::currentLine() const
     QTextCursor cursor = textCursor();
     cursor.setPosition(m_editableStart);
     cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
-    return cursor.selectedText().trimmed();
+
+    QString text = cursor.selectedText();
+    text.replace(QChar(0x2029), '\n');
+    return text.trimmed();
+}
+
+QString ReplWidget::currentInput() const
+{
+    QTextCursor cursor(document());
+    cursor.setPosition(m_editableStart);
+    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+
+    QString text = cursor.selectedText();
+    text.replace(QChar(0x2029), '\n');
+    return text.trimmed();
 }
 
 void ReplWidget::sendCurrentLine()
 {
-    QString line = currentLine();
-    //if (line.isEmpty()) {
-    //    insertPlainText("\n");
-    //    emit commandEntered("");
-    //    m_waitingForInput = false;
-    //    return;
-    //}
-    if (line.isEmpty()) {
+    QString input = currentInput();
+
+    if (!isFormComplete(input)) {
+        insertPlainText("\n");
+        return;
+    }
+
+    if (input.trimmed().isEmpty()) {
         appendPrompt();
         return;
     }
 
-    m_history.add(line);
-    if (line == "clear") {
+    if (!input.startsWith(";"))
+        m_history.add(input);
+
+    if (input == "clear") {
         clear();
         appendPrompt();
         return;
     }
 
     insertPlainText("\n");
-    emit commandEntered(line);
-    m_waitingForInput = false;
+    emit commandEntered(input);
 
+    setReadOnly(true);
+    m_waitingForInput = false;
     m_historyBrowsing = false;
     m_savedInput.clear();
 }

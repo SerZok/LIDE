@@ -12,7 +12,7 @@ ReplProcess::ReplProcess(QObject* parent)
 {
     sbclPath = m_settings->sbclPath();
     args = m_settings->sbclArgs();
-    
+
     connect(m_settings, &Settings::sbclPathChanged, this, [this]() {
         sbclPath = m_settings->sbclPath();
         restart();
@@ -23,8 +23,7 @@ ReplProcess::ReplProcess(QObject* parent)
         restart();
         });
 
-    connect(&m_process, &QProcess::readyReadStandardOutput, this, &ReplProcess::onReadyReadStandardOutput);
-    connect(&m_process, &QProcess::readyReadStandardError, this, &ReplProcess::onReadyReadStandardError);
+    connect(&m_process, &QProcess::readyReadStandardOutput, this, &ReplProcess::onReadyReadOutput);
     connect(&m_process, &QProcess::errorOccurred, this, &ReplProcess::onProcessError);
     connect(&m_process, &QProcess::finished, this, &ReplProcess::onProcessFinished);
 }
@@ -42,7 +41,7 @@ bool ReplProcess::start()
 
     qDebug() << "Запуск: " << sbclPath << " Аргументы: " << args;
 
-    m_process.setProcessChannelMode(QProcess::SeparateChannels);
+    m_process.setProcessChannelMode(QProcess::MergedChannels);
     m_process.setWorkingDirectory(QFileInfo(sbclPath).absolutePath());
     m_process.start(sbclPath, args);
 
@@ -58,9 +57,8 @@ bool ReplProcess::start()
 void ReplProcess::stop()
 {
     if (!isRunning()) return;
-
+    m_stopping = true;
     qDebug() << "Stopping SBCL process...";
-
     m_process.terminate();
 
     if (!m_process.waitForFinished(1000)) {
@@ -113,23 +111,13 @@ bool ReplProcess::isRunning() const
     return m_process.state() == QProcess::Running;
 }
 
-void ReplProcess::onReadyReadStandardOutput()
+void ReplProcess::onReadyReadOutput()
 {
     QByteArray data = m_process.readAllStandardOutput();
     if (!data.isEmpty()) {
         //qDebug() << "Сырые данные: " << data;
         emit stdoutData(QString::fromUtf8(data));
     }
-}
-
-void ReplProcess::onReadyReadStandardError()
-{
-    QByteArray data = m_process.readAllStandardError();
-    if (data.isEmpty()) return;
-
-    qDebug() << "Сырое значение(ошибка): " << data;
-    QString error = QString::fromUtf8(data);
-    emit stderrData(error);
 }
 
 void ReplProcess::onProcessFinished(int exitCode, QProcess::ExitStatus status)
@@ -139,6 +127,11 @@ void ReplProcess::onProcessFinished(int exitCode, QProcess::ExitStatus status)
 
     qDebug() << "SBCL process finished";
     emit finished();
+
+    if (m_stopping) {
+        m_stopping = false;
+        return;
+    }
 }
 
 void ReplProcess::onProcessError(QProcess::ProcessError error)
@@ -146,24 +139,23 @@ void ReplProcess::onProcessError(QProcess::ProcessError error)
     QString errorMsg;
     switch (error) {
     case QProcess::FailedToStart:
-        errorMsg = "Failed to start SBCL process";
+        errorMsg = "[Start error]";
         break;
     case QProcess::Crashed:
-        errorMsg = "Crashed";
+        errorMsg = "[Crashed]";
         break;
     case QProcess::Timedout:
-        errorMsg = "Operation timed out";
+        errorMsg = "[Operation timed out]";
         break;
     case QProcess::WriteError:
-        errorMsg = "Write error";
+        errorMsg = "[Write error]";
         break;
     case QProcess::ReadError:
-        errorMsg = "Read error";
+        errorMsg = "[Read error]";
         break;
     default:
-        errorMsg = "Unknown error";
+        errorMsg = "[Unknown error]";
     }
 
-    qDebug() << "ОШИБКА процесса: " << errorMsg;
     emit errorOccurred(errorMsg);
 }

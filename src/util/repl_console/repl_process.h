@@ -30,8 +30,7 @@ signals:
     void errorOccurred(const QString& error);
 
 private slots:
-    void onReadyReadStandardOutput();
-    void onReadyReadStandardError();
+    void onReadyReadOutput();
     void onProcessFinished(int exitCode, QProcess::ExitStatus status);
     void onProcessError(QProcess::ProcessError error);
 
@@ -39,6 +38,7 @@ private:
     QProcess m_process;
     QStringList args;
     QString sbclPath;
+    bool m_stopping = false;
 
     Settings* m_settings;
 };
