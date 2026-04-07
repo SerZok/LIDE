@@ -1,4 +1,4 @@
-#include "repl_widget.h"
+﻿#include "repl_widget.h"
 
 #include <QKeyEvent>
 #include <QMenu>
@@ -30,6 +30,7 @@ void ReplWidget::setupConnections()
     connect(m_controller, &ReplController::messageReady, this, &ReplWidget::displayMessage);
     connect(m_controller, &ReplController::started, this, &ReplWidget::onControllerStarted);
     connect(m_controller, &ReplController::finished, this, &ReplWidget::onControllerFinished);
+    connect(m_controller, &ReplController::errorLocationAvailable, this, &ReplWidget::onErrorLocationAvailable);
 }
 
 void ReplWidget::displayMessage(const ReplMessage& msg)
@@ -75,7 +76,7 @@ void ReplWidget::sendFile(const QString& path)
     }
     QString loadArgs = Settings::instance()->sbclLoadArgsString();
     QString command = QString("(load \"%1\"%2)").arg(path, loadArgs);
-
+    m_last_usage_file = path;
     emit commandEntered(command);
 }
 
@@ -387,4 +388,11 @@ void ReplWidget::onControllerStarted()
 void ReplWidget::onControllerFinished()
 {
     qDebug() << "=== SBCL остановлен ===";
+}
+
+void ReplWidget::onErrorLocationAvailable(const QString& message, int line, int column)
+{
+    if (!m_last_usage_file.isEmpty()) {
+        emit errorLocationAvailable(m_last_usage_file, message, line, column);
+    }
 }

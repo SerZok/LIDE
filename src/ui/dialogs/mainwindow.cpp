@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui/ui_mainwindow.h"
 
 #include <QMenu>
@@ -394,8 +394,7 @@ void MainWindow::setupDockWidgets()
     addDockWidget(Qt::BottomDockWidgetArea, m_ConsoleDock);
 
     // Подключаем сигнал ошибки из консоли
-    //connect(m_console, &ReplWidget::errorOccurred,
-    //    this, &MainWindow::onLispError);
+    connect(m_console, &ReplWidget::errorLocationAvailable, this, &MainWindow::onLispError);
 
     QTimer::singleShot(0, [this]() {
         if (m_projectTree && m_projectDock) {

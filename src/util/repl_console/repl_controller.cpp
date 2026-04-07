@@ -1,4 +1,4 @@
-#include "repl_controller.h"
+﻿#include "repl_controller.h"
 
 #include <QDebug>
 
@@ -22,6 +22,7 @@ void ReplController::setupConnections()
     connect(&process, &ReplProcess::finished, this, &ReplController::onProcessFinished);
     connect(&process, &ReplProcess::errorOccurred, this, &ReplController::onProcessError);
     connect(&parser, &ReplParser::messageReady, this, &ReplController::onParserMessage);
+    connect(&parser, &ReplParser::errorLocationAvailable, this, &ReplController::errorLocationAvailable);
 }
 
 void ReplController::start()
