@@ -20,6 +20,7 @@ public:
 	void sendCommand(const QString& cmd);
 	void interrupt();
 	void setFormattedOutput(bool enabled);
+	bool isRunning();
 
 signals:
 	void messageReady(const ReplMessage& msg);

@@ -123,3 +123,10 @@ void ReplController::onParserMessage(const ReplMessage& msg)
         restart();
     }
 }
+
+bool ReplController::isRunning()
+{
+    if (process.isRunning())
+        return true;
+    return false;
+}

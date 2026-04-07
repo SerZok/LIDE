@@ -51,7 +51,7 @@ private:
 
 	int m_editableStart = 0;            // позиция начала ввода
 	bool m_waitingForInput = true;      // ожидание ввода
-	QString m_prompt = "* ";     // текущий промпт
+	QString m_prompt = "> ";			// символ разрешения ввода
 	QString m_last_usage_file = "";     // последний использующийся файл
 
 	size_t MAX_LINES;
@@ -66,4 +66,6 @@ private:
 	void ensureCursorInEditable();
 	void setupConnections();
 	void onErrorLocationAvailable(const QString& message, int line, int column);
+	void clearCurrentLineAndPrompt();
+	bool hasPromptAtEditableStart() const;
 };
