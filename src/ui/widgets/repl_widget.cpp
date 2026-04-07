@@ -18,6 +18,7 @@ ReplWidget::ReplWidget(QWidget* parent)
 
     setupConnections();
     m_controller->start();
+    appendPrompt();
 }
 
 ReplWidget::~ReplWidget()
@@ -57,7 +58,7 @@ void ReplWidget::displayMessage(const ReplMessage& msg)
     switch (msg.type) {
     case ReplMessageType::Prompt:
         m_waitingForInput = true;
-        appendPrompt();
+        hasPrompt = true;
         setReadOnly(false);
         break;
     case ReplMessageType::Result:
@@ -172,13 +173,24 @@ void ReplWidget::appendPrompt()
     if (!toPlainText().endsWith("\n") && !document()->isEmpty())
         insertPlainText("\n");
 
-    QColor promptColor = QColor(0, 255, 0);
-    setTextColor(promptColor);
-    insertPlainText(m_prompt);
+    // Сохраняем текущий цвет
+    QTextCursor cursor = textCursor();
 
-    QTextCharFormat format;
-    format.setForeground(Qt::white);
-    textCursor().setCharFormat(format);
+    // Вставляем зеленый промпт
+    cursor.insertText(m_prompt, [&]() {
+        QTextCharFormat format;
+        format.setForeground(QColor(0, 255, 0));
+        return format;
+        }());
+
+    // Меняем формат для следующего ввода
+    cursor.setCharFormat([&]() {
+        QTextCharFormat format;
+        format.setForeground(Qt::white);
+        return format;
+        }());
+
+    document()->clearUndoRedoStacks(QTextDocument::UndoAndRedoStacks);
 
     m_editableStart = textCursor().position();
 
@@ -347,7 +359,7 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
     }
 
     // ЗАЩИТА ОТ УДАЛЕНИЯ
-    if (event->key() == Qt::Key_Backspace || event->key() == Qt::Key_Delete) {
+    if (event->key() == Qt::Key_Backspace) {
         QTextCursor cursor = textCursor();
 
         // Если есть выделение — проверяем, что выделение полностью в editable области
@@ -369,6 +381,37 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
         else {
             // Без выделения — проверяем позицию курсора
             if (cursor.position() <= m_editableStart) {
+                return;
+            }
+        }
+
+        QTextEdit::keyPressEvent(event);
+        return;
+    }
+
+    // ЗАЩИТА ОТ УДАЛЕНИЯ
+    if (event->key() == Qt::Key_Delete) {
+        QTextCursor cursor = textCursor();
+
+        // Если есть выделение — проверяем, что выделение полностью в editable области
+        if (cursor.hasSelection()) {
+            int start = cursor.selectionStart();
+            int end = cursor.selectionEnd();
+
+            // Выделение только в editable области — разрешаем
+            if (start >= m_editableStart && end >= m_editableStart) {
+                QTextEdit::keyPressEvent(event);
+            }
+            else if (start < m_editableStart && end > m_editableStart) {
+                return;
+            }
+            else {
+                return;
+            }
+        }
+        else {
+            // Без выделения — проверяем позицию курсора
+            if (cursor.position() < m_editableStart) {
                 return;
             }
         }
