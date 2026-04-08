@@ -35,6 +35,8 @@ MainWindow::MainWindow(QWidget* parent) :
     m_autoSaveTimer->setTimerType(Qt::VeryCoarseTimer);
     connect(m_autoSaveTimer, &QTimer::timeout, this, &MainWindow::triggerAutoSave);
 
+    m_errorNotification = new ErrorNotification(this);
+
     setupSaveTimer();
     setupDockWidgets();
     setupMenuBar();
@@ -449,8 +451,9 @@ void MainWindow::onLispError(const QString& file,
             // Подсвечиваем ошибку по позиции в файле
             editor->highlightErrorAtPosition(message, line, column);
 
-            // Показываем сообщение об ошибке в статус-баре. По таймеру не очень...
-            statusBar()->showMessage(tr("Ошибка: %1").arg(message), 10000);
+            m_errorNotification->showError(
+                tr("(%1:%2) %3").arg(line).arg(column).arg(message)
+            );
 
             // Переключаемся на вкладку
             int index = m_tabWidget->indexOf(editor);

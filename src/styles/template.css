@@ -384,7 +384,7 @@ ProjectTree {
 
 ReplWidget {
     background-color: @EDITOR_BG@; /* Исправлен хардкод */
-    color: @EDITOR_TEXT@; /* Исправлен хардкод */
+    color: @EDITOR_TEXT@;
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 11pt;
     border: none;
@@ -573,3 +573,40 @@ QAbstractScrollArea::corner {
     background-color: @LINENUMBER_BG@;
     border: none;
 }
+
+ErrorNotification {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 @ERROR_NOTIF_BG_START@, stop:1 @ERROR_NOTIF_BG_END@);
+    color: @ERROR_NOTIF_TEXT@;
+    padding: 10px 15px;
+    border: 1px solid @ERROR_NOTIF_BORDER@;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 10pt;
+}
+
+    ErrorNotification:hover {
+        border-color: @ACCENT@;
+        cursor: default;
+    }
+
+ErrorNotificationCloseButton {
+    color: @ERROR_NOTIF_TEXT@;
+    font-weight: bold;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    icon-size: 16px;
+    transition: border-color 0.2s ease;
+}
+
+    ErrorNotificationCloseButton:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+    }
+
+    ErrorNotificationCloseButton:pressed {
+        color: @ERROR_NOTIF_BORDER@;
+        padding: 0;
+        margin: 0;
+    }

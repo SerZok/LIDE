@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMap>
 
+#include "ui/components/error_notification.h"
 #include "ui/widgets/editor_tab_widget.h"
 #include "ui/widgets/project_tree.h"
 #include "ui/widgets/repl_widget.h"
@@ -70,6 +71,7 @@ private:
 
     QDockWidget* m_projectDock = nullptr;
     QDockWidget* m_ConsoleDock = nullptr;
+    ErrorNotification* m_errorNotification;
 
     // Основные виджеты
     EditorTabWidget* m_tabWidget;

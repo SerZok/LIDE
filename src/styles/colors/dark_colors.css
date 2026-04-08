@@ -22,4 +22,9 @@
 	REPL_ERROR = #ff6b6b;
 	REPL_WARNING = #ffd93d;
 	REPL_OUTPUT = #e0e0e0;
+
+	ERROR_NOTIF_BG_START = #ff6b6b;
+    ERROR_NOTIF_BG_END = #ee5a5a;
+    ERROR_NOTIF_TEXT = #ffffff;
+    ERROR_NOTIF_BORDER = #cc5555;
 }

@@ -29,6 +29,8 @@ LispEditor::LispEditor(QWidget* parent)
     m_matchedBracketFormat.setForeground(Qt::white);
     m_mismatchedBracketFormat.setBackground(QColor(200, 80, 80, 150));
 
+    connect(Settings::instance(), &Settings::settingsChanged, this, &LispEditor::applyEditorSettings, Qt::UniqueConnection);
+
     connect(this, &LispEditor::blockCountChanged, this, &LispEditor::updateLineNumberAreaWidth);
     connect(this, &LispEditor::updateRequest, this, &LispEditor::updateLineNumberArea);
     connect(this, &LispEditor::cursorPositionChanged, this, &LispEditor::highlightCurrentLine);;
@@ -37,7 +39,10 @@ LispEditor::LispEditor(QWidget* parent)
     connect(m_reloadTimer, &QTimer::timeout, this, &LispEditor::askForReload);
     connect(this, &LispEditor::textChanged, this, &LispEditor::onTextChanged);
 
-    connect(Settings::instance(), &Settings::settingsChanged, this, &LispEditor::applyEditorSettings, Qt::UniqueConnection);
+    connect(document(), &QTextDocument::contentsChanged, this, [this]() {
+        if (m_errorSelections.isEmpty()) return;
+        clearErrorHighlight();
+        });
 
     updateLineNumberAreaWidth(0);
 }
