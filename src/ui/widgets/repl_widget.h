@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <QTextEdit>
 
 #include "settings.h"
@@ -59,7 +59,7 @@ private:
 	void appendOutput(const QString& text, ReplMessageType type = ReplMessageType::Result);
 	void appendPrompt();
 	bool isFormComplete(const QString& text);
-	void sendCurrentLine();
+	void sendCurrentInput();
 	QString currentLine() const;
 	QString currentInput() const;
 	void insertFromHistory(int direction);

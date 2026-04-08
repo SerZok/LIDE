@@ -1,4 +1,4 @@
-﻿#include "repl_controller.h"
+#include "repl_controller.h"
 
 #include <QDebug>
 
@@ -23,6 +23,12 @@ void ReplController::setupConnections()
     connect(&process, &ReplProcess::errorOccurred, this, &ReplController::onProcessError);
     connect(&parser, &ReplParser::messageReady, this, &ReplController::onParserMessage);
     connect(&parser, &ReplParser::errorLocationAvailable, this, &ReplController::errorLocationAvailable);
+    connect(&parser, &ReplParser::sbclTerminated, this, [this]() {
+        if (m_settings->replAutoRestart()) {
+            qDebug() << "[ReplController] SBCL terminated, auto-restarting...";
+            restart();
+        }
+        });
 }
 
 void ReplController::start()
@@ -115,13 +121,6 @@ void ReplController::onProcessError(const QString& error)
 void ReplController::onParserMessage(const ReplMessage& msg)
 {
     emit messageReady(msg);
-
-    if (msg.type == ReplMessageType::Error && msg.text.contains("unhandled condition in --disable-debugger", Qt::CaseInsensitive) &&
-        m_settings->replAutoRestart())
-    {
-        qDebug() << "[ReplController] Критическая ошибка, перезапуск SBCL...";
-        restart();
-    }
 }
 
 bool ReplController::isRunning()

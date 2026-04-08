@@ -1,4 +1,4 @@
-﻿#include "mainwindow.h"
+#include "mainwindow.h"
 #include "ui/ui_mainwindow.h"
 
 #include <QMenu>
@@ -449,9 +449,8 @@ void MainWindow::onLispError(const QString& file,
             // Подсвечиваем ошибку по позиции в файле
             editor->highlightErrorAtPosition(message, line, column);
 
-            // Показываем сообщение об ошибке в статус-баре
-            statusBar()->showMessage(QString("Ошибка: %1 (строка %2, колонка %3)")
-                .arg(message).arg(line).arg(column), 10000);
+            // Показываем сообщение об ошибке в статус-баре. По таймеру не очень...
+            statusBar()->showMessage(tr("Ошибка: %1").arg(message), 10000);
 
             // Переключаемся на вкладку
             int index = m_tabWidget->indexOf(editor);

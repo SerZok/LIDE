@@ -1,4 +1,4 @@
-﻿#include "repl_widget.h"
+#include "repl_widget.h"
 
 #include <QKeyEvent>
 #include <QMenu>
@@ -243,7 +243,7 @@ QString ReplWidget::currentInput() const
     return text.trimmed();
 }
 
-void ReplWidget::sendCurrentLine()
+void ReplWidget::sendCurrentInput()
 {
     QString input = currentInput();
 
@@ -344,7 +344,7 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
 
     // Enter — отправка
     if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
-        sendCurrentLine();
+        sendCurrentInput();
         return;
     }
 
