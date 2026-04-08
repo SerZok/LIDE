@@ -20,6 +20,7 @@ SetupIconFile={#IconPath}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
+DisableDirPage=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

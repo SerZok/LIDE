@@ -18,6 +18,8 @@
 #include <QInputDialog>
 #include <QActionGroup>
 #include <QFontDatabase>
+#include <QStandardPaths>
+#include <QDesktopServices>
 
 MainWindow::MainWindow(QWidget* parent) :
       QMainWindow(parent)
@@ -48,6 +50,12 @@ MainWindow::MainWindow(QWidget* parent) :
 
 MainWindow::~MainWindow()
 {
+    saveBeforeExit();
+    saveAppState();
+    delete ui;
+}
+
+void MainWindow::saveBeforeExit(){
     if (m_tabWidget) {
         if (m_settings->saveExit())
             m_tabWidget->saveAll();
@@ -66,8 +74,6 @@ MainWindow::~MainWindow()
             }
         }
     }
-    saveAppState();
-    delete ui;
 }
 
 void MainWindow::changeEvent(QEvent* event) {
@@ -184,7 +190,10 @@ void MainWindow::setupMenuBar()
         m_tabWidget->saveAll();
         });
 
-    auto* exitAction = m_fileMenu->addAction(tr("Выйти"), [this]() { close(); });
+    auto* exitAction = m_fileMenu->addAction(tr("Выйти"), [this]() { 
+        saveBeforeExit();
+        close();
+        });
     exitAction->setObjectName("actionExit");
 
     // Edit menu
@@ -343,8 +352,9 @@ void MainWindow::setupMenuBar()
         dlg.exec();
         });
 
-    // TODO: добавить рукводство пользователя
-
+    auto manualAction = m_helpMenu->addAction(tr("Руководство"), QKeySequence(Qt::Key_F1));
+    manualAction->setObjectName("actionManual");
+    connect(manualAction, &QAction::triggered, this, &MainWindow::openManual);
 }
 
 void MainWindow::setupToolBar() {
@@ -608,4 +618,26 @@ void MainWindow::updateTranslations()
     setActionText("actionFullScreen", tr("Полноэкранный режим"));
     setActionText("actionSettings", tr("Настройки"));
     setActionText("actionAbout", tr("О программе"));
+    setActionText("actionManual", tr("Руководство"));
+}
+
+void MainWindow::openManual()
+{
+    const QString manualFileName = tr("LIDE Manual_RU.pdf");
+    QStringList searchPaths;
+
+    searchPaths << QCoreApplication::applicationDirPath() + "/docs";
+    searchPaths << QDir::currentPath() + "/docs";
+    searchPaths << QDir::currentPath() + "/../docs";
+
+    for (const QString& path : searchPaths) {
+        QString fullPath = QDir(path).filePath(manualFileName);
+        qDebug() << "Руководство ищем по пути:" << fullPath;
+        if (QFile::exists(fullPath)) {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
+            return;
+        }
+    }
+
+    qDebug() << "Руководство не найдено!";
 }

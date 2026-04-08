@@ -47,6 +47,8 @@ private:
     Settings* m_settings;
     QTimer* m_autoSaveTimer = nullptr;
 
+    void saveBeforeExit();
+
     void setupSaveTimer();
     void triggerAutoSave();
     void onSettingsChanged();
@@ -64,8 +66,8 @@ private:
 
     void openProject();
     void createProject();
-
     void updateTranslations();
+    void openManual();
 
     QMap<QDockWidget*, QString> m_dockNames;
 

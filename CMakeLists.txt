@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
-set (PROJECT_NAME LIDE)
+set(PROJECT_NAME LIDE)
 set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 2)
+set(PROJECT_VERSION_MINOR 5)
 set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
@@ -174,13 +174,15 @@ if(WIN32)
     find_program(WINDEPLOYQT windeployqt REQUIRED)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${WINDEPLOYQT} $<TARGET_FILE:${PROJECT_NAME}> 
+       --verbose 0
+        --release
         --no-network
         --no-opengl
-        --no-quick
+        --no-opengl-sw
+        --no-3dcore
         --no-compiler-runtime
         --no-system-d3d-compiler
         --no-system-dxc-compiler
-        --verbose 0
         COMMENT "Running windeployqt..."
     )
 
@@ -189,8 +191,14 @@ if(WIN32)
     COMMAND ${CMAKE_COMMAND} -E copy_directory 
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/SBCL" 
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sbcl"
-    COMMENT "Copying SBCL to output directory..."
-)
+    COMMENT "Copying SBCL to output directory...")
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/docs" 
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/docs"
+    COMMENT "Copying Manual to output directory...")
+
 endif()
 
 if(QT_VERSION_MAJOR EQUAL 6)

@@ -1,4 +1,5 @@
 set(TEMP_DIR "${CMAKE_CURRENT_BINARY_DIR}/install_temp")
+set(APP_BIN_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin") 
 file(REMOVE_RECURSE ${TEMP_DIR})
 
 # Копируем exe
@@ -6,6 +7,40 @@ file(COPY
     "${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.exe"
     DESTINATION "${TEMP_DIR}"
 )
+
+# Переводы
+file(MAKE_DIRECTORY "${TEMP_DIR}/translations")
+foreach(lang ru_RU en_US)
+    set(src "${APP_BIN_DIR}/translations/LIDE_${lang}.qm")
+    if(EXISTS "${src}")
+        file(COPY "${src}" DESTINATION "${TEMP_DIR}/translations/")
+        message(STATUS "  + LIDE_${lang}.qm")
+    endif()
+endforeach()
+
+set(QT_TRANSLATIONS "")
+if(DEFINED ENV{QTDIR})
+    set(QT_TRANSLATIONS "$ENV{QTDIR}/translations")
+elseif(CMAKE_PREFIX_PATH)
+    foreach(prefix ${CMAKE_PREFIX_PATH})
+        if(EXISTS "${prefix}/translations/qt_ru.qm")
+            set(QT_TRANSLATIONS "${prefix}/translations")
+            break()
+        endif()
+    endforeach()
+endif()
+
+if(QT_TRANSLATIONS AND EXISTS "${QT_TRANSLATIONS}")
+    foreach(lang ru en)
+        set(src "${QT_TRANSLATIONS}/qt_${lang}.qm")
+        if(EXISTS "${src}")
+            file(COPY "${src}" DESTINATION "${TEMP_DIR}/translations/")
+            message(STATUS "  + qt_${lang}.qm")
+        endif()
+    endforeach()
+else()
+    message(WARNING "  ! Не найдены системные переводы Qt. Проверьте QTDIR")
+endif()
 
 # windeployqt
 message(STATUS "Запуск windeployqt...")
@@ -16,7 +51,9 @@ execute_process(
         --release
         --no-network
         --no-opengl
+        --no-opengl-sw
         --no-3dcore
+        --no-translations
         --no-compiler-runtime
         --no-system-d3d-compiler
         --no-system-dxc-compiler
@@ -35,6 +72,12 @@ if(EXISTS "${ROOT_PATH}/libs/SBCL")
     )
 endif()
 
+if(EXISTS "${ROOT_PATH}/src/docs")
+    message(STATUS "Копирование Manual...")
+    file(COPY "${ROOT_PATH}/src/docs"  DESTINATION "${TEMP_DIR}"
+    )
+endif()
+
 # ZIP архив
 set(ZIP_NAME "${SETUP_DIR}/${PROJECT_NAME}_${PROJECT_VERSION}.zip")
 message(STATUS "Создание портативной ZIP версии...")
@@ -45,7 +88,7 @@ message(STATUS "Создание портативной ZIP версии...")
     )
 
 if(ZIP_RESULT EQUAL 0)
-    message(STATUS "Портативная версия создана: ${ZIP_NAME}")
+    message(STATUS "Портативная ZIP версия создана: ${ZIP_NAME}")
 else()
     message(WARNING "Не удалось создать ZIP архив")
 endif()
