@@ -66,6 +66,15 @@ private:
 	void ensureCursorInEditable();
 	void setupConnections();
 	void onErrorLocationAvailable(const QString& message, int line, int column);
-	void clearCurrentLineAndPrompt();
 	bool hasPromptAtEditableStart() const;
+
+	// Цвета
+	mutable QColor m_promptColor;
+	mutable QColor m_resultColor;
+	mutable QColor m_errorColor;
+	mutable QColor m_warningColor;
+	mutable QColor m_outputColor;
+
+	void loadThemeColors();
+	QTextCharFormat formatForType(ReplMessageType type) const;
 };

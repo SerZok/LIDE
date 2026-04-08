@@ -1,10 +1,11 @@
 #include "repl_widget.h"
 
-#include <QKeyEvent>
 #include <QMenu>
-#include <QApplication>
+#include <QKeyEvent>
 #include <QClipboard>
 #include <QTextBlock>
+#include <QApplication>
+#include <QRegularExpression>
 
 ReplWidget::ReplWidget(QWidget* parent)
     : QTextEdit(parent)
@@ -16,9 +17,14 @@ ReplWidget::ReplWidget(QWidget* parent)
 
     MAX_LINES = m_settings->replMaxLines();
 
+    loadThemeColors();
+
     setupConnections();
     m_controller->start();
-    appendPrompt();
+
+    connect(m_settings, &Settings::themeChanged, this, [this]() {
+        loadThemeColors();
+        });
 }
 
 ReplWidget::~ReplWidget()
@@ -48,47 +54,40 @@ bool ReplWidget::hasPromptAtEditableStart() const
 
 void ReplWidget::displayMessage(const ReplMessage& msg)
 {
-    bool hasPrompt = hasPromptAtEditableStart();
-    QString inputtedText = "";
-    if (hasPrompt)
-    {
-        inputtedText = currentInput();
-        clearCurrentLineAndPrompt();
-    }
+    moveCursor(QTextCursor::End);
+
     switch (msg.type) {
     case ReplMessageType::Prompt:
         m_waitingForInput = true;
-        hasPrompt = true;
         setReadOnly(false);
+        appendPrompt();
         break;
+
     case ReplMessageType::Result:
         appendOutput(msg.text + "\n", msg.type);
         break;
+
     case ReplMessageType::Error:
         appendOutput(msg.text + "\n", msg.type);
-        if(m_controller && m_controller->isRunning())
+        if (m_controller && m_controller->isRunning())
             m_waitingForInput = true;
         else
             m_waitingForInput = false;
         break;
+
     case ReplMessageType::Warning:
         appendOutput(msg.text + "\n", msg.type);
         break;
+
     case ReplMessageType::Output:
         appendOutput(msg.text, msg.type);
         break;
+
     default:
         break;
     }
-    if (hasPrompt)
-    {
-        appendPrompt();
-        if (m_waitingForInput)
-        {
-            appendOutput(inputtedText);
-            setReadOnly(false);
-        }
-    }
+
+    ensureCursorVisible();
 }
 
 void ReplWidget::sendCode(const QString& code)
@@ -124,11 +123,8 @@ void ReplWidget::stop()
 void ReplWidget::clear()
 {
     QTextEdit::clear();
-    m_editableStart = 0;
-
-    if (!m_prompt.isEmpty()) {
-        m_waitingForInput = true;
-    }
+    m_waitingForInput = true;
+    appendPrompt();
 }
 
 void ReplWidget::appendOutput(const QString& text, ReplMessageType type)
@@ -142,26 +138,8 @@ void ReplWidget::appendOutput(const QString& text, ReplMessageType type)
 
     QTextCursor cursor(document());
     cursor.movePosition(QTextCursor::End);
+    cursor.insertText(text, formatForType(type));
     setTextCursor(cursor);
-
-    QTextCharFormat fmt;
-    switch (type) {
-        break;
-    case ReplMessageType::Error:
-        fmt.setForeground(Qt::red);
-        break;
-    case ReplMessageType::Warning:
-        fmt.setForeground(QColor(255, 200, 0));
-        break;
-    case ReplMessageType::Prompt:
-    case ReplMessageType::Output:
-    case ReplMessageType::Result:
-    default:
-        fmt.setForeground(Qt::white);
-        break;
-    }
-    textCursor().insertText(text, fmt);
-
     ensureCursorVisible();
 }
 
@@ -177,11 +155,7 @@ void ReplWidget::appendPrompt()
     QTextCursor cursor = textCursor();
 
     // Вставляем зеленый промпт
-    cursor.insertText(m_prompt, [&]() {
-        QTextCharFormat format;
-        format.setForeground(QColor(0, 255, 0));
-        return format;
-        }());
+    cursor.insertText(m_prompt, formatForType(ReplMessageType::Prompt));
 
     // Меняем формат для следующего ввода
     cursor.setCharFormat([&]() {
@@ -266,7 +240,11 @@ void ReplWidget::sendCurrentInput()
         return;
     }
 
+    QTextCursor cursor = textCursor();
+    cursor.movePosition(QTextCursor::End);
+    setTextCursor(cursor);
     insertPlainText("\n");
+
     emit commandEntered(input);
 
     setReadOnly(true);
@@ -478,22 +456,40 @@ void ReplWidget::onErrorLocationAvailable(const QString& message, int line, int 
     }
 }
 
-void ReplWidget::clearCurrentLineAndPrompt()
+void ReplWidget::loadThemeColors()
 {
-    QTextCursor cursor = textCursor();
+    const QString styleSheet = qApp->styleSheet();
 
-    // Перемещаемся в позицию m_editableStart (начало ввода, после промпта)
-    cursor.setPosition(m_editableStart);
+    // Парсим цвета из кастомных свойств
+    auto extractColor = [&](const QString& propName, QColor& target, const QColor& fallback) {
+        // Ищем: qproperty-replPrompt: #00ff00;
+        QRegularExpression re(QString(R"(qproperty-%1:\s*(#[0-9A-Fa-f]+))").arg(propName));
+        auto match = re.match(styleSheet);
+        if (match.hasMatch()) {
+            target = QColor(match.captured(1));
+        }
+        else {
+            target = fallback; // запасной вариант
+        }
+        };
 
-    // 1. Удаляем всё от m_editableStart до конца документа
-    cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
-    cursor.removeSelectedText();
+    extractColor("replPrompt", m_promptColor, QColor(0, 255, 0));
+    extractColor("replResult", m_resultColor, QColor(220, 220, 220));
+    extractColor("replError", m_errorColor, QColor(255, 100, 100));
+    extractColor("replWarning", m_warningColor, QColor(255, 200, 100));
+    extractColor("replOutput", m_outputColor, QColor(220, 220, 220));
+}
 
-    // 2. Теперь удаляем промпт (от начала строки до m_editableStart)
-    cursor.setPosition(m_editableStart);
-    cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::KeepAnchor);
-    cursor.removeSelectedText();    
-
-    // Обновляем позицию начала редактирования
-    m_editableStart = textCursor().position();
+QTextCharFormat ReplWidget::formatForType(ReplMessageType type) const
+{
+    QTextCharFormat fmt;
+    switch (type) {
+    case ReplMessageType::Prompt:   fmt.setForeground(m_promptColor); break;
+    case ReplMessageType::Result:   fmt.setForeground(m_resultColor); break;
+    case ReplMessageType::Error:    fmt.setForeground(m_errorColor); break;
+    case ReplMessageType::Warning:  fmt.setForeground(m_warningColor); break;
+    case ReplMessageType::Output:   fmt.setForeground(m_outputColor); break;
+    default:                        fmt.setForeground(m_outputColor); break;
+    }
+    return fmt;
 }

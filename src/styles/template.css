@@ -388,6 +388,12 @@ ReplWidget {
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 11pt;
     border: none;
+
+    qproperty-replPrompt: @REPL_PROMPT@;
+    qproperty-replResult: @REPL_RESULT@;
+    qproperty-replError: @REPL_ERROR@;
+    qproperty-replWarning: @REPL_WARNING@;
+    qproperty-replOutput: @REPL_OUTPUT@;
 }
 
 /* --- EditorTabWidget --- */

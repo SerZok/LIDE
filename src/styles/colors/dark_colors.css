@@ -16,4 +16,10 @@
 	EDITOR_BG = #1e1e1e;
 	EDITOR_TEXT = #d4d4d4;
 	SELECTION_BG = #3e4451;
+
+	REPL_PROMPT = #00ff00;
+	REPL_RESULT = #e0e0e0;
+	REPL_ERROR = #ff6b6b;
+	REPL_WARNING = #ffd93d;
+	REPL_OUTPUT = #e0e0e0;
 }
