@@ -331,6 +331,11 @@ LispEditor {
     selection-background-color: #3e4451;
     selection-color: #e0e0e0;
     border: 0.08em solid #3d3d3d;
+
+    qproperty-currentLine: #000000;
+    qproperty-bracketMatch: #727272;
+    qproperty-bracketRegion: #333333;
+    qproperty-bracketError: #ff3232;
 }
 
     LispEditor QWidget {

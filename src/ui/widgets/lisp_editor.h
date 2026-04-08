@@ -60,8 +60,6 @@ private:
     QTimer* m_reloadTimer;
     bool m_ignoreChanges;
     LispHighlighter* m_highlighter;
-    QTextCharFormat m_matchedBracketFormat;
-    QTextCharFormat m_mismatchedBracketFormat;
 
     QTextEdit::ExtraSelection m_errorSelection;
     QList<QTextEdit::ExtraSelection> m_errorSelections;
@@ -70,22 +68,26 @@ private:
     int m_cachedTabSize = 4;
     bool m_cachedShowLineNumbers = true;
 
-    void setupSyntaxHighlighting();
+    void loadThemeColors();
     void updateErrorHighlight();
 
     int lineNumberAreaWidth() const;
 
-    void setupWatcher();
     void updateWatcher();
     bool reloadFile();
 
     int findMatchingBracket(int startPos, bool forward) const;
-    void matchBrackets(const QTextCursor& cursor);
     bool isPositionInComment(int position) const;
 
     void applyTabSize(int tabSize);
     void applyShowLineNumbers(bool show);
     void applyEditorSettings();
+
+    mutable QColor m_currentLineColor;
+    mutable QColor m_bracketMatchColor;
+    mutable QColor m_bracketRegionColor;
+    mutable QColor m_bracketErrorColor;
+
 };
 
 // Нумерация строк

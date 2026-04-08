@@ -25,11 +25,9 @@ LispEditor::LispEditor(QWidget* parent)
     m_reloadTimer->setSingleShot(true);
     m_reloadTimer->setInterval(200);
 
-    m_matchedBracketFormat.setBackground(QColor(100, 150, 100, 100));
-    m_matchedBracketFormat.setForeground(Qt::white);
-    m_mismatchedBracketFormat.setBackground(QColor(200, 80, 80, 150));
+    loadThemeColors();
 
-    connect(Settings::instance(), &Settings::settingsChanged, this, &LispEditor::applyEditorSettings, Qt::UniqueConnection);
+    connect(m_settings, &Settings::settingsChanged, this, &LispEditor::applyEditorSettings, Qt::UniqueConnection);
 
     connect(this, &LispEditor::blockCountChanged, this, &LispEditor::updateLineNumberAreaWidth);
     connect(this, &LispEditor::updateRequest, this, &LispEditor::updateLineNumberArea);
@@ -44,6 +42,11 @@ LispEditor::LispEditor(QWidget* parent)
         clearErrorHighlight();
         });
 
+    connect(m_settings, &Settings::themeChanged, this, [this]() {
+        loadThemeColors();
+        highlightMatchingBrackets();
+        });
+
     updateLineNumberAreaWidth(0);
 }
 
@@ -52,6 +55,27 @@ LispEditor::~LispEditor()
     if (!m_fileWatcher->files().isEmpty()) {
         m_fileWatcher->removePaths(m_fileWatcher->files());
     }
+}
+
+void LispEditor::loadThemeColors()
+{
+    const QString styleSheet = qApp->styleSheet();
+
+    auto extractColor = [&](const QString& propName, QColor& target, const QColor& fallback) {
+        QRegularExpression re(QString(R"(qproperty-%1:\s*(#[0-9A-Fa-f]+))").arg(propName));
+        auto match = re.match(styleSheet);
+        if (match.hasMatch()) {
+            target = QColor(match.captured(1));
+        }
+        else {
+            target = fallback;
+        }
+        };
+
+    extractColor("currentLine", m_currentLineColor, QColor(230, 230, 230, 20));
+    extractColor("bracketMatch", m_bracketMatchColor, QColor(50, 50, 255, 200));
+    extractColor("bracketRegion", m_bracketRegionColor, QColor(80, 80, 80, 50));
+    extractColor("bracketError", m_bracketErrorColor, QColor(255, 50, 50));
 }
 
 int LispEditor::lineNumberAreaWidth() const
@@ -119,7 +143,7 @@ QList<QTextEdit::ExtraSelection> LispEditor::highlightMatchingBrackets()
     // Подсвечиваем текущую скобку
     QTextEdit::ExtraSelection currentSelection;
     currentSelection.cursor = cursor;
-    currentSelection.format.setBackground(QColor(50, 50, 255, 200));
+    currentSelection.format.setBackground(m_bracketMatchColor);
     extraSelections.append(currentSelection);
 
     // Ищем парную скобку
@@ -141,7 +165,7 @@ QList<QTextEdit::ExtraSelection> LispEditor::highlightMatchingBrackets()
 
             if (!regionCursor.selectedText().isEmpty()) {
                 regionSelection.cursor = regionCursor;
-                regionSelection.format.setBackground(QColor(80, 80, 80, 50));
+                regionSelection.format.setBackground(m_bracketRegionColor);
                 extraSelections.append(regionSelection);
             }
 
@@ -152,7 +176,7 @@ QList<QTextEdit::ExtraSelection> LispEditor::highlightMatchingBrackets()
             matchCursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
 
             matchSelection.cursor = matchCursor;
-            matchSelection.format.setBackground(QColor(50, 50, 255, 200));
+            matchSelection.format.setBackground(m_bracketMatchColor);
             extraSelections.append(matchSelection);
         }
     }
@@ -160,7 +184,7 @@ QList<QTextEdit::ExtraSelection> LispEditor::highlightMatchingBrackets()
         // Если парная скобка не найдена, подсвечиваем ошибку
         QTextEdit::ExtraSelection errorSelection;
         errorSelection.cursor = cursor;
-        errorSelection.format.setBackground(QColor(255, 50, 50));
+        errorSelection.format.setBackground(m_bracketErrorColor);
         extraSelections.append(errorSelection);
     }
 
@@ -250,7 +274,7 @@ void LispEditor::highlightCurrentLine()
     // Добавляем подсветку текущей строки
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
-        selection.format.setBackground(QColor(230, 230, 230, 20));
+        selection.format.setBackground(m_currentLineColor);
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();
