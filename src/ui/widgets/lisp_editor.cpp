@@ -9,12 +9,15 @@
 
 LispEditor::LispEditor(QWidget* parent)
     : QPlainTextEdit(parent)
+    , m_settings(Settings::instance())
     , m_lineNumberArea(new LineNumberArea(this))
     , m_fileWatcher(new QFileSystemWatcher(this))
     , m_reloadTimer(new QTimer(this))
     , m_ignoreChanges(false)
     , m_highlighter(new LispHighlighter(this->document()))
 {
+    applyEditorSettings();
+
     m_lineNumberArea->setObjectName("LineNumberArea");
     setTabStopDistance(40);
     setLineWrapMode(QPlainTextEdit::NoWrap);
@@ -22,21 +25,29 @@ LispEditor::LispEditor(QWidget* parent)
     m_reloadTimer->setSingleShot(true);
     m_reloadTimer->setInterval(200);
 
-    m_matchedBracketFormat.setBackground(QColor(100, 150, 100, 100));
-    m_matchedBracketFormat.setForeground(Qt::white);
-    m_mismatchedBracketFormat.setBackground(QColor(200, 80, 80, 150));
+    loadThemeColors();
+
+    connect(m_settings, &Settings::settingsChanged, this, &LispEditor::applyEditorSettings, Qt::UniqueConnection);
 
     connect(this, &LispEditor::blockCountChanged, this, &LispEditor::updateLineNumberAreaWidth);
     connect(this, &LispEditor::updateRequest, this, &LispEditor::updateLineNumberArea);
-    connect(this, &LispEditor::cursorPositionChanged, this, &LispEditor::highlightCurrentLine);
-    connect(this, &LispEditor::cursorPositionChanged, this, &LispEditor::highlightMatchingBrackets);
+    connect(this, &LispEditor::cursorPositionChanged, this, &LispEditor::highlightCurrentLine);;
 
     connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &LispEditor::onFileChanged);
     connect(m_reloadTimer, &QTimer::timeout, this, &LispEditor::askForReload);
     connect(this, &LispEditor::textChanged, this, &LispEditor::onTextChanged);
 
+    connect(document(), &QTextDocument::contentsChanged, this, [this]() {
+        if (m_errorSelections.isEmpty()) return;
+        clearErrorHighlight();
+        });
+
+    connect(m_settings, &Settings::themeChanged, this, [this]() {
+        loadThemeColors();
+        highlightMatchingBrackets();
+        });
+
     updateLineNumberAreaWidth(0);
-    highlightCurrentLine();
 }
 
 LispEditor::~LispEditor()
@@ -44,6 +55,27 @@ LispEditor::~LispEditor()
     if (!m_fileWatcher->files().isEmpty()) {
         m_fileWatcher->removePaths(m_fileWatcher->files());
     }
+}
+
+void LispEditor::loadThemeColors()
+{
+    const QString styleSheet = qApp->styleSheet();
+
+    auto extractColor = [&](const QString& propName, QColor& target, const QColor& fallback) {
+        QRegularExpression re(QString(R"(qproperty-%1:\s*(#[0-9A-Fa-f]+))").arg(propName));
+        auto match = re.match(styleSheet);
+        if (match.hasMatch()) {
+            target = QColor(match.captured(1));
+        }
+        else {
+            target = fallback;
+        }
+        };
+
+    extractColor("currentLine", m_currentLineColor, QColor(230, 230, 230, 20));
+    extractColor("bracketMatch", m_bracketMatchColor, QColor(50, 50, 255, 200));
+    extractColor("bracketRegion", m_bracketRegionColor, QColor(80, 80, 80, 50));
+    extractColor("bracketError", m_bracketErrorColor, QColor(255, 50, 50));
 }
 
 int LispEditor::lineNumberAreaWidth() const
@@ -59,15 +91,18 @@ int LispEditor::lineNumberAreaWidth() const
     return space;
 }
 
-void LispEditor::highlightMatchingBrackets()
+QList<QTextEdit::ExtraSelection> LispEditor::highlightMatchingBrackets()
 {
+    // Получаем текущие подсветки (ошибки и текущую строку)
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
     QTextCursor cursor = textCursor();
     int position = cursor.position();
 
     // Пропускаем, если курсор в комментарии
     if (isPositionInComment(position)) {
-        setExtraSelections(QList<QTextEdit::ExtraSelection>());
-        return;
+        setExtraSelections(extraSelections);
+        return extraSelections;
     }
 
     // ЕСЛИ ЕСТЬ ВЫДЕЛЕНИЕ - используем его начало
@@ -77,40 +112,38 @@ void LispEditor::highlightMatchingBrackets()
 
         // Проверяем, не в комментарии ли начало выделения
         if (isPositionInComment(position)) {
-            setExtraSelections(QList<QTextEdit::ExtraSelection>());
-            return;
+            setExtraSelections(extraSelections);
+            return extraSelections;
         }
     }
 
     if (position >= document()->characterCount() - 1) {
-        setExtraSelections(QList<QTextEdit::ExtraSelection>());
-        return;
+        setExtraSelections(extraSelections);
+        return extraSelections;
     }
 
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
     QString selectedText = cursor.selectedText();
     if (selectedText.isEmpty()) {
-        setExtraSelections(QList<QTextEdit::ExtraSelection>());
-        return;
+        setExtraSelections(extraSelections);
+        return extraSelections;
     }
 
     QChar currentChar = selectedText.at(0);
     if (currentChar != '(' && currentChar != ')') {
-        setExtraSelections(QList<QTextEdit::ExtraSelection>());
-        return;
+        setExtraSelections(extraSelections);
+        return extraSelections;
     }
 
     if (isPositionInComment(position)) {
-        setExtraSelections(QList<QTextEdit::ExtraSelection>());
-        return;
+        setExtraSelections(extraSelections);
+        return extraSelections;
     }
-
-    QList<QTextEdit::ExtraSelection> extraSelections;
 
     // Подсвечиваем текущую скобку
     QTextEdit::ExtraSelection currentSelection;
     currentSelection.cursor = cursor;
-    currentSelection.format.setBackground(QColor(50, 50, 255, 200));
+    currentSelection.format.setBackground(m_bracketMatchColor);
     extraSelections.append(currentSelection);
 
     // Ищем парную скобку
@@ -132,7 +165,7 @@ void LispEditor::highlightMatchingBrackets()
 
             if (!regionCursor.selectedText().isEmpty()) {
                 regionSelection.cursor = regionCursor;
-                regionSelection.format.setBackground(QColor(80, 80, 80, 50));
+                regionSelection.format.setBackground(m_bracketRegionColor);
                 extraSelections.append(regionSelection);
             }
 
@@ -143,7 +176,7 @@ void LispEditor::highlightMatchingBrackets()
             matchCursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, 1);
 
             matchSelection.cursor = matchCursor;
-            matchSelection.format.setBackground(QColor(50, 50, 255, 200));
+            matchSelection.format.setBackground(m_bracketMatchColor);
             extraSelections.append(matchSelection);
         }
     }
@@ -151,11 +184,11 @@ void LispEditor::highlightMatchingBrackets()
         // Если парная скобка не найдена, подсвечиваем ошибку
         QTextEdit::ExtraSelection errorSelection;
         errorSelection.cursor = cursor;
-        errorSelection.format.setBackground(QColor(255, 50, 50));
+        errorSelection.format.setBackground(m_bracketErrorColor);
         extraSelections.append(errorSelection);
     }
 
-    setExtraSelections(extraSelections);
+    return extraSelections;
 }
 
 int LispEditor::findMatchingBracket(int startPos, bool forward) const
@@ -235,16 +268,20 @@ void LispEditor::resizeEvent(QResizeEvent* event)
 
 void LispEditor::highlightCurrentLine()
 {
-    QList<QTextEdit::ExtraSelection> extraSelections;
+    // Получаем текущие подсветки (ошибки и т.д.)
+    QList<QTextEdit::ExtraSelection> extraSelections = m_extraSelections;
 
+    // Добавляем подсветку текущей строки
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
-        selection.format.setBackground(QColor(230, 230, 230, 20));
+        selection.format.setBackground(m_currentLineColor);
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();
         extraSelections.append(selection);
     }
+
+    extraSelections.append(highlightMatchingBrackets());
 
     setExtraSelections(extraSelections);
 }
@@ -253,6 +290,43 @@ void LispEditor::paintEvent(QPaintEvent* event)
 {
     QPlainTextEdit::paintEvent(event);
 }
+
+void LispEditor::applyTabSize(int tabSize) {
+    if (tabSize == m_cachedTabSize || tabSize < 1 || tabSize > 16)
+        return;
+
+    int pixelWidth = fontMetrics().horizontalAdvance(' ') * tabSize;
+    setTabStopDistance(pixelWidth);
+    m_cachedTabSize = tabSize;
+}
+
+void LispEditor::applyShowLineNumbers(bool show) {
+    if (show == m_cachedShowLineNumbers)
+        return;
+
+    m_cachedShowLineNumbers = show;
+
+    if (show) {
+        updateLineNumberAreaWidth(0);
+        connect(this, &LispEditor::blockCountChanged, this, &LispEditor::updateLineNumberAreaWidth, Qt::UniqueConnection);
+        connect(this, &LispEditor::updateRequest, this, &LispEditor::updateLineNumberArea, Qt::UniqueConnection);
+        m_lineNumberArea->show();
+    }
+    else {
+        setViewportMargins(0, 0, 0, 0);
+        disconnect(this, &LispEditor::blockCountChanged, this, &LispEditor::updateLineNumberAreaWidth);
+        disconnect(this, &LispEditor::updateRequest, this, &LispEditor::updateLineNumberArea);
+        m_lineNumberArea->hide();
+    }
+    viewport()->update();
+}
+
+void LispEditor::applyEditorSettings() {
+    applyTabSize(m_settings->tabSize());
+    applyShowLineNumbers(m_settings->showLineNumbers());
+}
+
+
 
 // ==================[ LineNumberArea ]==================
 void LispEditor::LineNumberArea::paintEvent(QPaintEvent* event)
@@ -301,6 +375,9 @@ bool LispEditor::loadFile(const QString& fileName)
 
     emit fileLoaded(fileName);
     emit fileModifiedChanged(fileName, false);
+
+    // После загрузки файла восстанавливаем подсветку
+    updateErrorHighlight();
 
     return true;
 }
@@ -377,7 +454,7 @@ bool LispEditor::reloadFile()
     if (m_currentFile.isEmpty())
         return false;
 
-    loadFile(m_currentFile);
+    return loadFile(m_currentFile);
 }
 
 void LispEditor::updateWatcher()
@@ -389,4 +466,70 @@ void LispEditor::updateWatcher()
     if (!m_currentFile.isEmpty() && QFile::exists(m_currentFile)) {
         m_fileWatcher->addPath(m_currentFile);
     }
+}
+
+void LispEditor::highlightErrorAtPosition(const QString& message, int line, int column)
+{
+    // Очищаем предыдущую подсветку
+    clearErrorHighlight();
+
+    // Находим блок по номеру строки
+    QTextBlock block = document()->findBlockByNumber(line - 1);
+    if (!block.isValid()) {
+        qDebug() << "Invalid line:" << line;
+        return;
+    }
+
+    // Создаём курсор для выделения позиции ошибки
+    QTextCursor cursor(block);
+    int errorPosition = block.position() + (column - 1);
+    cursor.setPosition(errorPosition);
+    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+
+    // Подсветка позиции ошибки
+    QTextEdit::ExtraSelection errorSelection;
+    errorSelection.cursor = cursor;
+    errorSelection.format.setBackground(QColor(255, 100, 100, 80));
+    errorSelection.format.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
+    errorSelection.format.setUnderlineColor(QColor(255, 50, 50));
+    errorSelection.format.setToolTip(QString("Line %1, Column %2: %3").arg(line).arg(column).arg(message));
+
+    // Подсветка всей строки
+    QTextEdit::ExtraSelection lineHighlight;
+    QTextCursor lineCursor(block);
+    lineCursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+    lineHighlight.cursor = lineCursor;
+    lineHighlight.format.setBackground(QColor(255, 100, 100, 40));
+    lineHighlight.format.setProperty(QTextFormat::FullWidthSelection, true);
+
+    // Сохраняем обе подсветки
+    m_errorSelections.clear();
+    m_errorSelections.append(errorSelection);
+    m_errorSelections.append(lineHighlight);
+    
+    // Сохраняем основную подсветку для совместимости (если нужно)
+    m_errorSelection = errorSelection;
+    
+    // Применяем подсветку
+    updateErrorHighlight();
+
+    // Прокручиваем к ошибке
+    QTextCursor scrollCursor(document());
+    scrollCursor.setPosition(errorPosition);
+    setTextCursor(scrollCursor);
+    ensureCursorVisible();
+}
+
+void LispEditor::clearErrorHighlight()
+{
+    m_errorSelection.cursor = QTextCursor();
+    m_errorSelections.clear();
+    updateErrorHighlight();
+}
+
+void LispEditor::updateErrorHighlight()
+{
+    // Просто копируем список подсветок
+    m_extraSelections = m_errorSelections;
+    setExtraSelections(m_extraSelections);
 }

@@ -4,10 +4,14 @@
 #include <QMainWindow>
 #include <QMap>
 
+#include "ui/components/error_notification.h"
 #include "ui/widgets/editor_tab_widget.h"
 #include "ui/widgets/project_tree.h"
-#include "ui/widgets/console.h"
-#include "ui/about_dialog.h"
+#include "ui/widgets/repl_widget.h"
+
+#include "ui/dialogs/settings_dialog.h"
+#include "ui/dialogs/about_dialog.h"
+
 #include "settings.h"
 
 QT_BEGIN_NAMESPACE
@@ -30,8 +34,8 @@ public:
     void openFiles(QStringList files);
     void updateStatusBarPosition(int line, int col);
 
-signals:
-    void themeChanged(QString& themeName);
+protected:
+    void changeEvent(QEvent* event) override;
 
 private slots:
     void saveAppState();
@@ -40,28 +44,50 @@ private slots:
 private:
     Ui::MainWindow* ui;
     QToolBar* m_mainToolBar;
+    Settings* m_settings;
+    QTimer* m_autoSaveTimer = nullptr;
+
+    void saveBeforeExit();
+
+    void setupSaveTimer();
+    void triggerAutoSave();
+    void onSettingsChanged();
 
     void setupMenuBar();
     void setupToolBar();
     void setupStatusBar();
     void setupDockWidgets();
-    void loadTheme(QString stylePath);
+
+    LispEditor* findEditorByFile(const QString& filePath);
+    void onLispError(const QString& file, const QString& message, int line, int column);
 
     ProjectTree* createProjectTree();
-    Console* createConsoleLisp();
+    ReplWidget* createConsoleLisp();
 
     void openProject();
     void createProject();
+    void updateTranslations();
+    void openManual();
 
     QMap<QDockWidget*, QString> m_dockNames;
 
     QDockWidget* m_projectDock = nullptr;
     QDockWidget* m_ConsoleDock = nullptr;
+    ErrorNotification* m_errorNotification;
 
     // Основные виджеты
     EditorTabWidget* m_tabWidget;
     ProjectTree* m_projectTree;
-    Console* m_console;
+    ReplWidget* m_console;
+
+    // Меню
+    QMenu* m_fileMenu = nullptr;
+    QMenu* m_editMenu = nullptr;
+    QMenu* m_viewMenu = nullptr;
+    QMenu* m_runMenu = nullptr;
+    QMenu* m_toolsMenu = nullptr;
+    QMenu* m_helpMenu = nullptr;
+    QMenu* m_styleMenu = nullptr;
 
     // Меню работы с файлами
     QAction* m_createFileAction = nullptr;

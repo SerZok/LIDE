@@ -34,6 +34,7 @@ private slots:
     void onContextMenuRequested(const QPoint& pos);
 
 private:
+    Settings* m_settings;
     QFileSystemModel* m_model;
     QAction* m_newFileAction;
     QAction* m_newFolderAction;

@@ -25,6 +25,9 @@ public:
 
     QString currentFile() const { return m_currentFile; }
     bool isModified() const { return document()->isModified(); }
+    
+    void highlightErrorAtPosition(const QString& message, int line, int column);
+    void clearErrorHighlight();
 
 signals:
     void fileChangedExternally(const QString& path);
@@ -38,7 +41,7 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private slots:
-    void highlightMatchingBrackets();
+    QList<QTextEdit::ExtraSelection> highlightMatchingBrackets();
     void updateLineNumberAreaWidth(int newBlockCount);
     void highlightCurrentLine();
     void updateLineNumberArea(const QRect& rect, int dy);
@@ -49,6 +52,7 @@ private slots:
 
 private:
     class LineNumberArea;
+    Settings* m_settings;
 
     QString m_currentFile;
     QFileSystemWatcher* m_fileWatcher;
@@ -56,18 +60,33 @@ private:
     QTimer* m_reloadTimer;
     bool m_ignoreChanges;
     LispHighlighter* m_highlighter;
-    QTextCharFormat m_matchedBracketFormat;
-    QTextCharFormat m_mismatchedBracketFormat;
+
+    QTextEdit::ExtraSelection m_errorSelection;
+    QList<QTextEdit::ExtraSelection> m_errorSelections;
+    QList<QTextEdit::ExtraSelection> m_extraSelections;
+
+    int m_cachedTabSize = 4;
+    bool m_cachedShowLineNumbers = true;
+
+    void loadThemeColors();
+    void updateErrorHighlight();
 
     int lineNumberAreaWidth() const;
 
-    void setupWatcher();
     void updateWatcher();
     bool reloadFile();
 
     int findMatchingBracket(int startPos, bool forward) const;
-    void matchBrackets(const QTextCursor& cursor);
     bool isPositionInComment(int position) const;
+
+    void applyTabSize(int tabSize);
+    void applyShowLineNumbers(bool show);
+    void applyEditorSettings();
+
+    mutable QColor m_currentLineColor;
+    mutable QColor m_bracketMatchColor;
+    mutable QColor m_bracketRegionColor;
+    mutable QColor m_bracketErrorColor;
 
 };
 

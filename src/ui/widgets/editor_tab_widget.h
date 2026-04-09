@@ -29,6 +29,14 @@ public:
     // Получить список всех открытых файлов
     QStringList openedFiles();
 
+    int modifFileCounts();
+
+    // Получить путь к файлу текущего редактора
+    QString currentFilePath() const;
+
+    LispEditor* editorByPath(const QString& path) const;
+    int indexOf(LispEditor* editor) const;
+
 signals:
     void fileOpened(const QString& path);
     void fileClosed(const QString& path);

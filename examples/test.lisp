@@ -1,6 +1,4 @@
-(print "Test simple LISP")
-(* 3 5)
+(defun infinite-while ()
+  (loop (print "still running")))
 
-
-(print (* 10 200))
-(print (cons 'a '(b c)))
+(infinite-while)

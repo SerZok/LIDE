@@ -1,7 +1,7 @@
-﻿cmake_minimum_required(VERSION 3.19)
-set (PROJECT_NAME LIDE)
+cmake_minimum_required(VERSION 3.19)
+set(PROJECT_NAME LIDE)
 set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 2)
+set(PROJECT_VERSION_MINOR 5)
 set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
@@ -33,7 +33,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Путь к Qt
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Gui LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
 
 qt_standard_project_setup(
@@ -59,6 +59,7 @@ file(GLOB_RECURSE PROJECT_HEADERS
 )
 
 file(GLOB_RECURSE PROJECT_UIS
+    "src/ui/dialogs/*.ui"
     "src/ui/*.ui"
     "src/*.ui"
 )
@@ -67,30 +68,38 @@ file(GLOB_RECURSE PROJECT_RESOURCES
     "src/*.qrc"
 )
 
-# Генерация стилей
+#================================[ Генерацией стилей ]================================
 function(generate_theme theme_name)
-    set(COLORS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/colors/${theme_name}.colors")
-    message(STATUS "Генерация стиля [${theme_name}] используя цвета из: ${COLORS_FILE}")
+    set(COLORS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/colors/${theme_name}_colors.css")
+    set(TEMPLATE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/template.css")
+
+    message(STATUS "Генерация стиля [${theme_name}]")
+    if(NOT EXISTS "${COLORS_FILE}")
+        message(FATAL_ERROR "Файл цветов не найден: ${COLORS_FILE}")
+    endif()
 
     file(STRINGS ${COLORS_FILE} COLOR_LINES)
 
     foreach(line ${COLOR_LINES})
-        string(STRIP "${line}" line)
-        string(REGEX REPLACE "\r$" "" line "${line}")
-        
-        if(NOT line MATCHES "^#" AND NOT line STREQUAL "")
-            string(REGEX MATCH "^([^=]+)=(.*)$" match "${line}")
-            if(CMAKE_MATCH_1)
-                set(${CMAKE_MATCH_1} ${CMAKE_MATCH_2})
-            else()
-                message(WARNING "Could not parse line: '${line}'")
-            endif()
-        endif()
+       string(STRIP "${line}" line)
+       string(REGEX REPLACE "\r$" "" line "${line}") # Убираем Windows CR
+
+       # Пропускаем пустые строки, скобки и комментарии
+       if(line STREQUAL "" OR line MATCHES "^[{}]" OR line MATCHES "^[/\\*]")
+           continue()
+       endif()
+
+       # Парсим формат: KEY = #VALUE; (с пробелами, без точки с запятой и т.д.)
+       if(line MATCHES "^([A-Za-z_][A-Za-z0-9_]*)[ \t]*=[ \t]*(#[0-9A-Fa-f]+)[ \t]*;?[ \t]*$")
+           set(${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
+       else()
+           message(WARNING "Не удалось распознать строку в ${theme_name}_colors.css: '${line}'")
+       endif()
     endforeach()
 
-    # Генерируем CSS файл в бинарную директорию
-   configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/template.css.in"
+    file(MAKE_DIRECTORY "${OUTPUT_DIR}")
+    configure_file(
+        "${TEMPLATE_FILE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/src/styles/${theme_name}.css"
         @ONLY
     )
@@ -104,7 +113,7 @@ set(RESOURCE_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/resources.rc
 )
 
-# Создание exe'шника
+#================================[ Создание EXE'шника ]================================
 qt_add_executable(${PROJECT_NAME} 
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
@@ -114,16 +123,37 @@ qt_add_executable(${PROJECT_NAME}
     ${RESOURCE_FILES}
 )
 
+#================================[ ПЕРЕВОДЫ ]================================
+# Настройка lupdate (обновление .ts из исходников)
 qt_add_translations(${PROJECT_NAME}
-    TS_OUTPUT_DIRECTORY "src/translations" 
+    TS_FILE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/translations"
+    TS_FILE_NAME "LIDE"
+    QM_FILES_OUTPUT_VARIABLE QM_FILES  # сохраняем список сгенерированных .qm
 )
 
-add_dependencies(${PROJECT_NAME} update_translations)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_lrelease)
 
-# Подключение библиотек
+# Добавляем .qm в сборку (для AUTORCC / ресурсов)
+set_source_files_properties(${QM_FILES} PROPERTIES
+    OUTPUT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/translations"
+)
+
+# Копируем .qm в папку рядом с exe
+foreach(qm ${QM_FILES})
+    get_filename_component(qm_name ${qm} NAME)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${qm}
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/translations/${qm_name}
+        COMMENT "Copying ${qm_name} to output directory"
+    )
+endforeach()
+
+#================================[ Подключение библиотек ]================================
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Gui
 )
 
 # Добавляем пути для include файлов
@@ -144,15 +174,15 @@ if(WIN32)
     find_program(WINDEPLOYQT windeployqt REQUIRED)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${WINDEPLOYQT} $<TARGET_FILE:${PROJECT_NAME}> 
-        --no-translations
-        --no-translations
+       --verbose 0
+        --release
         --no-network
         --no-opengl
-        --no-quick
+        --no-opengl-sw
+        --no-3dcore
         --no-compiler-runtime
         --no-system-d3d-compiler
         --no-system-dxc-compiler
-        --verbose 0
         COMMENT "Running windeployqt..."
     )
 
@@ -161,8 +191,14 @@ if(WIN32)
     COMMAND ${CMAKE_COMMAND} -E copy_directory 
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/SBCL" 
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sbcl"
-    COMMENT "Copying SBCL to output directory..."
-)
+    COMMENT "Copying SBCL to output directory...")
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/docs" 
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/docs"
+    COMMENT "Copying Manual to output directory...")
+
 endif()
 
 if(QT_VERSION_MAJOR EQUAL 6)

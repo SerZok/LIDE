@@ -1,60 +1,265 @@
+/* ==========================================================================
+   ГЛОБАЛЬНЫЕ БАЗОВЫЕ СТИЛИ
+   ========================================================================== */
 * {
     font-size: 11pt;
 }
 
-QMainWindow {
+/* --- Поля ввода --- */
+QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox, QDoubleSpinBox, QComboBox, QFontComboBox {
+    background-color: #ffffff;
+    color: #2d2d2d;
+    border: 1px solid #d0d0d0;
+    border-radius: 0.35em;
+    padding: 0.1em 0.3em;
+    selection-background-color: #cde4ff;
+    selection-color: #2d2d2d;
+    outline: none;
+}
+
+    QLineEdit:focus, QTextEdit:focus{
+        border-color: #007acc;
+    }
+
+    QLineEdit[readOnly="true"], QTextEdit[readOnly="true"], QPlainTextEdit[readOnly="true"] {
+        background-color: #f5f5f5;
+        color: #a0a0a0;
+        border-color: #d0d0d0;
+    }
+
+        QLineEdit[readOnly="true"]:focus, QTextEdit[readOnly="true"]:focus, QPlainTextEdit[readOnly="true"]:focus {
+            border-color: #d0d0d0;
+        }
+
+        /* Приглушённое выделение (текст всё ещё можно копировать) */
+        QLineEdit[readOnly="true"]::selection, QTextEdit[readOnly="true"]::selection, QPlainTextEdit[readOnly="true"]::selection {
+            background-color: #e3e3e3;
+            color: #404040;
+        }
+
+    /* === Кнопки спинбоксов и комбобокса === */
+    /* Базовые стили: убираем нативную рамку, задаём масштабируемый размер */
+    QSpinBox::up-button, QSpinBox::down-button,
+    QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {
+        border: none;
+        border-radius: 0.4em;
+        background: transparent;
+        margin: 0.08em;
+        width: 0.8em;
+        height: 0.8em;
+    }
+
+    /* Стрелка ВВЕРХ */
+    QSpinBox::up-button, QDoubleSpinBox::up-button {
+        image: url(:/icons/images/up-icon.svg);
+        subcontrol-origin: margin;
+        subcontrol-position: top right;
+    }
+
+    /* Стрелка ВНИЗ */
+    QSpinBox::down-button, QDoubleSpinBox::down-button {
+        image: url(:/icons/images/down-icon.svg);
+        subcontrol-origin: margin;
+        subcontrol-position: bottom right;
+    }
+
+    /* Комбобокс: контейнер кнопки */
+    QComboBox::drop-down {
+        border: none;
+        background: transparent;
+        width: 1.4em;
+        subcontrol-origin: padding;
+        subcontrol-position: center right;
+    }
+    /* Комбобокс: сама стрелка внутри контейнера */
+    QComboBox::down-arrow {
+        image: url(:/icons/images/down-icon.svg);
+        width: 1em;
+        height: 1em;
+    }
+
+    /* Интерактивные состояния (фон при наведении/нажатии) */
+    QSpinBox::up-button:hover, QSpinBox::down-button:hover,
+    QDoubleSpinBox::up-button:hover, QDoubleSpinBox::down-button:hover,
+    QComboBox::drop-down:hover {
+        background-color: #e3e3e3;
+        border-radius: 0.2em;
+    }
+
+    QSpinBox::up-button:pressed, QSpinBox::down-button:pressed,
+    QDoubleSpinBox::up-button:pressed, QDoubleSpinBox::down-button:pressed,
+    QComboBox::drop-down:pressed {
+        background-color: #f5f5f5;
+    }
+
+    QComboBox QAbstractItemView {
+        background-color: #ffffff;
+        color: #2d2d2d;
+        selection-background-color: #e3e3e3;
+        selection-color: #2d2d2d;
+        border: 0.04em solid #d0d0d0;
+        outline: none;
+        padding: 0.2em;
+    }
+
+/* --- Кнопки --- */
+QPushButton, QToolButton {
+    background-color: #ffffff;
+    color: #2d2d2d;
+    border: 0.05em solid #d0d0d0;
+    border-radius: 0.35em;
+    padding: 0.1em 0.3em;
+    min-height: 1.2em;
+    outline: none;
+}
+
+    QPushButton:hover, QToolButton:hover {
+        background-color: #e3e3e3;
+        border-color: #e0e0e0;
+    }
+
+    QPushButton:pressed, QToolButton:pressed {
+        background-color: #f5f5f5;
+        padding: 0.25em 0.25em 0px 0.1em;
+    }
+/* QToolButton в тулбарах обычно прозрачный */
+QToolBar QToolButton {
+    background-color: transparent;
+    border: none;
+    padding: 0.25em;
+    border-radius: 0.8em;
+}
+
+    QToolBar QToolButton:hover {
+        background-color: #e3e3e3;
+    }
+
+/* --- Чекбоксы и Радиокнопки --- */
+QCheckBox, QRadioButton {
+    color: #2d2d2d;
+    spacing: 0.5em;
+    padding: 0.2em 0;
+}
+
+    QCheckBox::indicator, QRadioButton::indicator {
+        width: 1.1em;
+        height: 1.1em;
+        border: 0.04em solid #d0d0d0;
+        border-radius: 0.2em;
+        background-color: #ffffff;
+    }
+
+        QCheckBox::indicator:checked, QRadioButton::indicator:checked {
+            background-color: #007acc;
+            border-color: #007acc;
+        }
+
+        QCheckBox::indicator:hover, QRadioButton::indicator:hover {
+            border-color: #1c97ff;
+        }
+
+    QRadioButton::indicator {
+        border-radius: 0.55em;
+    }
+/* Круглая форма */
+
+/* --- Группировка --- */
+QGroupBox {
+    border: 0.04em solid #d0d0d0;
+    border-radius: 0.45em;
+    margin-top: 0.3em;
+    padding-top: 0.5em;
+    padding-left: 0.2em;
+    color: #2d2d2d;
+}
+
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        left: 0.6em;
+        padding: 0 0.5em;
+        font-weight: bold;
+        border: 0.08em solid #d0d0d0;
+        border-radius: 0.3em;
+    }
+
+QGroupBox[title=""] {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+    QGroupBox[title=""]::title {
+        height: 0;
+        padding: 0;
+        margin: 0;
+        border: none;
+        font-size: 0pt;
+        subcontrol-position: top left;
+    }
+
+/* --- Вкладки (база) --- */
+QTabBar {
+    border: none;
+    background-color: transparent;
+}
+
+    QTabBar::tab {
+        background-color: #ffffff;
+        color: #404040;
+        padding: 0.3em 0.5em;
+        margin: 0 0.15em 0 0;
+        border: 0.08em solid transparent;
+        border-bottom: none;
+        border-top-left-radius: 0.3em;
+        border-top-right-radius: 0.3em;
+    }
+
+        QTabBar::tab:selected {
+            background-color: #f5f5f5;
+            color: #2d2d2d;
+            border: 0.08em solid #d0d0d0;
+            border-bottom-color: #007acc;
+            border-bottom-width: 0.15em;
+            font-weight: bold;
+        }
+
+        QTabBar::tab:hover:!selected {
+            background-color: #e3e3e3;
+            color: #2d2d2d;
+        }
+
+/* ==========================================================================
+   КОНТЕЙНЕРЫ И ОКНА
+   ========================================================================== */
+QMainWindow, QDialog {
     background-color: #f5f5f5;
+    color: #2d2d2d;
 }
 
 QDialog {
     font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
-    background-color: #f5f5f5;
-    color: #2d2d2d;
 }
 
     QDialog QLabel {
         color: #2d2d2d;
     }
 
-    QDialog QLineEdit {
-        color: #2d2d2d;
-        background-color: #f5f5f5;
-        border: 1px solid #d0d0d0;
-    }
-
-QPushButton {
-    color: #2d2d2d;
-    background-color: #ffffff;
-    border: 1px solid #d0d0d0;
-    padding: 0.2em 0.8em;
-    border-radius: 0.2em;
-}
-
-    QPushButton::hover {
-        background-color: #e3e3e3;
-    }
-
-
 QMenuBar {
-    font-size: 10pt;
     background-color: #ffffff;
     color: #2d2d2d;
-    border-bottom: 1px solid #d0d0d0;
+    border-bottom: 0.08em solid #d0d0d0;
+    padding: 0.1em 0;
+    font-size: 10pt;
 }
 
-    QMenuBar::item:selected {
-        background-color: #e3e3e3;
-        color: #2d2d2d;
-    }
-
-    QMenuBar::item:pressed {
+    QMenuBar::item:selected, QMenuBar::item:pressed {
         background-color: #e3e3e3;
     }
 
 QMenu {
     background-color: #ffffff;
     color: #2d2d2d;
-    border: 1px solid #d0d0d0;
+    border: 0.08em solid #d0d0d0;
+    padding: 0.1em;
 }
 
     QMenu::item:selected {
@@ -63,7 +268,7 @@ QMenu {
     }
 
     QMenu::separator {
-        height: 1px;
+        height: 0.08em;
         background-color: #d0d0d0;
         margin: 0.2em 0;
     }
@@ -71,52 +276,9 @@ QMenu {
 QToolBar {
     background-color: #ffffff;
     border: none;
-    spacing: 3px;
-    padding: 2px;
+    spacing: 0.2em;
+    padding: 0.15em;
 }
-
-QToolButton {
-    background-color: transparent;
-    border: none;
-    border-radius: 3px;
-    padding: 4px;
-    color: #2d2d2d;
-}
-
-    QToolButton:hover {
-        background-color: #e3e3e3;
-    }
-
-    QToolButton:pressed {
-        background-color: #e3e3e3;
-    }
-
-QTabBar {
-    margin: 0px;
-    padding: 0px;
-    border: none;
-    background-color: none;
-}
-
-    QTabBar::tab {
-        background-color: #f5f5f5;
-        color: #2d2d2d;
-        padding: 0.1em 0.2em;
-        margin-right: 2px;
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-        border: 1px solid #d0d0d0;
-        border-bottom: none;
-    }
-
-    QTabBar::tab:selected {
-        background-color: #f5f5f5;
-        border-bottom: 2px solid #007acc;
-    }
-
-    QTabBar::tab:hover {
-        background-color: #e3e3e3;
-    }
 
 QDockWidget {
     background-color: #f5f5f5;
@@ -124,29 +286,43 @@ QDockWidget {
     border: none;
 }
 
-    QDockWidget::focus {
-        border: 1px solid #cde4ff;
-    }
-
     QDockWidget::title {
         background-color: #ffffff;
-        padding-left: 5px;
-        border: 1px solid #d0d0d0;
-        text-align: left;
+        padding-left: 0.4em;
+        border: 0.08em solid #d0d0d0;
     }
 
     QDockWidget::close-button, QDockWidget::float-button {
         background-color: #c0c0c0;
-        width: 1.2em;
-        height: 1.2em;
-        border-radius: 0.6em;
+        width: 1.1em;
+        height: 1.1em;
+        border-radius: 0.5em;
     }
 
         QDockWidget::close-button:hover, QDockWidget::float-button:hover {
             background-color: #2d2d2d;
         }
 
-/* ===== LispEditor ===== */
+QStatusBar {
+    background-color: #f5f5f5;
+    color: #2d2d2d;
+    font-weight: bold;
+    border-top: 0.15em solid #d0d0d0;
+}
+
+    QStatusBar QLabel {
+        color: #2d2d2d;
+        padding: 0 0.6em;
+        border-right: 0.08em solid #d0d0d0;
+    }
+
+        QStatusBar QLabel:last-child {
+            border-right: none;
+        }
+
+/* ==========================================================================
+   ВИДЖЕТЫ IDE
+   ========================================================================== */
 LispEditor {
     background-color: #ffffff;
     color: #1e1e1e;
@@ -154,22 +330,25 @@ LispEditor {
     font-size: 12pt;
     selection-background-color: #cde4ff;
     selection-color: #2d2d2d;
-    border: 1px solid #d0d0d0;
+    border: 0.08em solid #d0d0d0;
+
+    qproperty-currentLine: #e8e8ff;
+    qproperty-bracketMatch: #7c7c8a;
+    qproperty-bracketRegion: #cccce0;
+    qproperty-bracketError: #cc3030;
 }
 
-    /* Стили для области содержимого */
     LispEditor QWidget {
-        margin: 0px;
-        padding: 0px;
+        margin: 0;
+        padding: 0;
     }
 
-/* ===== LineNumberArea ===== */
 #LineNumberArea {
     background-color: #f0f0f0;
     color: #6a6a6a;
     font-family: 'Consolas', 'Monaco', monospace;
-    font-size: 11pt;
-    border-right: 1px solid #d0d0d0;
+    font-size: 10pt;
+    border-right: 0.08em solid #d0d0d0;
 }
 
     #LineNumberArea[current-line="true"] {
@@ -177,76 +356,70 @@ LispEditor {
         font-weight: bold;
     }
 
-/* ===== ProjectTree ===== */
+/* ==================== ProjectTree ==================== */
 ProjectTree {
     color: #1e1e1e;
     background-color: #f5f5f5;
-    border: 1px solid #d0d0d0;
+    border: 0.08em solid #d0d0d0;
+    border-radius: 0.2em;
     outline: none;
+    padding: 0;
 }
 
-ProjectTree::item:selected {
-    background-color: #cde4ff;
-    border: none;
-}
+    ProjectTree:focus {
+        border-color: #d0d0d0;
+    }
 
-/* ===== Console ===== */
-Console {
-    background-color: #1e1e1e;
-    color: #e0e0e0;
+    ProjectTree::item {
+        padding: 0.1em 0.5em;
+        border: 0.06em solid transparent;
+    }
+
+        ProjectTree::item:hover {
+            background-color: #e3e3e3;
+            border-color: transparent;
+        }
+
+        ProjectTree::item:selected {
+            background-color: #cde4ff;
+            color: #404040;
+            border-color: transparent;
+        }
+
+
+ReplWidget {
+    background-color: #ffffff; /* Исправлен хардкод */
+    color: #1e1e1e;
     font-family: 'Consolas', 'Monaco', monospace;
     font-size: 11pt;
     border: none;
+
+    qproperty-replPrompt: #006900;
+    qproperty-replResult: #202020;
+    qproperty-replError: #cc3333;
+    qproperty-replWarning: #cc9900;
+    qproperty-replOutput: #202020;
 }
 
-/* ===== QStatusBar ===== */
-QStatusBar {
-    background-color: #f5f5f5;
-    color: #2d2d2d;
-    font-weight: bold;
-    border-top: 2px solid #d0d0d0;
-}
-
-    QStatusBar QLabel {
-        color: #2d2d2d;
-        padding: 0 10px;
-        border-right: 1px solid #d0d0d0;
-    }
-
-        QStatusBar QLabel:last-child {
-            border-right: none;
-        }
-
-/* ===== EditorTabWidget ===== */
-
+/* --- EditorTabWidget --- */
 EditorTabWidget::pane {
     border: none;
     background-color: #f5f5f5;
 }
 
-    EditorTabWidget QTabBar::tab {
-        background-color: #ffffff;
-        color: #2d2d2d;
-        padding: 5px 5px 2px 5px;
-        margin: 0px 3px 0px 0px;
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-        border: 1px solid #d0d0d0;
-        border-bottom: none;
-    }
-
-    EditorTabWidget QTabBar::close-button {
-        image: url(:/icons/images/close.svg);
-        margin-right: 3px;
-    }
-
-    EditorTabWidget QTabBar::close-button:pressed {
-        padding: 1px -1px -1px 1px;
-    }
+EditorTabWidget QTabBar::tab {
+    background-color: #ffffff;
+    padding: 0.3em 0.4em 0.15em 0.4em;
+    margin: 0 0.2em 0 0;
+    border: 0.08em solid #d0d0d0;
+    border-bottom: none;
+    border-top-left-radius: 0.3em;
+    border-top-right-radius: 0.3em;
+}
 
     EditorTabWidget QTabBar::tab:selected {
         background-color: #f5f5f5;
-        border-bottom: 2px solid #007acc;
+        border-bottom: 0.15em solid #007acc;
     }
 
     EditorTabWidget QTabBar::tab:hover {
@@ -254,16 +427,87 @@ EditorTabWidget::pane {
     }
 
     EditorTabWidget QTabBar::tab:!selected {
-        margin-top: 2px;
+        margin-top: 0.15em;
     }
 
-/* Индикатор изменённого файла (звёздочка) */
-EditorTabWidget QTabBar::tab:modified {
-    font-weight: bold;
+    EditorTabWidget QTabBar::tab:modified {
+        font-weight: bold;
+    }
+
+EditorTabWidget QTabBar::close-button {
+    image: url(:/icons/images/close.svg);
+    margin-right: 0.2em;
 }
 
-/* ===== QScrollBar ===== */
+    EditorTabWidget QTabBar::close-button:pressed {
+        padding: 0.08em -0.08em -0.08em 0.08em;
+    }
 
+/* ==========================================================================
+   SETTINGS DIALOG 
+   ========================================================================== */
+SettingsDialog {
+    padding: 0;
+}
+
+    SettingsDialog QTabWidget {
+        background-color: transparent;
+    }
+
+        SettingsDialog QTabWidget::pane {
+            border: none;
+            background-color: transparent;
+        }
+
+    /* Вертикальные вкладки */
+    SettingsDialog QTabBar {
+        background-color: transparent;
+        outline: none;
+    }
+
+        SettingsDialog QTabBar::tab {
+            padding: 0.6em 0.2em;
+            margin: 0em 0.3em;
+            border: 0.08em solid #d0d0d0;
+            border-radius: 0;
+        }
+
+            SettingsDialog QTabBar::tab:selected {
+                margin: 0;
+                background-color: #f5f5f5;
+                color: #2d2d2d;
+                border: 0.08em solid #d0d0d0;
+                border-right: 0.15em solid #007acc;
+                border-top-right-radius: 0.3em;
+                border-bottom-right-radius: 0.3em;
+            }
+
+            SettingsDialog QTabBar::tab:hover:!selected {
+                background-color: #e3e3e3;
+                color: #2d2d2d;
+            }
+
+    SettingsDialog QScrollArea, SettingsDialog QScrollArea > QWidget, SettingsDialog QScrollArea > QWidget > QWidget {
+        background-color: transparent;
+        border: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    SettingsDialog QDialogButtonBox {
+        background-color: transparent;
+        border-top: 0.08em solid #d0d0d0;
+        padding-top: 0.8em;
+        margin-top: 0.5em;
+    }
+
+        SettingsDialog QDialogButtonBox QPushButton {
+            min-width: 3em;
+        }
+
+/* ==========================================================================
+СКРОЛЛБАРЫ
+========================================================================== */
 QScrollBar:vertical {
     background-color: #ffffff;
     border: 1px solid #d0d0d0;
@@ -278,13 +522,13 @@ QScrollBar::handle:vertical {
     margin: 0px;
 }
 
-QScrollBar::handle:vertical:hover {
-    background-color: #a0a0a0;
-}
+    QScrollBar::handle:vertical:hover {
+        background-color: #a0a0a0;
+    }
 
-QScrollBar::handle:vertical:pressed {
-    background-color: #a0a0a0;
-}
+    QScrollBar::handle:vertical:pressed {
+        background-color: #a0a0a0;
+    }
 
 QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical {
     height: 0px;
@@ -311,13 +555,13 @@ QScrollBar::handle:horizontal {
     margin: 0px;
 }
 
-QScrollBar::handle:horizontal:hover {
-    background-color: #a0a0a0;
-}
+    QScrollBar::handle:horizontal:hover {
+        background-color: #a0a0a0;
+    }
 
-QScrollBar::handle:horizontal:pressed {
-    background-color: #a0a0a0;
-}
+    QScrollBar::handle:horizontal:pressed {
+        background-color: #a0a0a0;
+    }
 
 QScrollBar::sub-line:horizontal, QScrollBar::add-line:horizontal {
     width: 0px;
@@ -334,3 +578,40 @@ QAbstractScrollArea::corner {
     background-color: #f0f0f0;
     border: none;
 }
+
+ErrorNotification {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #ff6b6b, stop:1 #ee5a5a);
+    color: #ffffff;
+    padding: 10px 15px;
+    border: 1px solid #cc5555;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 10pt;
+}
+
+    ErrorNotification:hover {
+        border-color: #007acc;
+        cursor: default;
+    }
+
+ErrorNotificationCloseButton {
+    color: #ffffff;
+    font-weight: bold;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    icon-size: 16px;
+    transition: border-color 0.2s ease;
+}
+
+    ErrorNotificationCloseButton:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+    }
+
+    ErrorNotificationCloseButton:pressed {
+        color: #cc5555;
+        padding: 0;
+        margin: 0;
+    }

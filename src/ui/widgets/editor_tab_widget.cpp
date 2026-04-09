@@ -2,6 +2,7 @@
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QShortCut>
+#include <QTabBar>
 
 EditorTabWidget::EditorTabWidget(QWidget* parent)
     : QTabWidget(parent)
@@ -13,6 +14,7 @@ EditorTabWidget::EditorTabWidget(QWidget* parent)
     connect(closeShortcut, &QShortcut::activated, this, &EditorTabWidget::closeCurrentTab);
     connect(this, &QTabWidget::tabCloseRequested, this, &EditorTabWidget::onTabCloseRequested);
     connect(this, &QTabWidget::currentChanged, this, &EditorTabWidget::onCurrentChanged);
+    connect(tabBar(), &QTabBar::tabMoved, this, &EditorTabWidget::updateMappings);
 }
 
 LispEditor* EditorTabWidget::currentEditor() const
@@ -27,7 +29,8 @@ LispEditor* EditorTabWidget::editorAt(int index) const
 
 bool EditorTabWidget::openFile(const QString& path)
 {
-    int existingIndex = findTabByPath(path);
+    QString normalized = QFileInfo(path).absoluteFilePath();
+    int existingIndex = findTabByPath(normalized);
     if (existingIndex != -1) {
         setCurrentIndex(existingIndex);
         return true;
@@ -38,13 +41,13 @@ bool EditorTabWidget::openFile(const QString& path)
     connect(editor, &LispEditor::fileSaved, this, &EditorTabWidget::onEditorSaved);
     connect(editor, &LispEditor::fileClosed, this, &EditorTabWidget::onFileClosed);
 
-    if (!editor->loadFile(path)) {
+    if (!editor->loadFile(normalized)) {
         delete editor;
         return false;
     }
-    addEditorTab(path, editor);
+    addEditorTab(normalized, editor);
 
-    emit fileOpened(path);
+    emit fileOpened(normalized);
     return true;
 }
 
@@ -216,4 +219,46 @@ QStringList EditorTabWidget::openedFiles() {
         }
     }
     return files;
+}
+
+int EditorTabWidget::modifFileCounts() {
+    int modifCnt = 0;
+    for (int i = 0; i < count(); ++i) {
+        LispEditor* editor = editorAt(i);
+        if (editor && editor->isModified()) {
+            modifCnt++;
+        }
+    }
+    return modifCnt;
+}
+
+QString EditorTabWidget::currentFilePath() const
+{
+    int currentIndex = QTabWidget::currentIndex();
+    if (currentIndex >= 0 && m_indexToPath.contains(currentIndex)) {
+        return m_indexToPath[currentIndex];
+    }
+    return QString();
+}
+
+LispEditor* EditorTabWidget::editorByPath(const QString& path) const
+{
+    QString normalizedPath = QFileInfo(path).absoluteFilePath();
+
+    for (auto it = m_indexToPath.begin(); it != m_indexToPath.end(); ++it) {
+        if (QFileInfo(it.value()).absoluteFilePath() == normalizedPath) {
+            return editorAt(it.key());
+        }
+    }
+    return nullptr;
+}
+
+int EditorTabWidget::indexOf(LispEditor* editor) const
+{
+    for (int i = 0; i < count(); ++i) {
+        if (editorAt(i) == editor) {
+            return i;
+        }
+    }
+    return -1;
 }

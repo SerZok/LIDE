@@ -12,6 +12,7 @@
 // ==================[ ProjectTree ]==================
 ProjectTree::ProjectTree(QWidget* parent)
     : QTreeView(parent)
+    , m_settings(Settings::instance())
     , m_model(new QFileSystemModel(this))
     , m_delegate(new ProjectTreeDelegate(this))
     , m_newFileAction(nullptr)
@@ -19,7 +20,7 @@ ProjectTree::ProjectTree(QWidget* parent)
     , m_openFileAction(nullptr)
 {
     m_model->setFilter(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::AllDirs);
-    m_model->setNameFilters(QStringList() << "*.lisp" << "*.lsp" << "*.asd");
+    m_model->setNameFilters(m_settings->projectExcludeFiltersList());
     m_model->setNameFilterDisables(false);
     m_model->setReadOnly(false);
 
@@ -38,6 +39,7 @@ ProjectTree::ProjectTree(QWidget* parent)
 
     connect(this, &QTreeView::doubleClicked, this, &ProjectTree::onItemActivated);
     connect(this, &QWidget::customContextMenuRequested, this, &ProjectTree::onContextMenuRequested);
+    connect(m_settings, &Settings::projectFilterChanged, this, [this]() { m_model->setNameFilters(m_settings->projectExcludeFiltersList()); });
 
     restoreState();
 }
@@ -46,6 +48,7 @@ ProjectTree::~ProjectTree()
 {
     saveState();
 }
+
 
 bool ProjectTree::openProject(const QString& path)
 {
@@ -59,7 +62,10 @@ bool ProjectTree::openProject(const QString& path)
 
     QModelIndex rootIndex = m_model->index(m_rootPath);
     setRootIndex(rootIndex);
-    setCurrentIndex(rootIndex);
+    selectionModel()->setCurrentIndex(
+        rootIndex,
+        QItemSelectionModel::ClearAndSelect
+    );
     expandToDepth(1);
     scrollTo(rootIndex, QAbstractItemView::PositionAtTop);
 
@@ -192,7 +198,8 @@ void ProjectTree::keyPressEvent(QKeyEvent* event)
 
 QModelIndex ProjectTree::findFileIndex(const QString& path)
 {
-    return m_model->index(path);
+    QString normalized = QFileInfo(path).absoluteFilePath();
+    return m_model->index(normalized);
 }
 
 void ProjectTree::expandToPath(const QString& path)
@@ -216,7 +223,10 @@ void ProjectTree::onFileLoaded(const QString& path)
     QModelIndex index = findFileIndex(path);
     if (index.isValid()) {
         expandToPath(path);
-        setCurrentIndex(index);
+        selectionModel()->setCurrentIndex(
+            index,
+            QItemSelectionModel::ClearAndSelect
+        );
         scrollTo(index, QAbstractItemView::PositionAtCenter);
         update(index);
     }
@@ -269,19 +279,16 @@ void ProjectTree::onFileClosed(const QString& path)
 
 void ProjectTree::saveState()
 {
-    auto* settings = Settings::instance();
-    settings->setLastProjectPath(m_rootPath);
+    m_settings->setLastProjectPath(m_rootPath);
 }
 
 void ProjectTree::restoreState()
 {
-    auto* settings = Settings::instance();
-    QString lastPath = settings->lastProjectPath();
-
+    QString lastPath = m_settings->lastProjectPath();
     if (!lastPath.isEmpty() && QDir(lastPath).exists()) {
         openProject(lastPath);
+        return;
     }
-    else {
-        openProject(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
-    }
+
+    openProject(m_settings->projectDefaultPath());
 }

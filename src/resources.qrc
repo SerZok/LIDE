@@ -2,8 +2,6 @@
     <qresource prefix="/">
         <file>styles/dark.css</file>
         <file>styles/light.css</file>
-        <file>styles/colors/dark.colors</file>
-        <file>styles/colors/light.colors</file>
     </qresource>
     <qresource prefix="/icons">
         <file>images/close.svg</file>
@@ -25,5 +23,7 @@
         <file>images/undo.svg</file>
         <file>images/restart.svg</file>
         <file>images/force-start.svg</file>
+        <file>images/down-icon.svg</file>
+        <file>images/up-icon.svg</file>
     </qresource>
 </RCC>
