@@ -73,7 +73,6 @@ void ReplWidget::displayMessage(const ReplMessage& msg)
     case ReplMessageType::Result:
         appendOutput(msg.text + "\n", msg.type);
         hasPrompt = false;
-        setReadOnly(true);
         break;
     case ReplMessageType::Error:
         if (hasPrompt)
@@ -86,7 +85,6 @@ void ReplWidget::displayMessage(const ReplMessage& msg)
         {
             needPrompt = true;
             m_waitingForInput = true;
-            setReadOnly(false);
         }
         break;
     case ReplMessageType::Warning:
@@ -96,7 +94,6 @@ void ReplWidget::displayMessage(const ReplMessage& msg)
         {
             needPrompt = true;
             m_waitingForInput = true;
-            setReadOnly(false);
         }
         appendOutput(msg.text + "\n", msg.type);
         break;
