@@ -1,4 +1,4 @@
-#include "repl_widget.h"
+﻿#include "repl_widget.h"
 
 #include <QMenu>
 #include <QKeyEvent>
@@ -55,39 +55,66 @@ bool ReplWidget::hasPromptAtEditableStart() const
 void ReplWidget::displayMessage(const ReplMessage& msg)
 {
     moveCursor(QTextCursor::End);
-
+    bool hasPrompt = hasPromptAtEditableStart();
+    bool needPrompt = false;
+    QString inputtedText = "";
+    if (hasPrompt)
+    {
+        inputtedText = currentInput();
+        clearCurrentLineAndPrompt();
+    }
     switch (msg.type) {
     case ReplMessageType::Prompt:
         m_waitingForInput = true;
+        needPrompt = true;
+        hasPrompt = false;
         setReadOnly(false);
-        appendPrompt();
         break;
-
     case ReplMessageType::Result:
         appendOutput(msg.text + "\n", msg.type);
+        hasPrompt = false;
+        setReadOnly(true);
         break;
-
     case ReplMessageType::Error:
+        if (hasPrompt)
+        {
+            m_history.add(inputtedText);
+            clearCurrentLineAndPrompt();
+        }
         appendOutput(msg.text + "\n", msg.type);
         if (m_controller && m_controller->isRunning())
+        {
+            needPrompt = true;
             m_waitingForInput = true;
-        else
-            m_waitingForInput = false;
+            setReadOnly(false);
+        }
         break;
-
     case ReplMessageType::Warning:
+        if (hasPrompt)
+            clearCurrentLineAndPrompt();
+        if (m_controller && m_controller->isRunning())
+        {
+            needPrompt = true;
+            m_waitingForInput = true;
+            setReadOnly(false);
+        }
         appendOutput(msg.text + "\n", msg.type);
         break;
-
     case ReplMessageType::Output:
         appendOutput(msg.text, msg.type);
         break;
-
     default:
         break;
     }
-
-    ensureCursorVisible();
+    if (needPrompt)
+    {
+        appendPrompt();
+        if (hasPrompt && m_waitingForInput)
+        {
+            appendOutput(inputtedText);
+            setReadOnly(false);
+        }
+    }
 }
 
 void ReplWidget::sendCode(const QString& code)
@@ -124,7 +151,6 @@ void ReplWidget::clear()
 {
     QTextEdit::clear();
     m_waitingForInput = true;
-    appendPrompt();
 }
 
 void ReplWidget::appendOutput(const QString& text, ReplMessageType type)
@@ -248,6 +274,7 @@ void ReplWidget::sendCurrentInput()
     emit commandEntered(input);
 
     setReadOnly(true);
+    appendPrompt();
     m_waitingForInput = false;
     m_historyBrowsing = false;
     m_savedInput.clear();
@@ -492,4 +519,24 @@ QTextCharFormat ReplWidget::formatForType(ReplMessageType type) const
     default:                        fmt.setForeground(m_outputColor); break;
     }
     return fmt;
+}
+
+void ReplWidget::clearCurrentLineAndPrompt()
+{
+    QTextCursor cursor = textCursor();
+
+    // Перемещаемся в позицию m_editableStart (начало ввода, после промпта)
+    cursor.setPosition(m_editableStart);
+
+    // 1. Удаляем всё от m_editableStart до конца документа
+    cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+
+    // 2. Теперь удаляем промпт (от начала строки до m_editableStart)
+    cursor.setPosition(m_editableStart);
+    cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+
+    // Обновляем позицию начала редактирования
+    m_editableStart = textCursor().position();
 }
