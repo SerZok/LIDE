@@ -1,10 +1,11 @@
-#pragma once
+﻿#pragma once
 #include <QStringList>
 
 class ReplHistory
 {
 public:
     void add(const QString& command);
+    void resetToEnd();
     QString previous();
     QString next();
     void clear();

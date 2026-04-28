@@ -233,7 +233,7 @@ QString ReplWidget::currentInput() const
 {
     QTextCursor cursor(document());
     cursor.setPosition(m_editableStart);
-    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+    cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
 
     QString text = cursor.selectedText();
     text.replace(QChar(0x2029), '\n');
@@ -254,8 +254,12 @@ void ReplWidget::sendCurrentInput()
         return;
     }
 
-    if (!input.startsWith(";"))
+    // Проверка: не добавляем дубликат последнего элемента
+    if (m_history.isEmpty() || m_history.getAll().last() != input) {
         m_history.add(input);
+    }
+
+    m_history.resetToEnd();
 
     if (input == "clear") {
         clear();
@@ -279,12 +283,19 @@ void ReplWidget::sendCurrentInput()
 
 void ReplWidget::insertFromHistory(int direction)
 {
+    // Сохраняем текущий ввод только при первом входе в историю
     if (!m_historyBrowsing) {
-        m_savedInput = currentLine();
+        m_savedInput = currentInput();  // Используйте currentInput()? currentLine()?
         m_historyBrowsing = true;
     }
 
-    QString cmd = (direction < 0) ? m_history.previous() : m_history.next();
+    QString cmd;
+    if (direction < 0) { // Up
+        cmd = m_history.previous();
+    }
+    else { // Down
+        cmd = m_history.next();
+    }
 
     ensureCursorInEditable();
 
@@ -294,8 +305,9 @@ void ReplWidget::insertFromHistory(int direction)
     cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
     cursor.removeSelectedText();
 
-    if (cmd.isEmpty()) {
-        // дошли до конца истории → возвращаем сохранённый ввод
+    // Если команда пустая (дошли до конца при навигации вниз)
+    if (cmd.isNull() || (direction > 0 && cmd.isEmpty())) {
+        // Возвращаем сохранённый ввод
         cursor.insertText(m_savedInput);
         m_historyBrowsing = false;
     }
@@ -330,6 +342,33 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
         return;
     }
 
+    // Enter — отправка
+    if ((event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) && event->modifiers() != Qt::ShiftModifier) {
+        sendCurrentInput();
+        ensureCursorVisible();
+        return;
+    }
+
+    // Стрелки для истории
+    if (event->key() == Qt::Key_Up) {
+        insertFromHistory(-1);
+        return;
+    }
+    if (event->key() == Qt::Key_Down) {
+        insertFromHistory(1);
+        return;
+    }
+
+    if (event->key() == Qt::Key_Left)
+    {
+        QTextCursor cursor = textCursor();
+        if (cursor.position() > m_editableStart)
+            QTextEdit::keyPressEvent(event);
+        return;
+    }
+
+    m_historyBrowsing = false; // Ставить перед клавишами редактирующими окно ввода
+
     // Ctrl+V — вставка
     if (event->key() == Qt::Key_V && event->modifiers() == Qt::ControlModifier) {
         ensureCursorInEditable();
@@ -341,22 +380,7 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
     if ((event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) && event->modifiers() == Qt::ShiftModifier) {
         ensureCursorInEditable();
         insertPlainText("\n");
-        return;
-    }
-
-    // Enter — отправка
-    if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
-        sendCurrentInput();
-        return;
-    }
-
-    // Стрелки для истории
-    if (event->key() == Qt::Key_Up) {
-        insertFromHistory(-1);
-        return;
-    }
-    if (event->key() == Qt::Key_Down) {
-        insertFromHistory(1);
+        ensureCursorVisible();
         return;
     }
 
@@ -372,6 +396,7 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
             // Выделение только в editable области — разрешаем
             if (start >= m_editableStart && end >= m_editableStart) {
                 QTextEdit::keyPressEvent(event);
+                return;
             }
             else if (start < m_editableStart && end > m_editableStart) {
                 return;
@@ -422,16 +447,40 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
         return;
     }
 
-    // Обычный ввод
-    ensureCursorInEditable();
-    if (event->key() == Qt::Key_Left)
-    {
-        QTextCursor cursor = textCursor();
-        if(cursor.position() > m_editableStart)
+    // Проверяем, можно ли редактировать в текущей позиции
+    if (!isEditAllowed()) {
+        // Только навигация и копирование
+        if (isNavigationKey(event)) {
             QTextEdit::keyPressEvent(event);
+        }
+        // Остальные клавиши игнорируем
         return;
     }
+
+    // Здесь можно редактировать
     QTextEdit::keyPressEvent(event);
+}
+
+bool ReplWidget::isEditAllowed() const
+{
+    QTextCursor cursor = textCursor();
+
+    // Если есть выделение — проверяем, что оно полностью внутри editable области
+    if (cursor.hasSelection()) {
+        return cursor.selectionStart() >= m_editableStart;
+    }
+
+    // Без выделения — проверяем позицию курсора
+    return cursor.position() >= m_editableStart;
+}
+
+bool ReplWidget::isNavigationKey(QKeyEvent* event) const
+{
+    int key = event->key();
+    return (key == Qt::Key_Left || key == Qt::Key_Right ||
+        key == Qt::Key_Up || key == Qt::Key_Down ||
+        key == Qt::Key_Home || key == Qt::Key_End ||
+        key == Qt::Key_PageUp || key == Qt::Key_PageDown);
 }
 
 void ReplWidget::contextMenuEvent(QContextMenuEvent* event)

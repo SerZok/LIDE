@@ -68,6 +68,8 @@ private:
 	void onErrorLocationAvailable(const QString& message, int line, int column);
 	bool hasPromptAtEditableStart() const;
 	void clearCurrentLineAndPrompt();
+	bool isEditAllowed() const;
+	bool isNavigationKey(QKeyEvent* event) const;
 
 	// Цвета
 	mutable QColor m_promptColor;
