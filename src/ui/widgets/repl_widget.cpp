@@ -531,26 +531,44 @@ void ReplWidget::onErrorLocationAvailable(const QString& message, int line, int 
 
 void ReplWidget::loadThemeColors()
 {
-    const QString styleSheet = qApp->styleSheet();
+    // Если стиль задан через qApp->setStyleSheet()
+    QString styleSheet = qApp->styleSheet();
 
-    // Парсим цвета из кастомных свойств
-    auto extractColor = [&](const QString& propName, QColor& target, const QColor& fallback) {
-        // Ищем: qproperty-replPrompt: #00ff00;
-        QRegularExpression re(QString(R"(qproperty-%1:\s*(#[0-9A-Fa-f]+))").arg(propName));
-        auto match = re.match(styleSheet);
-        if (match.hasMatch()) {
-            target = QColor(match.captured(1));
+    // Если стиль пустой - используем значения по умолчанию
+    if (styleSheet.isEmpty()) {
+        // Определяем тему автоматически
+        QColor bg = palette().color(QWidget::backgroundRole());
+        bool isDark = bg.lightness() < 128;
+
+        if (isDark) {
+            m_promptColor = QColor(0, 255, 0);
+            m_resultColor = QColor(224, 224, 224);
+            m_errorColor = QColor(255, 107, 107);
+            m_warningColor = QColor(255, 217, 61);
+            m_outputColor = QColor(224, 224, 224);
         }
         else {
-            target = fallback; // запасной вариант
+            m_promptColor = QColor(0, 136, 0);
+            m_resultColor = QColor(45, 45, 45);
+            m_errorColor = QColor(198, 38, 38);
+            m_warningColor = QColor(166, 124, 0);
+            m_outputColor = QColor(45, 45, 45);
         }
+        return;
+    }
+
+    // Парсим цвета из qApp стилей
+    auto extractColor = [&](const QString& propName, QColor& target, const QColor& fallback) {
+        QRegularExpression re(QString(R"(qproperty-%1:\s*(#[0-9A-Fa-f]+))").arg(propName));
+        auto match = re.match(styleSheet);
+        target = match.hasMatch() ? QColor(match.captured(1)) : fallback;
         };
 
     extractColor("replPrompt", m_promptColor, QColor(0, 255, 0));
-    extractColor("replResult", m_resultColor, QColor(220, 220, 220));
-    extractColor("replError", m_errorColor, QColor(255, 100, 100));
-    extractColor("replWarning", m_warningColor, QColor(255, 200, 100));
-    extractColor("replOutput", m_outputColor, QColor(220, 220, 220));
+    extractColor("replResult", m_resultColor, QColor(224, 224, 224));
+    extractColor("replError", m_errorColor, QColor(255, 107, 107));
+    extractColor("replWarning", m_warningColor, QColor(255, 217, 61));
+    extractColor("replOutput", m_outputColor, QColor(224, 224, 224));
 }
 
 QTextCharFormat ReplWidget::formatForType(ReplMessageType type) const

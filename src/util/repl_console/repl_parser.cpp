@@ -306,7 +306,10 @@ ReplMessage ReplParser::parseErrorBlock(const QStringList& lines)
     msg.text = formatErrorText(lines, m_parseMode);
 
     if (msg.line.has_value() && msg.column.has_value()) {
-        emit errorLocationAvailable(msg.text, msg.line.value(), msg.column.value());
+        if(m_parseMode == Settings::ParseOutputMode::Full)
+            emit errorLocationAvailable(formatErrorText(lines, Settings::ParseOutputMode::Minimal), msg.line.value(), msg.column.value());
+        else
+            emit errorLocationAvailable(msg.text, msg.line.value(), msg.column.value());
     }
 
     return msg;
