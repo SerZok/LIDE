@@ -148,6 +148,7 @@ void ReplWidget::clear()
 {
     QTextEdit::clear();
     m_waitingForInput = true;
+    appendPrompt();
 }
 
 void ReplWidget::appendOutput(const QString& text, ReplMessageType type)
