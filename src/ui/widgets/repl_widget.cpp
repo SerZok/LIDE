@@ -264,7 +264,6 @@ void ReplWidget::sendCurrentInput()
 
     if (input == "clear") {
         clear();
-        appendPrompt();
         return;
     }
 
