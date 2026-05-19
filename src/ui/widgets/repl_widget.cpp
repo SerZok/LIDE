@@ -384,6 +384,56 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
         return;
     }
 
+    // Ctrl+Backspace — удаление слова назад
+    if (event->key() == Qt::Key_Backspace && event->modifiers() == Qt::ControlModifier) {
+        QTextCursor cursor = textCursor();
+
+        // Проверка выделения
+        if (cursor.hasSelection()) {
+            int start = cursor.selectionStart();
+            int end = cursor.selectionEnd();
+
+            // Если выделение захватывает защищенную зону - запрещаем
+            if (start < m_editableStart) {
+                return;
+            }
+            // Выделение полностью в editable области - разрешаем
+            if (start >= m_editableStart && end >= m_editableStart) {
+                QTextEdit::keyPressEvent(event);
+            }
+            return;
+        }
+
+        // Без выделения - проверяем позицию курсора
+        if (cursor.position() <= m_editableStart) {
+            return;
+        }
+
+        // Сохраняем позицию
+        int originalPos = cursor.position();
+
+        // Выполняем стандартное удаление
+        QTextEdit::keyPressEvent(event);
+
+        // Проверяем новую позицию курсора
+        int newPos = textCursor().position();
+        int diff = m_editableStart - newPos;
+
+        if (diff >= 2) {
+            // Зашли на 2+ символа в защищенную зону - добавляем промпт
+            appendPrompt();
+        }
+        else if (diff == 1) {
+            // Зашли на 1 символ - вставляем пробел
+            insertPlainText(" ");
+            QTextCursor fixCursor = textCursor();
+            fixCursor.movePosition(QTextCursor::Right);
+            setTextCursor(fixCursor);
+        }
+
+        return;
+    }
+
     // ЗАЩИТА ОТ УДАЛЕНИЯ
     if (event->key() == Qt::Key_Backspace) {
         QTextCursor cursor = textCursor();
