@@ -1,4 +1,4 @@
-#include "repl_widget.h"
+﻿#include "repl_widget.h"
 
 #include <QMenu>
 #include <QKeyEvent>
@@ -55,39 +55,63 @@ bool ReplWidget::hasPromptAtEditableStart() const
 void ReplWidget::displayMessage(const ReplMessage& msg)
 {
     moveCursor(QTextCursor::End);
-
+    bool hasPrompt = hasPromptAtEditableStart();
+    bool needPrompt = false;
+    QString inputtedText = "";
+    if (hasPrompt)
+    {
+        inputtedText = currentInput();
+        clearCurrentLineAndPrompt();
+    }
     switch (msg.type) {
     case ReplMessageType::Prompt:
         m_waitingForInput = true;
+        needPrompt = true;
+        hasPrompt = false;
         setReadOnly(false);
-        appendPrompt();
         break;
-
     case ReplMessageType::Result:
         appendOutput(msg.text + "\n", msg.type);
+        hasPrompt = false;
         break;
-
     case ReplMessageType::Error:
+        if (hasPrompt)
+        {
+            m_history.add(inputtedText);
+            clearCurrentLineAndPrompt();
+        }
         appendOutput(msg.text + "\n", msg.type);
         if (m_controller && m_controller->isRunning())
+        {
+            needPrompt = true;
             m_waitingForInput = true;
-        else
-            m_waitingForInput = false;
+        }
         break;
-
     case ReplMessageType::Warning:
+        if (hasPrompt)
+            clearCurrentLineAndPrompt();
+        if (m_controller && m_controller->isRunning())
+        {
+            needPrompt = true;
+            m_waitingForInput = true;
+        }
         appendOutput(msg.text + "\n", msg.type);
         break;
-
     case ReplMessageType::Output:
         appendOutput(msg.text, msg.type);
         break;
-
     default:
         break;
     }
-
-    ensureCursorVisible();
+    if (needPrompt)
+    {
+        appendPrompt();
+        if (hasPrompt && m_waitingForInput)
+        {
+            appendOutput(inputtedText);
+            setReadOnly(false);
+        }
+    }
 }
 
 void ReplWidget::sendCode(const QString& code)
@@ -210,7 +234,7 @@ QString ReplWidget::currentInput() const
 {
     QTextCursor cursor(document());
     cursor.setPosition(m_editableStart);
-    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+    cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
 
     QString text = cursor.selectedText();
     text.replace(QChar(0x2029), '\n');
@@ -231,12 +255,15 @@ void ReplWidget::sendCurrentInput()
         return;
     }
 
-    if (!input.startsWith(";"))
+    // Проверка: не добавляем дубликат последнего элемента
+    if (m_history.isEmpty() || m_history.getAll().last() != input) {
         m_history.add(input);
+    }
+
+    m_history.resetToEnd();
 
     if (input == "clear") {
         clear();
-        appendPrompt();
         return;
     }
 
@@ -248,6 +275,7 @@ void ReplWidget::sendCurrentInput()
     emit commandEntered(input);
 
     setReadOnly(true);
+    appendPrompt();
     m_waitingForInput = false;
     m_historyBrowsing = false;
     m_savedInput.clear();
@@ -255,12 +283,19 @@ void ReplWidget::sendCurrentInput()
 
 void ReplWidget::insertFromHistory(int direction)
 {
+    // Сохраняем текущий ввод только при первом входе в историю
     if (!m_historyBrowsing) {
-        m_savedInput = currentLine();
+        m_savedInput = currentInput();  // Используйте currentInput()? currentLine()?
         m_historyBrowsing = true;
     }
 
-    QString cmd = (direction < 0) ? m_history.previous() : m_history.next();
+    QString cmd;
+    if (direction < 0) { // Up
+        cmd = m_history.previous();
+    }
+    else { // Down
+        cmd = m_history.next();
+    }
 
     ensureCursorInEditable();
 
@@ -270,8 +305,9 @@ void ReplWidget::insertFromHistory(int direction)
     cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
     cursor.removeSelectedText();
 
-    if (cmd.isEmpty()) {
-        // дошли до конца истории → возвращаем сохранённый ввод
+    // Если команда пустая (дошли до конца при навигации вниз)
+    if (cmd.isNull() || (direction > 0 && cmd.isEmpty())) {
+        // Возвращаем сохранённый ввод
         cursor.insertText(m_savedInput);
         m_historyBrowsing = false;
     }
@@ -306,6 +342,33 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
         return;
     }
 
+    // Enter — отправка
+    if ((event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) && event->modifiers() != Qt::ShiftModifier) {
+        sendCurrentInput();
+        ensureCursorVisible();
+        return;
+    }
+
+    // Стрелки для истории
+    if (event->key() == Qt::Key_Up) {
+        insertFromHistory(-1);
+        return;
+    }
+    if (event->key() == Qt::Key_Down) {
+        insertFromHistory(1);
+        return;
+    }
+
+    if (event->key() == Qt::Key_Left)
+    {
+        QTextCursor cursor = textCursor();
+        if (cursor.position() > m_editableStart)
+            QTextEdit::keyPressEvent(event);
+        return;
+    }
+
+    m_historyBrowsing = false; // Ставить перед клавишами редактирующими окно ввода
+
     // Ctrl+V — вставка
     if (event->key() == Qt::Key_V && event->modifiers() == Qt::ControlModifier) {
         ensureCursorInEditable();
@@ -317,22 +380,57 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
     if ((event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) && event->modifiers() == Qt::ShiftModifier) {
         ensureCursorInEditable();
         insertPlainText("\n");
+        ensureCursorVisible();
         return;
     }
 
-    // Enter — отправка
-    if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
-        sendCurrentInput();
-        return;
-    }
+    // Ctrl+Backspace — удаление слова назад
+    if (event->key() == Qt::Key_Backspace && event->modifiers() == Qt::ControlModifier) {
+        QTextCursor cursor = textCursor();
 
-    // Стрелки для истории
-    if (event->key() == Qt::Key_Up) {
-        insertFromHistory(-1);
-        return;
-    }
-    if (event->key() == Qt::Key_Down) {
-        insertFromHistory(1);
+        // Проверка выделения
+        if (cursor.hasSelection()) {
+            int start = cursor.selectionStart();
+            int end = cursor.selectionEnd();
+
+            // Если выделение захватывает защищенную зону - запрещаем
+            if (start < m_editableStart) {
+                return;
+            }
+            // Выделение полностью в editable области - разрешаем
+            if (start >= m_editableStart && end >= m_editableStart) {
+                QTextEdit::keyPressEvent(event);
+            }
+            return;
+        }
+
+        // Без выделения - проверяем позицию курсора
+        if (cursor.position() <= m_editableStart) {
+            return;
+        }
+
+        // Сохраняем позицию
+        int originalPos = cursor.position();
+
+        // Выполняем стандартное удаление
+        QTextEdit::keyPressEvent(event);
+
+        // Проверяем новую позицию курсора
+        int newPos = textCursor().position();
+        int diff = m_editableStart - newPos;
+
+        if (diff >= 2) {
+            // Зашли на 2+ символа в защищенную зону - добавляем промпт
+            appendPrompt();
+        }
+        else if (diff == 1) {
+            // Зашли на 1 символ - вставляем пробел
+            insertPlainText(" ");
+            QTextCursor fixCursor = textCursor();
+            fixCursor.movePosition(QTextCursor::Right);
+            setTextCursor(fixCursor);
+        }
+
         return;
     }
 
@@ -348,6 +446,7 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
             // Выделение только в editable области — разрешаем
             if (start >= m_editableStart && end >= m_editableStart) {
                 QTextEdit::keyPressEvent(event);
+                return;
             }
             else if (start < m_editableStart && end > m_editableStart) {
                 return;
@@ -398,16 +497,40 @@ void ReplWidget::keyPressEvent(QKeyEvent* event)
         return;
     }
 
-    // Обычный ввод
-    ensureCursorInEditable();
-    if (event->key() == Qt::Key_Left)
-    {
-        QTextCursor cursor = textCursor();
-        if(cursor.position() > m_editableStart)
+    // Проверяем, можно ли редактировать в текущей позиции
+    if (!isEditAllowed()) {
+        // Только навигация и копирование
+        if (isNavigationKey(event)) {
             QTextEdit::keyPressEvent(event);
+        }
+        // Остальные клавиши игнорируем
         return;
     }
+
+    // Здесь можно редактировать
     QTextEdit::keyPressEvent(event);
+}
+
+bool ReplWidget::isEditAllowed() const
+{
+    QTextCursor cursor = textCursor();
+
+    // Если есть выделение — проверяем, что оно полностью внутри editable области
+    if (cursor.hasSelection()) {
+        return cursor.selectionStart() >= m_editableStart;
+    }
+
+    // Без выделения — проверяем позицию курсора
+    return cursor.position() >= m_editableStart;
+}
+
+bool ReplWidget::isNavigationKey(QKeyEvent* event) const
+{
+    int key = event->key();
+    return (key == Qt::Key_Left || key == Qt::Key_Right ||
+        key == Qt::Key_Up || key == Qt::Key_Down ||
+        key == Qt::Key_Home || key == Qt::Key_End ||
+        key == Qt::Key_PageUp || key == Qt::Key_PageDown);
 }
 
 void ReplWidget::contextMenuEvent(QContextMenuEvent* event)
@@ -458,26 +581,44 @@ void ReplWidget::onErrorLocationAvailable(const QString& message, int line, int 
 
 void ReplWidget::loadThemeColors()
 {
-    const QString styleSheet = qApp->styleSheet();
+    // Если стиль задан через qApp->setStyleSheet()
+    QString styleSheet = qApp->styleSheet();
 
-    // Парсим цвета из кастомных свойств
-    auto extractColor = [&](const QString& propName, QColor& target, const QColor& fallback) {
-        // Ищем: qproperty-replPrompt: #00ff00;
-        QRegularExpression re(QString(R"(qproperty-%1:\s*(#[0-9A-Fa-f]+))").arg(propName));
-        auto match = re.match(styleSheet);
-        if (match.hasMatch()) {
-            target = QColor(match.captured(1));
+    // Если стиль пустой - используем значения по умолчанию
+    if (styleSheet.isEmpty()) {
+        // Определяем тему автоматически
+        QColor bg = palette().color(QWidget::backgroundRole());
+        bool isDark = bg.lightness() < 128;
+
+        if (isDark) {
+            m_promptColor = QColor(0, 255, 0);
+            m_resultColor = QColor(224, 224, 224);
+            m_errorColor = QColor(255, 107, 107);
+            m_warningColor = QColor(255, 217, 61);
+            m_outputColor = QColor(224, 224, 224);
         }
         else {
-            target = fallback; // запасной вариант
+            m_promptColor = QColor(0, 136, 0);
+            m_resultColor = QColor(45, 45, 45);
+            m_errorColor = QColor(198, 38, 38);
+            m_warningColor = QColor(166, 124, 0);
+            m_outputColor = QColor(45, 45, 45);
         }
+        return;
+    }
+
+    // Парсим цвета из qApp стилей
+    auto extractColor = [&](const QString& propName, QColor& target, const QColor& fallback) {
+        QRegularExpression re(QString(R"(qproperty-%1:\s*(#[0-9A-Fa-f]+))").arg(propName));
+        auto match = re.match(styleSheet);
+        target = match.hasMatch() ? QColor(match.captured(1)) : fallback;
         };
 
     extractColor("replPrompt", m_promptColor, QColor(0, 255, 0));
-    extractColor("replResult", m_resultColor, QColor(220, 220, 220));
-    extractColor("replError", m_errorColor, QColor(255, 100, 100));
-    extractColor("replWarning", m_warningColor, QColor(255, 200, 100));
-    extractColor("replOutput", m_outputColor, QColor(220, 220, 220));
+    extractColor("replResult", m_resultColor, QColor(224, 224, 224));
+    extractColor("replError", m_errorColor, QColor(255, 107, 107));
+    extractColor("replWarning", m_warningColor, QColor(255, 217, 61));
+    extractColor("replOutput", m_outputColor, QColor(224, 224, 224));
 }
 
 QTextCharFormat ReplWidget::formatForType(ReplMessageType type) const
@@ -492,4 +633,24 @@ QTextCharFormat ReplWidget::formatForType(ReplMessageType type) const
     default:                        fmt.setForeground(m_outputColor); break;
     }
     return fmt;
+}
+
+void ReplWidget::clearCurrentLineAndPrompt()
+{
+    QTextCursor cursor = textCursor();
+
+    // Перемещаемся в позицию m_editableStart (начало ввода, после промпта)
+    cursor.setPosition(m_editableStart);
+
+    // 1. Удаляем всё от m_editableStart до конца документа
+    cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+
+    // 2. Теперь удаляем промпт (от начала строки до m_editableStart)
+    cursor.setPosition(m_editableStart);
+    cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+
+    // Обновляем позицию начала редактирования
+    m_editableStart = textCursor().position();
 }

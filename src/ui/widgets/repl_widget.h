@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <QTextEdit>
 
 #include "settings.h"
@@ -67,6 +67,9 @@ private:
 	void setupConnections();
 	void onErrorLocationAvailable(const QString& message, int line, int column);
 	bool hasPromptAtEditableStart() const;
+	void clearCurrentLineAndPrompt();
+	bool isEditAllowed() const;
+	bool isNavigationKey(QKeyEvent* event) const;
 
 	// Цвета
 	mutable QColor m_promptColor;

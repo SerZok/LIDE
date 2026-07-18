@@ -1,4 +1,4 @@
-#include "repl_parser.h"
+﻿#include "repl_parser.h"
 
 #include <QRegularExpression>
 #include <QString>
@@ -67,7 +67,7 @@ void ReplParser::processBuffer()
             }
             ReplMessage promptMsg;
             promptMsg.type = ReplMessageType::Prompt;
-            promptMsg.text = line.trimmed();
+            promptMsg.text = (m_parseMode != Settings::ParseOutputMode::Full?line.trimmed():line);
             emit messageReady(promptMsg);
             m_state = ParseState::Idle;
             continue;
@@ -98,7 +98,7 @@ void ReplParser::processBuffer()
 
         ReplMessage promptMsg;
         promptMsg.type = ReplMessageType::Prompt;
-        promptMsg.text = remaining;
+        promptMsg.text = (m_parseMode != Settings::ParseOutputMode::Full ? remaining : m_inputBuffer);
         emit messageReady(promptMsg);
 
         m_inputBuffer.clear();
@@ -158,11 +158,11 @@ void ReplParser::flushBlock()
         break;
     case BlockType::Prompt:
         msg.type = ReplMessageType::Prompt;
-        msg.text = m_blockBuffer.join("\n").trimmed();
+        msg.text = (m_parseMode != Settings::ParseOutputMode::Full ? m_blockBuffer.join("\n").trimmed() : m_blockBuffer.join("\n"));
         break;
     default:
         msg.type = ReplMessageType::Output;
-        msg.text = m_blockBuffer.join("\n").trimmed();
+        msg.text = (m_parseMode != Settings::ParseOutputMode::Full ? m_blockBuffer.join("\n").trimmed() : m_blockBuffer.join("\n"));
     }
 
     if (shouldEmitBlock(type, m_blockBuffer)) {
@@ -306,7 +306,10 @@ ReplMessage ReplParser::parseErrorBlock(const QStringList& lines)
     msg.text = formatErrorText(lines, m_parseMode);
 
     if (msg.line.has_value() && msg.column.has_value()) {
-        emit errorLocationAvailable(msg.text, msg.line.value(), msg.column.value());
+        if(m_parseMode == Settings::ParseOutputMode::Full)
+            emit errorLocationAvailable(formatErrorText(lines, Settings::ParseOutputMode::Minimal), msg.line.value(), msg.column.value());
+        else
+            emit errorLocationAvailable(msg.text, msg.line.value(), msg.column.value());
     }
 
     return msg;
@@ -327,7 +330,7 @@ ReplMessage ReplParser::parseWarningBlock(const QStringList& lines)
         }
     }
 
-    msg.text = lines.join("\n").trimmed();
+    msg.text = (m_parseMode != Settings::ParseOutputMode::Full ? lines.join("\n").trimmed() : lines.join("\n"));
     return msg;
 }
 
@@ -336,13 +339,15 @@ ReplMessage ReplParser::parseResultBlock(const QStringList& lines)
     ReplMessage msg;
     msg.type = ReplMessageType::Result;
 
-    QString text = lines.join("\n").trimmed();
+    QString line = lines.join("\n");
+
+    QString text = line.trimmed();
 
     if (text.startsWith("*")) {
         text = text.mid(1).trimmed();
     }
 
-    msg.text = text;
+    msg.text = (m_parseMode != Settings::ParseOutputMode::Full ? text : line);
     return msg;
 }
 
@@ -410,7 +415,7 @@ QString ReplParser::formatErrorText(const QStringList& lines, Settings::ParseOut
 
     for (const QString& rawLine : lines) {
         QString line = rawLine.trimmed();
-        if (line.isEmpty()) continue;
+        if (line.isEmpty() && mode != Settings::ParseOutputMode::Full) continue;
 
         switch (mode) {
         case Settings::ParseOutputMode::Minimal:
@@ -486,7 +491,7 @@ QString ReplParser::formatErrorText(const QStringList& lines, Settings::ParseOut
         case Settings::ParseOutputMode::Full:
         default:
         {
-            result.append(line);
+            result.append(rawLine);
             break;
         }
         }

@@ -1,4 +1,4 @@
-#include "repl_history.h"
+﻿#include "repl_history.h"
 
 void ReplHistory::add(const QString& command)
 {
@@ -42,4 +42,9 @@ bool ReplHistory::isEmpty() const
 QStringList ReplHistory::getAll() const
 {
     return m_commands;
+}
+
+void ReplHistory::resetToEnd()
+{
+    m_index = m_commands.size();
 }
