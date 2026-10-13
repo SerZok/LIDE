@@ -1,4 +1,5 @@
-(defun infinite-while ()
-  (loop (print "still running")))
-
-(infinite-while)
+(defun factorial (n)
+  "Возвращает факториал числа N."
+  (if (zerop n)
+      1
+      (* n (factorial (- n 1)))))

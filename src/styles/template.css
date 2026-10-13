@@ -615,3 +615,115 @@ ErrorNotificationCloseButton {
         padding: 0;
         margin: 0;
     }
+
+
+/* ==========================================================================
+   AI ASSISTANT: CODE BLOCK WIDGET
+   ========================================================================== */
+
+/* Контейнер всего блока кода */
+QWidget#codeBlockWidget {
+    background-color: @BG_SECONDARY@;
+    border: 0.08em solid @BORDER@;
+    border-radius: 0.4em;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+}
+
+/* Шапка блока кода */
+QWidget#codeBlockHeader {
+    background-color: @BG_TERTIARY@;
+    border-top-left-radius: 0.4em;
+    border-top-right-radius: 0.4em;
+    border-bottom: 0.05em solid @BORDER@;
+}
+
+/* Название языка (lisp, python и т.д.) */
+QLabel#codeLangLabel {
+    color: @TEXT_SECONDARY@;
+    font-size: 9pt;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Кнопки "Копировать" и "Вставить" */
+QPushButton#codeActionBtn {
+    background-color: transparent;
+    color: @TEXT_PRIMARY@;
+    border: 0.05em solid @BORDER@;
+    border-radius: 0.3em;
+    padding: 0.2em 0.5em;
+    font-size: 9pt;
+    min-height: 1.5em;
+}
+
+    QPushButton#codeActionBtn:hover {
+        background-color: @BG_PRIMARY@;
+        border-color: @ACCENT@;
+        color: @ACCENT@;
+    }
+
+    QPushButton#codeActionBtn:pressed {
+        background-color: @ACCENT@;
+        color: @BG_PRIMARY@;
+    }
+
+/* Сам редактор кода внутри блока */
+QPlainTextEdit#codeBlockEditor {
+    background-color: @EDITOR_BG@;
+    color: @EDITOR_TEXT@;
+    border: none;
+    border-bottom-left-radius: 0.4em;
+    border-bottom-right-radius: 0.4em;
+    font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
+    font-size: 10pt;
+    padding: 0.6em;
+    selection-background-color: @SELECTION_BG@;
+    selection-color: @TEXT_PRIMARY@;
+}
+
+/* Убираем стандартный фон скролл-зоны чата */
+QScrollArea#aiChatScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+    QScrollArea#aiChatScrollArea > QWidget {
+        background-color: @EDITOR_BG@;
+    }
+
+/* Сообщение пользователя */
+QTextEdit#userMessageEdit {
+    background-color: @BG_TERTIARY@;
+    color: @TEXT_PRIMARY@;
+    border: none;
+    border-radius: 0.4em;
+    padding: 0.6em;
+    font-size: 11pt;
+}
+
+/* Обычное сообщение AI (текст) */
+QTextEdit#aiMessageEdit {
+    background-color: transparent;
+    color: @TEXT_PRIMARY@;
+    border: none;
+    padding: 0.4em 0;
+    font-size: 11pt;
+}
+
+/* Сообщение об ошибке */
+QTextEdit#errorMessageEdit {
+    background-color: @ERROR_NOTIF_BG_START@;
+    color: @ERROR_NOTIF_TEXT@;
+    border: none;
+    border-radius: 0.4em;
+    border-left: 0.2em solid @ERROR_NOTIF_BORDER@;
+    padding: 0.6em;
+    font-size: 11pt;
+}
+
+QTextEdit#thinkingLabel {
+    color: @TEXT_SECONDARY@;
+    font-style: italic;
+    padding-left: 0.5em;
+}

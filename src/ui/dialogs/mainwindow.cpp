@@ -405,6 +405,11 @@ void MainWindow::setupDockWidgets()
     m_ConsoleDock->setObjectName("console_dock");
     addDockWidget(Qt::BottomDockWidgetArea, m_ConsoleDock);
 
+    m_AiAssistant = new AIAssistantWidget(this);
+    m_AiAssistant->setAllowedAreas(Qt::AllDockWidgetAreas);
+    m_dockNames[m_AiAssistant] = m_AiAssistant->windowTitle();
+    addDockWidget(Qt::RightDockWidgetArea, m_AiAssistant);
+
     // Подключаем сигнал ошибки из консоли
     connect(m_console, &ReplWidget::errorLocationAvailable, this, &MainWindow::onLispError);
 

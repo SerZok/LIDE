@@ -8,6 +8,7 @@
 #include "ui/widgets/editor_tab_widget.h"
 #include "ui/widgets/project_tree.h"
 #include "ui/widgets/repl_widget.h"
+#include "ui/widgets/ai_assistant_widget.h"
 
 #include "ui/dialogs/settings_dialog.h"
 #include "ui/dialogs/about_dialog.h"
@@ -73,6 +74,7 @@ private:
 
     QDockWidget* m_projectDock = nullptr;
     QDockWidget* m_ConsoleDock = nullptr;
+    QDockWidget* m_AiAssistant = nullptr;
     ErrorNotification* m_errorNotification;
 
     // Основные виджеты
