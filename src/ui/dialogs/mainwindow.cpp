@@ -637,12 +637,9 @@ void MainWindow::openManual()
 
     for (const QString& path : searchPaths) {
         QString fullPath = QDir(path).filePath(manualFileName);
-        qDebug() << "Руководство ищем по пути:" << fullPath;
         if (QFile::exists(fullPath)) {
             QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
             return;
         }
     }
-
-    qDebug() << "Руководство не найдено!";
 }

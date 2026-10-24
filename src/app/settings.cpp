@@ -28,7 +28,6 @@ Settings::Settings(QObject* parent) :
 {
     QSettings::Format format = m_settings.format();
     QString path = m_settings.fileName();
-    qDebug() << "Файл настроек:" << path;
 
     m_defaultFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     m_defaultFont.setPointSize(11);

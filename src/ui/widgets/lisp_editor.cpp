@@ -476,7 +476,7 @@ void LispEditor::highlightErrorAtPosition(const QString& message, int line, int 
     // Находим блок по номеру строки
     QTextBlock block = document()->findBlockByNumber(line - 1);
     if (!block.isValid()) {
-        qDebug() << "Invalid line:" << line;
+        //qDebug() << "Invalid line:" << line;
         return;
     }
 

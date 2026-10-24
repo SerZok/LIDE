@@ -39,7 +39,7 @@ bool ReplProcess::start()
         stop();
     }
 
-    qDebug() << "Запуск: " << sbclPath << " Аргументы: " << args;
+    //qDebug() << "Запуск: " << sbclPath << " Аргументы: " << args;
 
     m_process.setProcessChannelMode(QProcess::MergedChannels);
     m_process.setWorkingDirectory(QFileInfo(sbclPath).absolutePath());
@@ -58,11 +58,11 @@ void ReplProcess::stop()
 {
     if (!isRunning()) return;
     m_stopping = true;
-    qDebug() << "Stopping SBCL process...";
+    //qDebug() << "Stopping SBCL process...";
     m_process.terminate();
 
     if (!m_process.waitForFinished(1000)) {
-        qDebug() << "Process didn't terminate, killing...";
+        //qDebug() << "Process didn't terminate, killing...";
         m_process.kill();
         m_process.waitForFinished(1000);
     }
@@ -102,7 +102,7 @@ void ReplProcess::interrupt()
 #else
     // Unix: отправляем SIGINT
     ::kill(m_process.processId(), SIGINT);
-    qDebug() << "SIGINT sent to process" << m_process.processId();
+    //qDebug() << "SIGINT sent to process" << m_process.processId();
 #endif
 }
 
@@ -125,7 +125,7 @@ void ReplProcess::onProcessFinished(int exitCode, QProcess::ExitStatus status)
     Q_UNUSED(exitCode);
     Q_UNUSED(status);
 
-    qDebug() << "SBCL process finished";
+    //qDebug() << "SBCL process finished";
     emit finished();
 
     if (m_stopping) {

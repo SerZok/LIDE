@@ -170,7 +170,7 @@ void EditorTabWidget::onFileClosed(const QString& path)
     if (index != -1) {
         LispEditor* editor = editorAt(index);
         if (editor && editor->currentFile() == path) {
-            qDebug() << "Removing tab at index:" << index;
+            //qDebug() << "Removing tab at index:" << index;
             m_pathToIndex.remove(path);
             m_indexToPath.remove(index);
             removeTab(index);
