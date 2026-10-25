@@ -1,13 +1,14 @@
 #pragma once
 
 #include <QWidget>
-#include <QPlainTextEdit>
+#include <QTextEdit>
 #include <QPushButton>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QClipboard>
 #include <QGuiApplication>
+#include <QTimer>
 
 class CodeBlockWidget : public QWidget {
     Q_OBJECT
@@ -21,7 +22,12 @@ private slots:
     void onCopyClicked();
     void onInsertClicked();
 
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+
 private:
+    void updateCodeHeight();
+    
     QString m_code;
-    QPlainTextEdit* m_codeEdit;
+    QTextEdit* m_codeEdit;
 };

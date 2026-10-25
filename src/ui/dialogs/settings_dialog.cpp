@@ -10,13 +10,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 {
 	ui.setupUi(this);
 
-    if (auto* layout = ui.console_scrollAreaContents->layout()) {
-        layout->setContentsMargins(0, 0, 0, 0);
-    }
-    if (auto* layout = ui.sbcl_scrollAreatContents->layout()) {
-        layout->setContentsMargins(0, 0, 0, 0);
-    }
-
 	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
     // ComboBox'ы
@@ -37,6 +30,11 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     ui.sbcl_file_format_comboBox->addItem("default", ":default");
     ui.sbcl_file_format_comboBox->addItem("utf-8", ":utf-8");
     ui.sbcl_file_format_comboBox->addItem("latin-1", ":latin-1");
+
+    ui.ai_endpoint_lineEdit->setText(m_settings->aiEndpoint());
+    ui.ai_model_lineEdit->setText(m_settings->aiModel());
+    ui.ai_api_key_lineEdit->setText(m_settings->aiApiKey());
+    ui.ai_system_prompt_textEdit->setPlainText(m_settings->aiSystemPrompt());
 
     // Кнопки
     connect(ui.buttonBox, &QDialogButtonBox::accepted, this, [this]() {
@@ -190,6 +188,12 @@ void SettingsDialog::saveFromUi()
     // ── Project ──────────────────────────────────────
     m_settings->setProjectDefaultPath(ui.project_default_line->text());
     m_settings->setProjectExcludeFilters(ui.project_filter_files_line->text());
+
+    // ── AI ──────────────────────────────────────
+    m_settings->setAiApiKey(ui.ai_api_key_lineEdit->text());
+    m_settings->setAiEndpoint(ui.ai_endpoint_lineEdit->text());
+    m_settings->setAiModel(ui.ai_model_lineEdit->text());
+    m_settings->setAiSystemPrompt(ui.ai_system_prompt_textEdit->toPlainText());
 
     // ── SBCL ─────────────────────────────────────────
     m_settings->setSbclPath(ui.sbcl_path_lineEdit->text());

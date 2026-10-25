@@ -5,10 +5,10 @@
 #include <QNetworkReply>
 #include <QString>
 
-class OllamaClient : public QObject {
+class AiClient : public QObject {
     Q_OBJECT
 public:
-    explicit OllamaClient(QObject* parent = nullptr);
+    explicit AiClient(QObject* parent = nullptr);
 
     void sendRequest(const QString& prompt);
 

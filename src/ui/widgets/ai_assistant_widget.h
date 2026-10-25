@@ -7,8 +7,10 @@
 #include <QHBoxLayout>
 #include <QScrollArea>
 #include <QRegularExpression>
-#include "../network/ollama_client.h"
+
+#include "../network/ai_client.h"
 #include "code_block_widget.h"
+#include "components/input_text_edit.h"
 
 class AIAssistantWidget : public QDockWidget {
     Q_OBJECT
@@ -26,15 +28,15 @@ private slots:
     void onError(const QString& error);
 
 private:
-    void appendTextMessage(const QString& text, bool isUser);
+    void appendTextMessage(const QString& text, bool isUser, bool isError);
     void appendAIMessage(const QString& markdownResponse);
 
-    OllamaClient* m_client;
+    AiClient* m_client;
     QScrollArea* m_scrollArea;
     QWidget* m_contentWidget;
     QVBoxLayout* m_chatLayout;
 
-    QLineEdit* m_inputField;
+    InputTextEdit* m_inputField;
     QPushButton* m_sendButton;
 
     bool m_isWaiting;

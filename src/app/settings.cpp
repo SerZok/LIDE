@@ -221,28 +221,56 @@ void Settings::setLastProjectPath(const QString& path)
     setValue(Key::PROJECT_LAST_PATH, path);
 }
 
-//TODO: сохранять несколько проектов
-// 
-//QStringList Settings::recentProjects() const
-//{
-//    return value<QStringList>(Key::PROJECT_RECENT, QStringList());
-//}
-//
-//void Settings::addRecentProject(const QString& path)
-//{
-//    QStringList recent = recentProjects();
-//    recent.removeAll(path);
-//    recent.prepend(path);
-//    while (recent.size() > 10) {
-//        recent.removeLast();
-//    }
-//    setValue(Key::PROJECT_RECENT, recent);
-//}
-//
-//void Settings::clearRecentProjects()
-//{
-//    m_settings.remove(Key::PROJECT_RECENT);
-//}
+// =========================================================================
+// AI Assistant settings
+// =========================================================================
+
+QString Settings::aiEndpoint() const {
+    return value<QString>(Key::AI_ENDPOINT, "http://localhost:11434/api/chat");
+}
+
+void Settings::setAiEndpoint(const QString& endpoint) {
+    if (endpoint != aiEndpoint()) {
+        setValue(Key::AI_ENDPOINT, endpoint);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiModel() const {
+    return value<QString>(Key::AI_MODEL, "");
+}
+
+void Settings::setAiModel(const QString& model) {
+    if (model != aiModel()) {
+        setValue(Key::AI_MODEL, model);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiApiKey() const {
+    return value<QString>(Key::AI_API_KEY, "");
+}
+
+void Settings::setAiApiKey(const QString& key) {
+    if (key != aiApiKey()) {
+        setValue(Key::AI_API_KEY, key);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiSystemPrompt() const {
+    return value<QString>(Key::AI_SYSTEM_PROMPT,
+        "Ты опытный помощник-программист, специализирующийся на Common Lisp (SBCL). "
+        "Отвечай кратко и по делу. Весь предоставляемый код обязательно оформляй в блоки markdown с указанием языка,"
+        "например: ```lisp\n(твой код)\n```");
+}
+
+void Settings::setAiSystemPrompt(const QString& prompt) {
+    if (prompt != aiSystemPrompt()) {
+        setValue(Key::AI_SYSTEM_PROMPT, prompt);
+        emit settingsChanged();
+    }
+}
 
 // SBCL
 QString Settings::sbclPath() const
@@ -570,8 +598,6 @@ void Settings::setKeywordColor(const QColor& color)
         emit settingsChanged();
     }
 }
-
-// ... аналогично для других цветов ...
 
 bool Settings::contains(const QString& key) const
 {

@@ -1,53 +1,60 @@
-#include "ollama_client.h"
+#include "ai_client.h"
+#include "app/settings.h"
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QUrl>
 
-OllamaClient::OllamaClient(QObject* parent) : QObject(parent) {
+AiClient::AiClient(QObject* parent) : QObject(parent) {
     m_networkManager = new QNetworkAccessManager(this);
-    connect(m_networkManager, &QNetworkAccessManager::finished, this, &OllamaClient::onReplyFinished);
+    connect(m_networkManager, &QNetworkAccessManager::finished, this, &AiClient::onReplyFinished);
 }
 
-void OllamaClient::sendRequest(const QString& prompt) {
-    QUrl url("http://localhost:11434/api/chat");
+void AiClient::sendRequest(const QString& prompt) {
+    Settings* settings = Settings::instance();
+
+    QUrl url(settings->aiEndpoint());
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
 
-    // Формируем JSON для Ollama (формат chat)
+    QString apiKey = settings->aiApiKey();
+    if (!apiKey.isEmpty()) {
+        request.setRawHeader("Authorization", ("Bearer " + apiKey).toUtf8());
+    }
+
     QJsonObject json;
-    json["model"] = m_modelName;
+    auto model = settings->aiModel();
+    json["model"] = model;
     json["stream"] = false;
 
     QJsonArray messages;
     QJsonObject systemMessage;
     systemMessage["role"] = "system";
-    systemMessage["content"] = "Ты эксперт по Common Lisp (SBCL)."
-        "Отвечай кратко. Весь код обязательно оформляй в блоки markdown с указанием языка,"
-        "например: ```lisp\\n(код)\\n```";
+    systemMessage["content"] = settings->aiSystemPrompt();
     messages.append(systemMessage);
 
     QJsonObject userMessage;
     userMessage["role"] = "user";
     userMessage["content"] = prompt;
     messages.append(userMessage);
-
     json["messages"] = messages;
 
-    QJsonDocument doc(json);
-    m_networkManager->post(request, doc.toJson());
+    m_networkManager->post(request, QJsonDocument(json).toJson());
 }
 
-void OllamaClient::onReplyFinished(QNetworkReply* reply) {
+void AiClient::onReplyFinished(QNetworkReply* reply) {
     if (!reply) return;
 
     if (reply->error() == QNetworkReply::NoError) {
         QByteArray responseData = reply->readAll();
         QJsonDocument doc = QJsonDocument::fromJson(responseData);
         QString responseText = doc.object().value("message").toObject().value("content").toString();
+        qDebug() << "[ai]:" << responseText;
         emit responseReady(responseText);
     }
     else {
+        qDebug() << "[ai]:" << reply->errorString();
         emit errorOccurred(reply->errorString());
     }
     reply->deleteLater();
