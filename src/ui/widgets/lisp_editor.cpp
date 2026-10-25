@@ -6,6 +6,8 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QMenu>
+#include "network/ai_client.h"
 
 LispEditor::LispEditor(QWidget* parent)
     : QPlainTextEdit(parent)
@@ -16,6 +18,8 @@ LispEditor::LispEditor(QWidget* parent)
     , m_ignoreChanges(false)
     , m_highlighter(new LispHighlighter(this->document()))
 {
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+
     applyEditorSettings();
 
     m_lineNumberArea->setObjectName("LineNumberArea");
@@ -45,6 +49,27 @@ LispEditor::LispEditor(QWidget* parent)
     connect(m_settings, &Settings::themeChanged, this, [this]() {
         loadThemeColors();
         highlightMatchingBrackets();
+        });
+
+    connect(this, &LispEditor::customContextMenuRequested, this, [this](const QPoint& pos) {
+        QMenu* menu = this->createStandardContextMenu();
+        menu->addSeparator();
+
+        auto explainAction = menu->addAction("🧠 Объяснить выделенное");
+        explainAction->setEnabled(this->textCursor().hasSelection());
+
+        connect(explainAction, &QAction::triggered, this, [this]() {
+            QString selectedText = this->textCursor().selectedText();
+
+            AiClient::ExplainContext context = (this->objectName() == "replWidget")
+                ? AiClient::ExplainContext::Repl
+                : AiClient::ExplainContext::Editor;
+
+            AiClient::instance()->sendExplainRequest(selectedText, context);
+            });
+
+        menu->exec(this->mapToGlobal(pos));
+        delete menu;
         });
 
     updateLineNumberAreaWidth(0);

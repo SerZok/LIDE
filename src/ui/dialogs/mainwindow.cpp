@@ -17,6 +17,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QActionGroup>
+#include <QTextBrowser>
 #include <QFontDatabase>
 #include <QStandardPaths>
 #include <QDesktopServices>
@@ -27,10 +28,14 @@ MainWindow::MainWindow(QWidget* parent) :
     , m_projectTree(nullptr)
     , m_tabWidget(nullptr)
     , m_settings(Settings::instance())
+    , m_aiClient(AiClient::instance())
 {
     ui->setupUi(this);
     resize(1366, 1080);
     connect(m_settings, &Settings::settingsChanged, this, &MainWindow::onSettingsChanged);
+
+    connect(m_aiClient, &AiClient::responseReady, this, &MainWindow::onAiExplanationReady);
+    connect(m_aiClient, &AiClient::errorOccurred, this, &MainWindow::onAiError);
 
     m_autoSaveTimer = new QTimer(this);
     m_autoSaveTimer->setSingleShot(false);
@@ -528,6 +533,41 @@ void MainWindow::loadAppState()
     
     m_settings->setCurrentTheme(m_settings->currentTheme());
     m_settings->setCurrentLang(m_settings->currentLang());
+}
+
+void MainWindow::onAiExplanationReady(const QString& htmlResponse) {
+    QDialog* dialog = new QDialog(this);
+    dialog->setWindowTitle("🧠 Объяснение");
+    dialog->resize(650, 450);
+
+    QVBoxLayout* layout = new QVBoxLayout(dialog);
+    QTextBrowser* browser = new QTextBrowser(dialog);
+
+    browser->setOpenExternalLinks(true);
+    browser->setHtml(htmlResponse);
+
+    browser->document()->setDefaultStyleSheet(
+        "pre { background-color: #f0f0f0; padding: 8px; border-radius: 4px; font-family: 'Consolas', 'Courier New', monospace; border-left: 3px solid #0078d7; }"
+        "code { font-family: 'Consolas', 'Courier New', monospace; color: #d63384; background-color: #f8f9fa; padding: 2px 4px; border-radius: 3px; }"
+        "a { color: #0078d7; text-decoration: none; font-weight: bold; }"
+        "a:hover { text-decoration: underline; }"
+    );
+
+    QPushButton* closeBtn = new QPushButton("Закрыть", dialog);
+    closeBtn->setCursor(Qt::PointingHandCursor);
+    connect(closeBtn, &QPushButton::clicked, dialog, &QDialog::accept);
+
+    layout->addWidget(browser);
+    layout->addWidget(closeBtn);
+
+    dialog->exec();
+    dialog->deleteLater();
+}
+
+void MainWindow::onAiError(const QString& error) {
+    QMessageBox::warning(this, "Ошибка AI",
+        "Не удалось получить объяснение:\n" + error +
+        "\n\nПроверьте, запущен ли локальный сервер (например, Ollama) или корректен ли API-ключ в настройках.");
 }
 
 void MainWindow::openProject() {

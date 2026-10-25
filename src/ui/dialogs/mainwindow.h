@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QMap>
 
+#include "network/ai_client.h"
 #include "ui/components/error_notification.h"
 #include "ui/widgets/editor_tab_widget.h"
 #include "ui/widgets/project_tree.h"
@@ -41,12 +42,15 @@ protected:
 private slots:
     void saveAppState();
     void loadAppState();
+    void onAiExplanationReady(const QString& htmlResponse);
+    void onAiError(const QString& error);
 
 private:
     Ui::MainWindow* ui;
     QToolBar* m_mainToolBar;
     Settings* m_settings;
     QTimer* m_autoSaveTimer = nullptr;
+    AiClient* m_aiClient;
 
     void saveBeforeExit();
 

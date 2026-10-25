@@ -8,9 +8,14 @@
 class AiClient : public QObject {
     Q_OBJECT
 public:
-    explicit AiClient(QObject* parent = nullptr);
+    enum class ExplainContext {
+        Editor,
+        Repl
+    };
 
+    static AiClient* instance();
     void sendRequest(const QString& prompt);
+    void sendExplainRequest(const QString& selectedText, ExplainContext context);
 
 signals:
     void responseReady(const QString& response);
@@ -21,6 +26,13 @@ private slots:
     void onReplyFinished(QNetworkReply* reply);
 
 private:
+    explicit AiClient(QObject* parent = nullptr);
+    AiClient(const AiClient&) = delete;
+    AiClient& operator=(const AiClient&) = delete;
+
     QNetworkAccessManager* m_networkManager;
-    QString m_modelName = "qwen2.5-coder:1.5b";
+    QNetworkReply* m_currentReply = nullptr;
+    QString m_modelName;
+
+    QString buildTeacherInstructions(ExplainContext context) const;
 };

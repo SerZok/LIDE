@@ -9,7 +9,7 @@ AIAssistantWidget::AIAssistantWidget(QWidget* parent)
 
     setObjectName("AI-assist");
 
-    m_client = new AiClient(this);
+    m_client = AiClient::instance();
     connect(m_client, &AiClient::responseReady, this, &AIAssistantWidget::onResponse);
     connect(m_client, &AiClient::errorOccurred, this, &AIAssistantWidget::onError);
 
