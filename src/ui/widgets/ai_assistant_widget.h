@@ -8,7 +8,7 @@
 #include <QScrollArea>
 #include <QRegularExpression>
 
-#include "../network/ai_client.h"
+#include "network/ai_client.h"
 #include "code_block_widget.h"
 #include "components/input_text_edit.h"
 
@@ -17,6 +17,8 @@ class AIAssistantWidget : public QDockWidget {
 public:
     explicit AIAssistantWidget(QWidget* parent = nullptr);
     void appendToInput(const QString& text);
+
+    void explainSelectedCode(const QString& code, AiClient::ExplainContext context);
 
 signals:
     // Сигнал наружу, в главное окно

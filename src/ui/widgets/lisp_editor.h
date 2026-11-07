@@ -6,6 +6,7 @@
 #include <QWidget>
 
 #include "ui/components/lisp_highlighter.h"
+#include "network/ai_client.h"
 
 class QPaintEvent;
 class QResizeEvent;
@@ -35,6 +36,7 @@ signals:
     void fileLoaded(const QString& path);
     void fileModifiedChanged(const QString& path, bool modified);
     void fileClosed(const QString& path);
+    void requestAIExplanation(const QString& code, AiClient::ExplainContext context);
 
 protected:
     void resizeEvent(QResizeEvent* event) override;
@@ -45,6 +47,7 @@ private slots:
     void updateLineNumberAreaWidth(int newBlockCount);
     void highlightCurrentLine();
     void updateLineNumberArea(const QRect& rect, int dy);
+    void triggerAIExplanation();
 
     void onFileChanged(const QString& path);
     void onTextChanged();

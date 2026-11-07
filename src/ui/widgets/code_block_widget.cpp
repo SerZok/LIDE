@@ -41,7 +41,7 @@ CodeBlockWidget::CodeBlockWidget(const QString& language, const QString& code, Q
     m_codeEdit->setReadOnly(true);
     m_codeEdit->setFrameShape(QFrame::NoFrame);
     m_codeEdit->setWordWrapMode(QTextOption::NoWrap);
-    m_codeEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    m_codeEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_codeEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_codeEdit->setTextInteractionFlags(Qt::TextSelectableByMouse);
     m_codeEdit->setPlainText(m_code);
@@ -57,9 +57,8 @@ void CodeBlockWidget::updateCodeHeight() {
     int lineCount = m_codeEdit->document()->lineCount();
     int padding = 20;
     int neededHeight = (lineCount * lineHeight) + padding;
-    int minHeight = (4 * lineHeight) + padding;
-    int maxHeight = (20 * lineHeight) + padding;
-    int finalHeight = qBound(minHeight, neededHeight, maxHeight);
+    int minHeight = (2 * lineHeight) + padding;
+    int finalHeight = qMax(minHeight, neededHeight);
 
     if (m_codeEdit->height() != finalHeight) {
         m_codeEdit->setFixedHeight(finalHeight);

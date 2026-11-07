@@ -1,13 +1,14 @@
 #include "lisp_editor.h"
+#include "network/ai_client.h"
 
 #include <QFile>
+#include <QMenu>
 #include <QPainter>
+#include <QFileInfo>
+#include <QShortcut>
 #include <QTextBlock>
 #include <QTextStream>
 #include <QMessageBox>
-#include <QFileInfo>
-#include <QMenu>
-#include "network/ai_client.h"
 
 LispEditor::LispEditor(QWidget* parent)
     : QPlainTextEdit(parent)
@@ -58,19 +59,16 @@ LispEditor::LispEditor(QWidget* parent)
         auto explainAction = menu->addAction("🧠 Объяснить выделенное");
         explainAction->setEnabled(this->textCursor().hasSelection());
 
-        connect(explainAction, &QAction::triggered, this, [this]() {
-            QString selectedText = this->textCursor().selectedText();
-
-            AiClient::ExplainContext context = (this->objectName() == "replWidget")
-                ? AiClient::ExplainContext::Repl
-                : AiClient::ExplainContext::Editor;
-
-            AiClient::instance()->sendExplainRequest(selectedText, context);
-            });
+        // Вызываем единый метод
+        connect(explainAction, &QAction::triggered, this, &LispEditor::triggerAIExplanation);
 
         menu->exec(this->mapToGlobal(pos));
         delete menu;
         });
+
+    // Горячая клавиша Alt+Q
+    QShortcut* explainShortcut = new QShortcut(QKeySequence("Alt+Q"), this);
+    connect(explainShortcut, &QShortcut::activated, this, &LispEditor::triggerAIExplanation);
 
     updateLineNumberAreaWidth(0);
 }
@@ -557,4 +555,19 @@ void LispEditor::updateErrorHighlight()
     // Просто копируем список подсветок
     m_extraSelections = m_errorSelections;
     setExtraSelections(m_extraSelections);
+}
+
+void LispEditor::triggerAIExplanation() {
+    QString selectedText = textCursor().selectedText().trimmed();
+    selectedText = selectedText.replace(QChar::ParagraphSeparator, '\n').trimmed();
+
+    if (selectedText.isEmpty()) {
+        return;
+    }
+
+    AiClient::ExplainContext context = (this->objectName() == "replWidget")
+        ? AiClient::ExplainContext::Repl
+        : AiClient::ExplainContext::Editor;
+
+    emit requestAIExplanation(selectedText, context);
 }

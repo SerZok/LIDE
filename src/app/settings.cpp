@@ -599,6 +599,13 @@ void Settings::setKeywordColor(const QColor& color)
     }
 }
 
+QString Settings::localHyperSpecPath() const {
+    return m_settings.value("ai/localHyperSpecPath", "").toString();
+}
+void Settings::setLocalHyperSpecPath(const QString& path) {
+    m_settings.setValue("ai/localHyperSpecPath", path);
+}
+
 bool Settings::contains(const QString& key) const
 {
     return m_settings.contains(key);

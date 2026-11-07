@@ -10,8 +10,6 @@ AIAssistantWidget::AIAssistantWidget(QWidget* parent)
     setObjectName("AI-assist");
 
     m_client = AiClient::instance();
-    connect(m_client, &AiClient::responseReady, this, &AIAssistantWidget::onResponse);
-    connect(m_client, &AiClient::errorOccurred, this, &AIAssistantWidget::onError);
 
     // --- Область чата ---
     m_scrollArea = new QScrollArea(this);
@@ -38,9 +36,6 @@ AIAssistantWidget::AIAssistantWidget(QWidget* parent)
     m_sendButton = new QPushButton(tr("Отправить"), this);
     m_sendButton->setObjectName("aiSendButton");
 
-    connect(m_inputField, &InputTextEdit::submitRequested, this, &AIAssistantWidget::onSendClicked);
-    connect(m_sendButton, &QPushButton::clicked, this, &AIAssistantWidget::onSendClicked);
-
     // --- Компоновка всего виджета ---
     QWidget* mainWidget = new QWidget(this);
     QVBoxLayout* mainLayout = new QVBoxLayout(mainWidget);
@@ -54,6 +49,15 @@ AIAssistantWidget::AIAssistantWidget(QWidget* parent)
     mainLayout->addLayout(inputLayout);
 
     setWidget(mainWidget);
+
+    connect(m_client, &AiClient::responseReady, this, &AIAssistantWidget::onResponse);
+    connect(m_client, &AiClient::explainResponseReady, this, &AIAssistantWidget::onResponse);
+
+    connect(m_client, &AiClient::errorOccurred, this, &AIAssistantWidget::onError);
+    connect(m_client, &AiClient::explainErrorOccurred, this, &AIAssistantWidget::onError);
+
+    connect(m_inputField, &InputTextEdit::submitRequested, this, &AIAssistantWidget::onSendClicked);
+    connect(m_sendButton, &QPushButton::clicked, this, &AIAssistantWidget::onSendClicked);
 }
 
 void AIAssistantWidget::appendToInput(const QString& text) {
@@ -67,27 +71,28 @@ void AIAssistantWidget::appendTextMessage(const QString& text, bool isUser, bool
     textEdit->setReadOnly(true);
     textEdit->setFrameShape(QFrame::NoFrame);
     textEdit->setWordWrapMode(QTextOption::WordWrap);
+
     textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     textEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     textEdit->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     if (isError) {
         textEdit->setObjectName("errorMessageEdit");
+        textEdit->setMarkdown(text);
     }
     else if (isUser) {
         textEdit->setObjectName("userMessageEdit");
+        textEdit->setPlainText(text);
     }
     else {
         textEdit->setObjectName("aiMessageEdit");
+        textEdit->setMarkdown(text);
     }
 
-    textEdit->setMarkdown(text);
-
-    // Магия авто-высоты
     textEdit->document()->adjustSize();
     qreal docHeight = textEdit->document()->size().height();
-    textEdit->setMaximumHeight(static_cast<int>(docHeight) + 10);
-    textEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+    textEdit->setMaximumHeight(static_cast<int>(docHeight) + 20);
+    textEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
     m_chatLayout->addWidget(textEdit);
 }
@@ -178,4 +183,25 @@ void AIAssistantWidget::onError(const QString& error) {
     m_sendButton->setEnabled(true);
     m_inputField->setEnabled(true);
     m_inputField->setFocus();
+}
+
+void AIAssistantWidget::explainSelectedCode(const QString& code, AiClient::ExplainContext context) {
+    QString contextStr = (context == AiClient::ExplainContext::Repl) ? "REPL" : "Редактор";
+
+    QString prompt = QString("Объясни выделенный код\n%1"
+        "Код: %2\n\n")
+        .arg(contextStr, code);
+
+    appendTextMessage(contextStr, true, false);
+
+    m_isWaiting = true;
+    m_inputField->setEnabled(false);
+    m_sendButton->setEnabled(false);
+
+    QLabel* thinkingLabel = new QLabel(QObject::tr("Анализирую код..."), m_contentWidget);
+    thinkingLabel->setObjectName("thinkingLabel");
+    thinkingLabel->setWordWrap(true);
+    m_chatLayout->addWidget(thinkingLabel);
+
+    m_client->sendExplainRequest(code, context);
 }

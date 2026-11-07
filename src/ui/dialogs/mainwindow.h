@@ -42,8 +42,8 @@ protected:
 private slots:
     void saveAppState();
     void loadAppState();
-    void onAiExplanationReady(const QString& htmlResponse);
     void onAiError(const QString& error);
+    void onRequestAIExplanation(const QString& code, AiClient::ExplainContext context);
 
 private:
     Ui::MainWindow* ui;
@@ -118,7 +118,7 @@ private:
     // Запуск
     QAction* m_runAction = nullptr;
     QAction* m_restartAction = nullptr;
-    QAction* m_cleanRunAction = nullptr;
+    //QAction* m_cleanRunAction = nullptr;
 
     // StatusBar
     QLabel* m_positionLabel;

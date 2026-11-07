@@ -14,6 +14,11 @@ public:
 	SettingsDialog(QWidget*parent = nullptr);
 	~SettingsDialog();
 
+private slots:
+	void onBrowseHyperSpecPath();
+	void onBrowseSBCLPath();
+	void onBrowseProjectPath();
+
 protected:
 	void changeEvent(QEvent* event) override;
 
@@ -28,6 +33,4 @@ private:
 
 	void updateSbclArgs();
 	void updateSbclLoad();
-	void onBrowseSBCLPath();
-	void onBrowseProjectPath();
 };

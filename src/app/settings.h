@@ -185,6 +185,9 @@ public:
     QColor keywordColor() const;
     void setKeywordColor(const QColor& color);
 
+    QString localHyperSpecPath() const;
+    void setLocalHyperSpecPath(const QString& path);
+
     // TODO: задание пользовательских цветов...
     //QColor functionColor() const;
     //void setFunctionColor(const QColor& color);

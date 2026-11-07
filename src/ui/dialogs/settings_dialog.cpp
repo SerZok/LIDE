@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QDir>
 
 SettingsDialog::SettingsDialog(QWidget* parent)
 	: QDialog(parent),
@@ -35,6 +36,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     ui.ai_model_lineEdit->setText(m_settings->aiModel());
     ui.ai_api_key_lineEdit->setText(m_settings->aiApiKey());
     ui.ai_system_prompt_textEdit->setPlainText(m_settings->aiSystemPrompt());
+    ui.ai_hyper_spec_lineEdit->setText(m_settings->localHyperSpecPath());
 
     // Кнопки
     connect(ui.buttonBox, &QDialogButtonBox::accepted, this, [this]() {
@@ -58,6 +60,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     // Browse кнопки
     connect(ui.project_default_browse_button, &QPushButton::clicked, this, &SettingsDialog::onBrowseProjectPath);
     connect(ui.sbcl_path_pushButton, &QPushButton::clicked, this, &SettingsDialog::onBrowseSBCLPath);
+    connect(ui.ai_hyper_spec_browse_button, &QPushButton::clicked, this, &SettingsDialog::onBrowseHyperSpecPath);
 
     // Live preview для load-команды
     connect(ui.sbcl_file_verbose_checkBox, &QCheckBox::toggled, this, &SettingsDialog::updateSbclLoad);
@@ -194,6 +197,7 @@ void SettingsDialog::saveFromUi()
     m_settings->setAiEndpoint(ui.ai_endpoint_lineEdit->text());
     m_settings->setAiModel(ui.ai_model_lineEdit->text());
     m_settings->setAiSystemPrompt(ui.ai_system_prompt_textEdit->toPlainText());
+    m_settings->setLocalHyperSpecPath(ui.ai_hyper_spec_lineEdit->text());
 
     // ── SBCL ─────────────────────────────────────────
     m_settings->setSbclPath(ui.sbcl_path_lineEdit->text());
@@ -263,7 +267,7 @@ void SettingsDialog::updateSbclArgs()
         args << custom.split(' ', Qt::SkipEmptyParts);
     }
 
-    // Формируем строку команды
+    // Формируем строку команды1
     QString preview = "sbcl";
     for (const QString& arg : args) {
         preview += " " + arg;
@@ -297,5 +301,19 @@ void SettingsDialog::onBrowseSBCLPath()
         ui.sbcl_path_lineEdit->setText(path);
         // Опционально: обновить превью аргументов, если путь влияет на доступные флаги
         updateSbclArgs();
+    }
+}
+
+void SettingsDialog::onBrowseHyperSpecPath()
+{
+    QString path = QFileDialog::getExistingDirectory(
+        this,
+        tr("Выберите папку с HyperSpec"),
+        ui.ai_hyper_spec_lineEdit->text(),
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
+    );
+
+    if (!path.isEmpty()) {
+        ui.ai_hyper_spec_lineEdit->setText(QDir::toNativeSeparators(path));
     }
 }

@@ -33,8 +33,6 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->setupUi(this);
     resize(1366, 1080);
     connect(m_settings, &Settings::settingsChanged, this, &MainWindow::onSettingsChanged);
-
-    connect(m_aiClient, &AiClient::responseReady, this, &MainWindow::onAiExplanationReady);
     connect(m_aiClient, &AiClient::errorOccurred, this, &MainWindow::onAiError);
 
     m_autoSaveTimer = new QTimer(this);
@@ -232,7 +230,7 @@ void MainWindow::setupMenuBar()
 
             m_runAction->setEnabled(true);
             m_restartAction->setEnabled(true);
-            m_cleanRunAction->setEnabled(true);
+            //m_cleanRunAction->setEnabled(true);
 
             // обновления состояния undo/redo
             connect(editor->document(), &QTextDocument::undoAvailable, m_undoAction, &QAction::setEnabled, Qt::UniqueConnection);
@@ -246,7 +244,7 @@ void MainWindow::setupMenuBar()
             m_pasteAction->setEnabled(false);
             m_runAction->setEnabled(false);
             m_restartAction->setEnabled(false);
-            m_cleanRunAction->setEnabled(false);
+            //m_cleanRunAction->setEnabled(false);
         }
         });
 
@@ -309,20 +307,20 @@ void MainWindow::setupMenuBar()
             }
         });
 
-    m_cleanRunAction = m_runMenu->addAction(QIcon(":/icons/images/force-start.svg"), tr("Принудительный запуск"), QKeySequence(Qt::CTRL | Qt::Key_F5));
-    m_cleanRunAction->setEnabled(false);
-    m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и запуск текущего кода"));
-    connect(m_cleanRunAction, &QAction::triggered, this, [this]() {
-        if (m_console && m_tabWidget) {
-            QString filePath = m_tabWidget->currentFilePath();
-            if (!filePath.isEmpty()) {
-                m_tabWidget->currentEditor()->saveFile();
-                m_tabWidget->currentEditor()->clearErrorHighlight();
-                m_console->restart();
-                m_console->sendFile(filePath);
-            }
-        }
-        });
+    //m_cleanRunAction = m_runMenu->addAction(QIcon(":/icons/images/force-start.svg"), tr("Принудительный запуск"), QKeySequence(Qt::CTRL | Qt::Key_F5));
+    //m_cleanRunAction->setEnabled(false);
+    //m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и запуск текущего кода"));
+    //connect(m_cleanRunAction, &QAction::triggered, this, [this]() {
+    //    if (m_console && m_tabWidget) {
+    //        QString filePath = m_tabWidget->currentFilePath();
+    //        if (!filePath.isEmpty()) {
+    //            m_tabWidget->currentEditor()->saveFile();
+    //            m_tabWidget->currentEditor()->clearErrorHighlight();
+    //            m_console->restart();
+    //            m_console->sendFile(filePath);
+    //        }
+    //    }
+    //    });
 
     // Tools menu
     m_toolsMenu = menuBar()->addMenu(tr("&Опции"));
@@ -376,7 +374,7 @@ void MainWindow::setupToolBar() {
     m_mainToolBar->addSeparator();
     m_mainToolBar->addAction(m_runAction);
     m_mainToolBar->addAction(m_restartAction);
-    m_mainToolBar->addAction(m_cleanRunAction);
+    //m_mainToolBar->addAction(m_cleanRunAction);
 }
 
 void MainWindow::setupStatusBar()
@@ -415,7 +413,6 @@ void MainWindow::setupDockWidgets()
     m_dockNames[m_AiAssistant] = m_AiAssistant->windowTitle();
     addDockWidget(Qt::RightDockWidgetArea, m_AiAssistant);
 
-    // Подключаем сигнал ошибки из консоли
     connect(m_console, &ReplWidget::errorLocationAvailable, this, &MainWindow::onLispError);
 
     QTimer::singleShot(0, [this]() {
@@ -452,9 +449,13 @@ void MainWindow::setupDockWidgets()
                         updateStatusBarPosition(line, col);
                     });
 
-                // Инициализация текущего редактора
                 QTextCursor cursor = editor->textCursor();
                 updateStatusBarPosition(cursor.blockNumber() + 1, cursor.columnNumber() + 1);
+
+                connect(editor, &LispEditor::requestAIExplanation,
+                    this, &MainWindow::onRequestAIExplanation,
+                    Qt::UniqueConnection);
+
             }
             else {
                 updateStatusBarPosition(0, 0);
@@ -535,39 +536,19 @@ void MainWindow::loadAppState()
     m_settings->setCurrentLang(m_settings->currentLang());
 }
 
-void MainWindow::onAiExplanationReady(const QString& htmlResponse) {
-    QDialog* dialog = new QDialog(this);
-    dialog->setWindowTitle("🧠 Объяснение");
-    dialog->resize(650, 450);
-
-    QVBoxLayout* layout = new QVBoxLayout(dialog);
-    QTextBrowser* browser = new QTextBrowser(dialog);
-
-    browser->setOpenExternalLinks(true);
-    browser->setHtml(htmlResponse);
-
-    browser->document()->setDefaultStyleSheet(
-        "pre { background-color: #f0f0f0; padding: 8px; border-radius: 4px; font-family: 'Consolas', 'Courier New', monospace; border-left: 3px solid #0078d7; }"
-        "code { font-family: 'Consolas', 'Courier New', monospace; color: #d63384; background-color: #f8f9fa; padding: 2px 4px; border-radius: 3px; }"
-        "a { color: #0078d7; text-decoration: none; font-weight: bold; }"
-        "a:hover { text-decoration: underline; }"
-    );
-
-    QPushButton* closeBtn = new QPushButton("Закрыть", dialog);
-    closeBtn->setCursor(Qt::PointingHandCursor);
-    connect(closeBtn, &QPushButton::clicked, dialog, &QDialog::accept);
-
-    layout->addWidget(browser);
-    layout->addWidget(closeBtn);
-
-    dialog->exec();
-    dialog->deleteLater();
-}
-
 void MainWindow::onAiError(const QString& error) {
     QMessageBox::warning(this, "Ошибка AI",
         "Не удалось получить объяснение:\n" + error +
         "\n\nПроверьте, запущен ли локальный сервер (например, Ollama) или корректен ли API-ключ в настройках.");
+}
+
+void MainWindow::onRequestAIExplanation(const QString& code, AiClient::ExplainContext context) {
+    if (!m_AiAssistant) return;
+
+    auto aiAssitant = static_cast<AIAssistantWidget*>(m_AiAssistant);
+    aiAssitant->setVisible(true);
+    aiAssitant->raise();
+    aiAssitant->explainSelectedCode(code, context);
 }
 
 void MainWindow::openProject() {
@@ -639,10 +620,10 @@ void MainWindow::updateTranslations()
         m_restartAction->setText(tr("Перезапустить SBCL"));
         m_restartAction->setToolTip(tr("Перезапустить SBCL"));
     }
-    if (m_cleanRunAction) {
-        m_cleanRunAction->setText(tr("Принудительный запуск"));
-        m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и запуск текущего кода"));
-    }
+    //if (m_cleanRunAction) {
+    //    m_cleanRunAction->setText(tr("Принудительный запуск"));
+    //    m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и запуск текущего кода"));
+    //}
 
     // ── Tools Menu ─────────────────────────────────────
     if (m_lightStyleAction) m_lightStyleAction->setText(tr("Светлая"));
