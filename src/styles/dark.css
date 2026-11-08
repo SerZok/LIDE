@@ -627,8 +627,34 @@ QScrollArea#aiChatScrollArea > QWidget {
 
 /* Фон самой области чата */
 QScrollArea#aiChatScrollArea {
+    background-color: #1e1e1e;
+    border: none;
+}
+
+QScrollArea#aiChatScrollArea QScrollBar:vertical {
     background-color: transparent;
     border: none;
+    width: 8px;
+    margin: 4px 2px;
+}
+
+QScrollArea#aiChatScrollArea QScrollBar::handle:vertical {
+    background-color: #4a4a4a;
+    border-radius: 4px;
+    min-height: 28px;
+}
+
+QScrollArea#aiChatScrollArea QScrollBar::handle:vertical:hover {
+    background-color: #5a5a5a;
+}
+
+QScrollArea#aiChatScrollArea QScrollBar::add-line:vertical,
+QScrollArea#aiChatScrollArea QScrollBar::sub-line:vertical,
+QScrollArea#aiChatScrollArea QScrollBar::add-page:vertical,
+QScrollArea#aiChatScrollArea QScrollBar::sub-page:vertical {
+    background: transparent;
+    border: none;
+    height: 0;
 }
 
 /* Фон внутреннего виджета (контент) */
@@ -637,47 +663,68 @@ QWidget#aiChatContent {
     border: none;
 }
 
-/* Сообщение пользователя */
-QTextEdit#userMessageEdit {
+QWidget#userMessageBubble {
     background-color: #353b45;
     color: #e0e0e0;
-    padding: 0.8em 1em;
+    border: 1px solid #4a4a4a;
     border-radius: 0.8em;
     border-top-right-radius: 0.2em;
-    font-size: 11pt;
-    margin-left: 2em;
-    margin-right: 0.2em;
 }
 
-/* Обычное сообщение AI */
-QTextEdit#aiMessageEdit {
+QWidget#assistantMessageBubble {
     background-color: #252528;
     color: #e0e0e0;
-    padding: 0.8em 1em;
     border-radius: 0.8em;
     border-top-left-radius: 0.2em;
-    font-size: 11pt;
-    margin-right: 2em;
-    margin-left: 0.2em;
-    border-left: 0.25em solid #00aca1;
+    border: 1px solid #3d3d3d;
+    border-left: 3px solid #00aca1;
 }
 
-/* Сообщение об ошибке */
-QTextEdit#errorMessageEdit {
-    background-color: #ff6b6b;
+QWidget#errorMessageBubble {
+    background-color: #2d2d2d;
     color: #ffffff;
-    padding: 0.8em 1em;
     border-radius: 0.8em;
-    border-left: 0.25em solid #cc5555;
+    border: 1px solid #cc5555;
+    border-left: 3px solid #cc5555;
+}
+
+QLabel#chatMessageRole {
+    color: #00aca1;
+    font-size: 9.5pt;
+    font-weight: bold;
+}
+
+QTextBrowser#userMessageText,
+QTextBrowser#assistantMessageText,
+QTextBrowser#errorMessageText {
+    background-color: transparent;
+    border: none;
     font-size: 11pt;
-    margin: 0.2em 0;
+    selection-background-color: #3e4451;
+    selection-color: #e0e0e0;
+}
+
+QTextBrowser#userMessageText {
+    color: #e0e0e0;
+}
+
+QTextBrowser#assistantMessageText {
+    color: #e0e0e0;
+}
+
+QTextBrowser#errorMessageText {
+    color: #ffffff;
 }
 
 /* Индикатор "Думаю..." */
 QLabel#thinkingLabel {
     color: #d4d4d4;
     font-style: italic;
-    padding: 0.5em 1em;
+    background-color: #252528;
+    border: 1px solid #3d3d3d;
+    border-left: 3px solid #00aca1;
+    border-radius: 0.6em;
+    padding: 0.6em 0.8em;
 }
 
 /* ==========================================================================
@@ -687,16 +734,16 @@ QLabel#thinkingLabel {
 /* Контейнер всего блока кода */
 QWidget#codeBlockWidget {
     background-color: #1a1a1c;
-    border: 0.08em solid #3d3d3d;
-    border-top: 0.2em solid #00aca1;
-    border-radius: 0.4em;
-    margin: 0.6em 0.2em;
+    border: 1px solid #3d3d3d;
+    border-top: 3px solid #00aca1;
+    border-radius: 0.55em;
+    margin: 0.2em 0;
 }
 
 /* Шапка блока кода */
 QWidget#codeBlockHeader {
     background-color: #2d2d30;
-    border-bottom: 0.05em solid #3d3d3d;
+    border-bottom: 1px solid #3d3d3d;
 }
 
 /* Название языка (lisp, python и т.д.) */
@@ -710,13 +757,13 @@ QLabel#codeLangLabel {
 
 /* Кнопки "Копировать" и "Вставить" */
 QPushButton#codeActionBtn {
-    background-color: transparent;
+    background-color: #2d2d2d;
     color: #e0e0e0;
-    border: 0.05em solid #3d3d3d;
-    border-radius: 0.3em;
-    padding: 0.2em 0.6em;
+    border: 1px solid #3d3d3d;
+    border-radius: 0.4em;
+    padding: 0.25em 0.7em;
     font-size: 9pt;
-    min-height: 1.5em;
+    min-height: 1.8em;
 }
 
     QPushButton#codeActionBtn:hover {
@@ -739,14 +786,13 @@ QTextEdit#codeBlockEditor {
     border-bottom-right-radius: 0.4em;
     font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
     font-size: 10.5pt;
-    padding: 0.8em;
+    padding: 0.65em 0.8em;
     selection-background-color: #3e4451;
     selection-color: #e0e0e0;
 }
 
 /* Стилизация inline-кода (если Markdown его сгенерирует как `code`) */
-QTextEdit#aiMessageEdit code,
-QTextEdit#userMessageEdit code {
+QTextBrowser#assistantMessageText code {
     background-color: #1a1a1c;
     color: #00aca1;
     padding: 0.1em 0.3em;
@@ -757,31 +803,45 @@ QTextEdit#userMessageEdit code {
 QTextEdit#aiInputField {
     background-color: #2d2d2d;
     color: #e0e0e0;
-    border: 0.08em solid #3d3d3d;
-    border-radius: 0.35em;
-    padding: 0.5em 0.7em;
+    border: 1px solid #3d3d3d;
+    border-radius: 0.6em;
+    padding: 0.2em 0.7em;
     font-size: 11pt;
-    font-family: 'Consolas', 'Monaco', 'Fira Code', sans-serif;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
     selection-background-color: #3e4451;
     selection-color: #e0e0e0;
 }
 
-    QTextEdit#aiInputField:focus {
-        border-color: #00aca1;
-    }
+QTextEdit#aiInputField:focus {
+    border: 1px solid #00aca1;
+}
 
-    QTextEdit#aiInputField:empty {
-        color: #6a6a6a;
-    }
+QTextEdit#aiInputField:disabled {
+    background-color: #3e4451;
+    color: #e0e0e0;
+    border-color: #3d3d3d;
+}
 
-    QTextEdit#aiInputField:disabled {
-        background-color: #3e4451;
-        color: #6a6a6a;
-        border-color: #3d3d3d;
-        cursor: wait;
-    }
+QPushButton#aiSendButton {
+    background-color: #00aca1;
+    color: #1a1a1c;
+    border: none;
+    border-radius: 0.55em;
+    font-weight: bold;
+    min-width: 5em;
+}
 
-        QTextEdit#aiInputField:disabled:empty {
-            color: #6a6a6a;
-            font-style: italic;
-        }
+QPushButton#aiSendButton:hover {
+    background-color: #00c7b8;
+}
+
+QPushButton#aiSendButton:pressed {
+    background-color: #00aca1;
+    color: #1a1a1c;
+}
+
+QPushButton#aiSendButton:disabled {
+    background-color: #3e4451;
+    color: #d4d4d4;
+    border: 1px solid #3d3d3d;
+}

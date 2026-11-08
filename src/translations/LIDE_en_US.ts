@@ -798,4 +798,38 @@ number of rows</translation>
         <translation></translation>
     </message>
 </context>
+<context>
+    <name>ChatMessageWidget</name>
+    <message>
+        <source>Вы</source>
+        <translation>You</translation>
+    </message>
+    <message>
+        <source>Ассистент</source>
+        <translation>Assistant</translation>
+    </message>
+    <message>
+        <source>Ошибка</source>
+        <translation>Error</translation>
+    </message>
+</context>
+<context>
+    <name>AIAssistantWidget</name>
+    <message>
+        <source>REPL</source>
+        <translation>REPL</translation>
+    </message>
+    <message>
+        <source>Редактор</source>
+        <translation>Editor</translation>
+    </message>
+    <message>
+        <source>Объясни выделенный код из %1:
+
+%2</source>
+        <translation>Explain the selected code from %1:
+
+%2</translation>
+    </message>
+</context>
 </TS>

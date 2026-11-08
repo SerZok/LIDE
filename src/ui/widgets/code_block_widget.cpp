@@ -1,37 +1,32 @@
 #include "code_block_widget.h"
 #include <QFontMetrics>
-#include <QResizeEvent>
+#include <QSizePolicy>
 
-CodeBlockWidget::CodeBlockWidget(const QString& language, const QString& code, QWidget* parent)
-    : QWidget(parent), m_code(code) {
+CodeBlockWidget::CodeBlockWidget(const QString &language, const QString &code, QWidget *parent)
+    : QWidget(parent), m_code(code)
+{
 
     setObjectName("codeBlockWidget");
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
     // --- Шапка блока кода ---
-    QWidget* header = new QWidget(this);
+    QWidget *header = new QWidget(this);
     header->setObjectName("codeBlockHeader");
-    QHBoxLayout* headerLayout = new QHBoxLayout(header);
-    headerLayout->setContentsMargins(8, 4, 8, 4);
+    QHBoxLayout *headerLayout = new QHBoxLayout(header);
+    headerLayout->setContentsMargins(8, 2, 8, 2);
 
-    QLabel* langLabel = new QLabel(language.isEmpty() ? "text" : language.toUpper(), this);
+    QLabel *langLabel = new QLabel(language.isEmpty() ? "text" : language.toUpper(), this);
     langLabel->setObjectName("codeLangLabel");
     headerLayout->addWidget(langLabel);
     headerLayout->addStretch();
 
-    QPushButton* copyBtn = new QPushButton("📋 Копировать", this);
+    QPushButton *copyBtn = new QPushButton("📋 Копировать", this);
     copyBtn->setObjectName("codeActionBtn");
     copyBtn->setCursor(Qt::PointingHandCursor);
     connect(copyBtn, &QPushButton::clicked, this, &CodeBlockWidget::onCopyClicked);
     headerLayout->addWidget(copyBtn);
-
-    QPushButton* insertBtn = new QPushButton("➕ В редактор", this);
-    insertBtn->setObjectName("codeActionBtn");
-    insertBtn->setCursor(Qt::PointingHandCursor);
-    connect(insertBtn, &QPushButton::clicked, this, &CodeBlockWidget::onInsertClicked);
-    headerLayout->addWidget(insertBtn);
 
     mainLayout->addWidget(header);
 
@@ -44,48 +39,39 @@ CodeBlockWidget::CodeBlockWidget(const QString& language, const QString& code, Q
     m_codeEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_codeEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_codeEdit->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    m_codeEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    m_codeEdit->setMinimumSize(0, 0);
     m_codeEdit->setPlainText(m_code);
     mainLayout->addWidget(m_codeEdit);
 
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    setMinimumWidth(0);
     updateCodeHeight();
 }
 
-void CodeBlockWidget::updateCodeHeight() {
+void CodeBlockWidget::updateCodeHeight()
+{
     QFontMetrics fm(m_codeEdit->font());
-    int lineHeight = fm.lineSpacing();
-
-    int lineCount = m_codeEdit->document()->lineCount();
-    int padding = 20;
-    int neededHeight = (lineCount * lineHeight) + padding;
-    int minHeight = (2 * lineHeight) + padding;
-    int finalHeight = qMax(minHeight, neededHeight);
-
-    if (m_codeEdit->height() != finalHeight) {
-        m_codeEdit->setFixedHeight(finalHeight);
-    }
+    const int lineCount = qMax(1, m_codeEdit->document()->lineCount());
+    const int verticalPadding = 2 * fm.height();
+    const int frame = 2 * m_codeEdit->frameWidth();
+    m_codeEdit->setFixedHeight(lineCount * fm.lineSpacing() + verticalPadding + frame);
 }
 
-void CodeBlockWidget::resizeEvent(QResizeEvent* event) {
-    QWidget::resizeEvent(event);
-    updateCodeHeight();
-}
-
-void CodeBlockWidget::onCopyClicked() {
+void CodeBlockWidget::onCopyClicked()
+{
     QGuiApplication::clipboard()->setText(m_code);
 
-    QPushButton* btn = qobject_cast<QPushButton*>(sender());
-    if (btn) {
+    QPushButton *btn = qobject_cast<QPushButton *>(sender());
+    if (btn)
+    {
         QString originalText = btn->text();
         btn->setText("✓ Скопировано!");
         btn->setEnabled(false);
 
-        QTimer::singleShot(1500, this, [btn, originalText]() {
+        QTimer::singleShot(1500, this, [btn, originalText]()
+                           {
             btn->setText(originalText);
-            btn->setEnabled(true);
-            });
+            btn->setEnabled(true); });
     }
-}
-
-void CodeBlockWidget::onInsertClicked() {
-    emit insertToEditorRequested(m_code);
 }

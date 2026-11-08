@@ -1,11 +1,13 @@
 #include "ai_assistant_widget.h"
 
-#include <QApplication>
 #include <QScrollBar>
 #include <QLabel>
+#include <QRegularExpression>
+#include <QTimer>
 
-AIAssistantWidget::AIAssistantWidget(QWidget* parent)
-    : QDockWidget(tr("AI-Ассистент"), parent), m_isWaiting(false) {
+AIAssistantWidget::AIAssistantWidget(QWidget *parent)
+    : QDockWidget(tr("AI-Ассистент"), parent), m_isWaiting(false)
+{
 
     setObjectName("AI-assist");
 
@@ -31,18 +33,18 @@ AIAssistantWidget::AIAssistantWidget(QWidget* parent)
     // --- Поле ввода и кнопка ---
     m_inputField = new InputTextEdit(this);
     m_inputField->setObjectName("aiInputField");
-    m_inputField->setPlaceholderText(tr("Введите запрос или код...\n(Shift+Enter — перенос строки, Enter — отправить)"));
+    m_inputField->setPlaceholderText(tr("Введите запрос или код..."));
 
     m_sendButton = new QPushButton(tr("Отправить"), this);
     m_sendButton->setObjectName("aiSendButton");
 
     // --- Компоновка всего виджета ---
-    QWidget* mainWidget = new QWidget(this);
-    QVBoxLayout* mainLayout = new QVBoxLayout(mainWidget);
+    QWidget *mainWidget = new QWidget(this);
+    QVBoxLayout *mainLayout = new QVBoxLayout(mainWidget);
     mainLayout->setContentsMargins(4, 4, 4, 4);
     mainLayout->addWidget(m_scrollArea);
 
-    QHBoxLayout* inputLayout = new QHBoxLayout();
+    QHBoxLayout *inputLayout = new QHBoxLayout();
     inputLayout->addWidget(m_inputField);
     inputLayout->addWidget(m_sendButton);
     inputLayout->setAlignment(m_sendButton, Qt::AlignBottom);
@@ -60,148 +62,145 @@ AIAssistantWidget::AIAssistantWidget(QWidget* parent)
     connect(m_sendButton, &QPushButton::clicked, this, &AIAssistantWidget::onSendClicked);
 }
 
-void AIAssistantWidget::appendToInput(const QString& text) {
+void AIAssistantWidget::appendToInput(const QString &text)
+{
     m_inputField->setPlainText(text);
     m_inputField->setFocus();
 }
 
-void AIAssistantWidget::appendTextMessage(const QString& text, bool isUser, bool isError) {
-    QTextEdit* textEdit = new QTextEdit(m_contentWidget);
-
-    textEdit->setReadOnly(true);
-    textEdit->setFrameShape(QFrame::NoFrame);
-    textEdit->setWordWrapMode(QTextOption::WordWrap);
-
-    textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    textEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    textEdit->setTextInteractionFlags(Qt::TextSelectableByMouse);
-
-    if (isError) {
-        textEdit->setObjectName("errorMessageEdit");
-        textEdit->setMarkdown(text);
-    }
-    else if (isUser) {
-        textEdit->setObjectName("userMessageEdit");
-        textEdit->setPlainText(text);
-    }
-    else {
-        textEdit->setObjectName("aiMessageEdit");
-        textEdit->setMarkdown(text);
-    }
-
-    textEdit->document()->adjustSize();
-    qreal docHeight = textEdit->document()->size().height();
-    textEdit->setMaximumHeight(static_cast<int>(docHeight) + 20);
-    textEdit->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-
-    m_chatLayout->addWidget(textEdit);
+void AIAssistantWidget::appendTextMessage(const QString &text, ChatMessageWidget::Role role)
+{
+    m_chatLayout->addWidget(new ChatMessageWidget(role, text, m_contentWidget));
 }
 
-void AIAssistantWidget::appendAIMessage(const QString& markdownResponse) {
+void AIAssistantWidget::appendAIMessage(const QString &markdownResponse)
+{
     QRegularExpression re("```(\\w*)\\r?\\n?([\\s\\S]*?)```");
     QRegularExpressionMatchIterator i = re.globalMatch(markdownResponse);
 
     int lastPos = 0;
 
-    while (i.hasNext()) {
+    while (i.hasNext())
+    {
         QRegularExpressionMatch match = i.next();
 
         QString textBefore = markdownResponse.mid(lastPos, match.capturedStart() - lastPos).trimmed();
-        if (!textBefore.isEmpty()) {
-            appendTextMessage(textBefore, false, false);
+        if (!textBefore.isEmpty())
+        {
+            appendTextMessage(textBefore, ChatMessageWidget::Role::Assistant);
         }
 
         QString lang = match.captured(1).trimmed();
         QString code = match.captured(2).trimmed();
 
-        CodeBlockWidget* codeWidget = new CodeBlockWidget(lang, code, m_contentWidget);
-        connect(codeWidget, &CodeBlockWidget::insertToEditorRequested, this, &AIAssistantWidget::insertCodeToMainEditor);
+        CodeBlockWidget *codeWidget = new CodeBlockWidget(lang, code, m_contentWidget);
         m_chatLayout->addWidget(codeWidget);
 
         lastPos = match.capturedEnd();
     }
 
     QString textAfter = markdownResponse.mid(lastPos).trimmed();
-    if (!textAfter.isEmpty()) {
-        appendTextMessage(textAfter, false, false);
+    if (!textAfter.isEmpty())
+    {
+        appendTextMessage(textAfter, ChatMessageWidget::Role::Assistant);
     }
 }
 
-void AIAssistantWidget::onSendClicked() {
-    if (m_isWaiting) {
+void AIAssistantWidget::onSendClicked()
+{
+    if (m_isWaiting)
+    {
         return;
     }
 
     QString prompt = m_inputField->toPlainText().trimmed();
-    if (prompt.isEmpty()) return;
+    if (prompt.isEmpty())
+        return;
 
-    appendTextMessage("**Вы:**\n" + prompt, true, false);
+    appendTextMessage(prompt, ChatMessageWidget::Role::User);
     m_isWaiting = true;
 
     m_inputField->setEnabled(false);
     m_inputField->setPlaceholderText(tr("Ожидайте ответ..."));
     m_sendButton->setEnabled(false);
-
-    QLabel* thinkingLabel = new QLabel(QObject::tr("Думаю..."), m_contentWidget);
-    thinkingLabel->setObjectName("thinkingLabel");
-    thinkingLabel->setWordWrap(true);
-    m_chatLayout->addWidget(thinkingLabel);
+    addWaitingIndicator(tr("Думаю..."));
 
     m_inputField->clear();
     m_client->sendRequest(prompt);
 }
 
-void AIAssistantWidget::onResponse(const QString& response) {
+void AIAssistantWidget::onResponse(const QString &response)
+{
     m_isWaiting = false;
-
-    // Удаляем метку "Думаю..."
-    if (QLayoutItem* item = m_chatLayout->takeAt(m_chatLayout->count() - 1)) {
-        delete item->widget();
-    }
+    clearWaitingIndicator();
 
     appendAIMessage(response);
 
     m_inputField->setEnabled(true);
-    m_inputField->setPlaceholderText(tr("Введите запрос или код...\n(Shift+Enter — перенос строки, Enter — отправить)"));
+    m_inputField->setPlaceholderText(tr("Введите запрос или код..."));
     m_sendButton->setEnabled(true);
     m_inputField->setFocus();
-
-    QApplication::processEvents();
-    QScrollBar* bar = m_scrollArea->verticalScrollBar();
-    bar->setValue(bar->maximum());
+    scrollToBottom();
 }
 
-void AIAssistantWidget::onError(const QString& error) {
+void AIAssistantWidget::onError(const QString &error)
+{
     m_isWaiting = false;
-
-    if (QLayoutItem* item = m_chatLayout->takeAt(m_chatLayout->count() - 1)) {
-        delete item->widget();
-    }
-
-    appendTextMessage("**Ошибка:**\n" + error, false, true);
+    clearWaitingIndicator();
+    appendTextMessage(error, ChatMessageWidget::Role::Error);
 
     m_sendButton->setEnabled(true);
     m_inputField->setEnabled(true);
+    m_inputField->setPlaceholderText(tr("Введите запрос или код..."));
     m_inputField->setFocus();
+    scrollToBottom();
 }
 
-void AIAssistantWidget::explainSelectedCode(const QString& code, AiClient::ExplainContext context) {
-    QString contextStr = (context == AiClient::ExplainContext::Repl) ? "REPL" : "Редактор";
+void AIAssistantWidget::explainSelectedCode(const QString &code, AiClient::ExplainContext context)
+{
+    if (m_isWaiting)
+    {
+        return;
+    }
 
-    QString prompt = QString("Объясни выделенный код\n%1"
-        "Код: %2\n\n")
-        .arg(contextStr, code);
+    QString contextStr = (context == AiClient::ExplainContext::Repl) ? tr("REPL") : tr("Редактор");
 
-    appendTextMessage(contextStr, true, false);
+    appendTextMessage(tr("Объясни выделенный код из %1:\n\n%2").arg(contextStr, code),
+                      ChatMessageWidget::Role::User);
 
     m_isWaiting = true;
     m_inputField->setEnabled(false);
     m_sendButton->setEnabled(false);
-
-    QLabel* thinkingLabel = new QLabel(QObject::tr("Анализирую код..."), m_contentWidget);
-    thinkingLabel->setObjectName("thinkingLabel");
-    thinkingLabel->setWordWrap(true);
-    m_chatLayout->addWidget(thinkingLabel);
+    addWaitingIndicator(tr("Анализирую код..."));
 
     m_client->sendExplainRequest(code, context);
+}
+
+void AIAssistantWidget::addWaitingIndicator(const QString &text)
+{
+    m_waitingIndicator = new QLabel(text, m_contentWidget);
+    m_waitingIndicator->setObjectName("thinkingLabel");
+    m_waitingIndicator->setWordWrap(true);
+    m_chatLayout->addWidget(m_waitingIndicator);
+    scrollToBottom();
+}
+
+void AIAssistantWidget::clearWaitingIndicator()
+{
+    if (!m_waitingIndicator)
+    {
+        return;
+    }
+
+    m_chatLayout->removeWidget(m_waitingIndicator);
+    delete m_waitingIndicator;
+    m_waitingIndicator = nullptr;
+}
+
+void AIAssistantWidget::scrollToBottom()
+{
+    QTimer::singleShot(0, m_scrollArea, [this]()
+                       {
+        QScrollBar* bar = m_scrollArea->verticalScrollBar();
+        bar->setValue(bar->maximum()); });
 }
