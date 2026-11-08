@@ -626,19 +626,13 @@ QDockWidget#AI-assist {
     border: none;
 }
 
-QLabel#aiContextLabel {
-    background-color: transparent;
-    color: #404040;
-    font-size: 9pt;
-}
-
 QComboBox#aiContextSelector {
     background-color: #ffffff;
     color: #2d2d2d;
     border: 1px solid #d0d0d0;
     border-radius: 0.3em;
     min-height: 1.65em;
-    padding: 0.05em 0.35em;
+    padding: 0.15em 0.5em;
 }
 
 QComboBox#aiContextSelector:hover,
@@ -656,8 +650,9 @@ QComboBox#aiContextSelector QAbstractItemView {
 }
 
 QToolButton#aiNewContextButton,
-QToolButton#aiRenameContextButton,
-QToolButton#aiDeleteContextButton {
+QToolButton#aiDeleteContextButton,
+QToolButton#aiAddContextFilesButton,
+QToolButton#aiRemoveContextFileButton {
     background-color: transparent;
     color: #2d2d2d;
     border: none;
@@ -666,13 +661,13 @@ QToolButton#aiDeleteContextButton {
     max-width: 1.8em;
     min-height: 1.8em;
     max-height: 1.8em;
-    padding: 0;
+    padding: 0.12em;
     font-size: 12pt;
     font-weight: bold;
 }
 
 QToolButton#aiNewContextButton:hover,
-QToolButton#aiRenameContextButton:hover {
+QToolButton#aiAddContextFilesButton:hover {
     background-color: #e3e3e3;
     color: #007acc;
 }
@@ -681,21 +676,48 @@ QToolButton#aiDeleteContextButton {
     color: #cc5555;
 }
 
-QToolButton#aiDeleteContextButton:hover {
+QToolButton#aiDeleteContextButton:hover,
+QToolButton#aiRemoveContextFileButton:hover {
     background-color: #e3e3e3;
 }
 
 QToolButton#aiNewContextButton:pressed,
-QToolButton#aiRenameContextButton:pressed,
-QToolButton#aiDeleteContextButton:pressed {
+QToolButton#aiDeleteContextButton:pressed,
+QToolButton#aiAddContextFilesButton:pressed,
+QToolButton#aiRemoveContextFileButton:pressed {
     background-color: #ffffff;
 }
 
 QToolButton#aiNewContextButton:disabled,
-QToolButton#aiRenameContextButton:disabled,
-QToolButton#aiDeleteContextButton:disabled {
+QToolButton#aiDeleteContextButton:disabled,
+QToolButton#aiAddContextFilesButton:disabled,
+QToolButton#aiRemoveContextFileButton:disabled {
     background-color: transparent;
     color: #a0a0a0;
+}
+
+QLabel#aiContextFilesLabel {
+    color: #404040;
+    font-size: 9pt;
+    padding: 0.15em 0.3em;
+}
+
+QListWidget#aiContextFiles {
+    background-color: #f5f5f5;
+    color: #404040;
+    border: none;
+    outline: none;
+    padding: 0;
+}
+
+QListWidget#aiContextFiles::item {
+    padding: 0.25em 0.5em;
+    border-radius: 0.25em;
+}
+
+QListWidget#aiContextFiles::item:selected {
+    background-color: #e3e3e3;
+    color: #2d2d2d;
 }
 
 QScrollArea#aiChatScrollArea > QWidget {
@@ -755,6 +777,7 @@ QWidget#assistantMessageBubble {
     border-top-left-radius: 0.2em;
     border: 1px solid #d0d0d0;
     border-left: 3px solid #007acc;
+    padding-bottom: 1em;
 }
 
 QWidget#errorMessageBubble {
@@ -769,6 +792,7 @@ QLabel#chatMessageRole {
     color: #007acc;
     font-size: 9.5pt;
     font-weight: bold;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 QTextBrowser#userMessageText,
@@ -777,6 +801,7 @@ QTextBrowser#errorMessageText {
     background-color: transparent;
     border: none;
     font-size: 11pt;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
     selection-background-color: #cde4ff;
     selection-color: #2d2d2d;
 }
@@ -863,7 +888,7 @@ QTextEdit#codeBlockEditor {
     border-bottom-right-radius: 0.4em;
     font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
     font-size: 10.5pt;
-    padding: 0.65em 0.8em;
+    padding: 0.25em 0.8em;
     selection-background-color: #cde4ff;
     selection-color: #2d2d2d;
 }
