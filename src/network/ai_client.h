@@ -42,6 +42,8 @@ private:
     AiClient(const AiClient&) = delete;
     AiClient& operator=(const AiClient&) = delete;
 
+    QString buildChatInstructions() const;
+    QString buildHyperSpecInstructions() const;
     QString buildTeacherInstructions(ExplainContext context) const;
-    QString formatHyperSpecLinks(const QString& html) const;
+    QString formatHyperSpecLinks(const QString& markdown) const;
 };

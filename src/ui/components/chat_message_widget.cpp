@@ -1,8 +1,11 @@
 #include "chat_message_widget.h"
+#include "app/settings.h"
 
 #include <QHBoxLayout>
 #include <QFrame>
 #include <QLabel>
+#include <QColor>
+#include <QPalette>
 #include <QResizeEvent>
 #include <QTextBrowser>
 #include <QTextDocument>
@@ -41,7 +44,9 @@ ChatMessageWidget::ChatMessageWidget(Role role, const QString &text, QWidget *pa
         rowLayout->addWidget(m_bubble);
         rowLayout->addSpacing(12);
         m_textBrowser->setMarkdown(text);
+        updateLinkStyle();
         m_textBrowser->setOpenExternalLinks(true);
+        connect(Settings::instance(), &Settings::settingsChanged, this, &ChatMessageWidget::updateLinkStyle);
         break;
     case Role::Error:
         m_bubble->setObjectName("errorMessageBubble");
@@ -70,6 +75,16 @@ ChatMessageWidget::ChatMessageWidget(Role role, const QString &text, QWidget *pa
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     updateTextHeight();
+}
+
+void ChatMessageWidget::updateLinkStyle()
+{
+    QPalette palette = m_textBrowser->palette();
+    palette.setColor(QPalette::Link, Settings::instance()->currentTheme() == "dark"
+        ? QColor("#4dd0c8")
+        : QColor("#0067a8"));
+    palette.setColor(QPalette::LinkVisited, palette.color(QPalette::Link));
+    m_textBrowser->setPalette(palette);
 }
 
 void ChatMessageWidget::resizeEvent(QResizeEvent *event)

@@ -18,6 +18,7 @@ private slots:
 	void onBrowseHyperSpecPath();
 	void onBrowseSBCLPath();
 	void onBrowseProjectPath();
+	void fetchAiModels();
 
 protected:
 	void changeEvent(QEvent* event) override;

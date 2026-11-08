@@ -163,10 +163,7 @@ void AIAssistantWidget::explainSelectedCode(const QString &code, AiClient::Expla
         return;
     }
 
-    QString contextStr = (context == AiClient::ExplainContext::Repl) ? tr("REPL") : tr("Редактор");
-
-    appendTextMessage(tr("Объясни выделенный код из %1:\n\n%2").arg(contextStr, code),
-                      ChatMessageWidget::Role::User);
+    appendTextMessage(tr("Объясни выделенный код:\n%1").arg(code), ChatMessageWidget::Role::User);
 
     m_isWaiting = true;
     m_inputField->setEnabled(false);

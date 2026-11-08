@@ -4,6 +4,13 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QDir>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QUrl>
 
 SettingsDialog::SettingsDialog(QWidget* parent)
 	: QDialog(parent),
@@ -32,12 +39,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     ui.sbcl_file_format_comboBox->addItem("utf-8", ":utf-8");
     ui.sbcl_file_format_comboBox->addItem("latin-1", ":latin-1");
 
-    ui.ai_endpoint_lineEdit->setText(m_settings->aiEndpoint());
-    ui.ai_model_lineEdit->setText(m_settings->aiModel());
-    ui.ai_api_key_lineEdit->setText(m_settings->aiApiKey());
-    ui.ai_system_prompt_textEdit->setPlainText(m_settings->aiSystemPrompt());
-    ui.ai_hyper_spec_lineEdit->setText(m_settings->localHyperSpecPath());
-
     // Кнопки
     connect(ui.buttonBox, &QDialogButtonBox::accepted, this, [this]() {
         saveFromUi();
@@ -61,6 +62,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     connect(ui.project_default_browse_button, &QPushButton::clicked, this, &SettingsDialog::onBrowseProjectPath);
     connect(ui.sbcl_path_pushButton, &QPushButton::clicked, this, &SettingsDialog::onBrowseSBCLPath);
     connect(ui.ai_hyper_spec_browse_button, &QPushButton::clicked, this, &SettingsDialog::onBrowseHyperSpecPath);
+    connect(ui.ai_refresh_models_button, &QPushButton::clicked, this, &SettingsDialog::fetchAiModels);
 
     // Live preview для load-команды
     connect(ui.sbcl_file_verbose_checkBox, &QCheckBox::toggled, this, &SettingsDialog::updateSbclLoad);
@@ -118,6 +120,14 @@ void SettingsDialog::loadToUi()
     // ── Project ──────────────────────────────────────
     ui.project_default_line->setText(m_settings->projectDefaultPath());
     ui.project_filter_files_line->setText(m_settings->projectExcludeFilters());
+
+    // ── AI Assistant ──────────────────────────────────
+    ui.ai_endpoint_lineEdit->setText(m_settings->aiEndpoint());
+    ui.ai_model_comboBox->clear();
+    ui.ai_model_comboBox->setCurrentText(m_settings->aiModel());
+    ui.ai_api_key_lineEdit->setText(m_settings->aiApiKey());
+    ui.ai_system_prompt_textEdit->setPlainText(m_settings->aiSystemPrompt());
+    ui.ai_hyper_spec_lineEdit->setText(m_settings->localHyperSpecPath());
 
     // ── SBCL ─────────────────────────────────────────
     ui.sbcl_path_lineEdit->setText(m_settings->sbclPath());
@@ -195,7 +205,7 @@ void SettingsDialog::saveFromUi()
     // ── AI ──────────────────────────────────────
     m_settings->setAiApiKey(ui.ai_api_key_lineEdit->text());
     m_settings->setAiEndpoint(ui.ai_endpoint_lineEdit->text());
-    m_settings->setAiModel(ui.ai_model_lineEdit->text());
+    m_settings->setAiModel(ui.ai_model_comboBox->currentText().trimmed());
     m_settings->setAiSystemPrompt(ui.ai_system_prompt_textEdit->toPlainText());
     m_settings->setLocalHyperSpecPath(ui.ai_hyper_spec_lineEdit->text());
 
@@ -221,6 +231,115 @@ void SettingsDialog::saveFromUi()
     m_settings->setSbclLoadIfNotExists(!ui.sbcl_file_show_error_checkBox->isChecked());
     m_settings->setSbclLoadExternalFormat(ui.sbcl_file_format_comboBox->currentData().toString());
 
+}
+
+void SettingsDialog::fetchAiModels()
+{
+    QUrl endpoint(ui.ai_endpoint_lineEdit->text().trimmed());
+    if (!endpoint.isValid() || (endpoint.scheme() != "http" && endpoint.scheme() != "https") || endpoint.host().isEmpty())
+    {
+        QMessageBox::warning(this, tr("Некорректный адрес"), tr("Укажите корректный URL HTTP-эндпоинта AI."));
+        return;
+    }
+
+    QString path = endpoint.path();
+    while (path.endsWith('/') && !path.isEmpty())
+        path.chop(1);
+
+    if (path.endsWith("/api/chat") || path.endsWith("/api/generate"))
+    {
+        path = path.left(path.lastIndexOf("/api/")) + "/api/tags";
+    }
+    else if (path.endsWith("/v1/chat/completions"))
+    {
+        path = path.left(path.lastIndexOf("/v1/")) + "/v1/models";
+    }
+    else if (!path.endsWith("/api/tags") && !path.endsWith("/v1/models"))
+    {
+        if (path.isEmpty())
+            path = "/api/tags";
+        else
+        {
+            QMessageBox::warning(this, tr("Неизвестный эндпоинт"),
+                                 tr("Для Ollama укажите URL вида http://localhost:11434/api/chat, "
+                                    "для OpenAI-совместимого API — URL вида .../v1/chat/completions."));
+            return;
+        }
+    }
+
+    endpoint.setPath(path);
+    endpoint.setQuery(QString());
+    endpoint.setFragment(QString());
+
+    QNetworkRequest request(endpoint);
+    request.setTransferTimeout(10000);
+    const QString apiKey = ui.ai_api_key_lineEdit->text().trimmed();
+    if (!apiKey.isEmpty())
+        request.setRawHeader("Authorization", ("Bearer " + apiKey).toUtf8());
+
+    ui.ai_refresh_models_button->setEnabled(false);
+    ui.ai_refresh_models_button->setText(tr("Загрузка..."));
+
+    auto *networkManager = new QNetworkAccessManager(this);
+    QNetworkReply *reply = networkManager->get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, networkManager, reply]() {
+        const QByteArray response = reply->readAll();
+        const QNetworkReply::NetworkError networkError = reply->error();
+        const QString errorString = reply->errorString();
+        reply->deleteLater();
+        networkManager->deleteLater();
+
+        ui.ai_refresh_models_button->setEnabled(true);
+        ui.ai_refresh_models_button->setText(tr("Обновить"));
+
+        if (networkError != QNetworkReply::NoError)
+        {
+            QMessageBox::warning(this, tr("Не удалось получить модели"),
+                                 tr("Проверьте, что сервер запущен и доступен.\n%1").arg(errorString));
+            return;
+        }
+
+        QJsonParseError parseError;
+        const QJsonDocument document = QJsonDocument::fromJson(response, &parseError);
+        if (parseError.error != QJsonParseError::NoError || !document.isObject())
+        {
+            QMessageBox::warning(this, tr("Ошибка ответа сервера"),
+                                 tr("Сервер вернул некорректный список моделей."));
+            return;
+        }
+
+        const QJsonObject root = document.object();
+        QJsonArray models = root.value("models").toArray();
+        if (models.isEmpty())
+            models = root.value("data").toArray();
+
+        QStringList modelNames;
+        for (const QJsonValue &value : models)
+        {
+            if (!value.isObject())
+                continue;
+
+            const QJsonObject model = value.toObject();
+            QString name = model.value("name").toString();
+            if (name.isEmpty())
+                name = model.value("id").toString();
+            if (!name.isEmpty())
+                modelNames.append(name);
+        }
+
+        if (modelNames.isEmpty())
+        {
+            QMessageBox::information(this, tr("Модели не найдены"),
+                                     tr("Сервер не вернул модели. В Ollama сначала загрузите модель командой ollama pull."));
+            return;
+        }
+
+        const QString selectedModel = ui.ai_model_comboBox->currentText();
+        ui.ai_model_comboBox->clear();
+        ui.ai_model_comboBox->addItems(modelNames);
+        ui.ai_model_comboBox->setCurrentText(
+            modelNames.contains(selectedModel) ? selectedModel : modelNames.first());
+    });
 }
 
 void SettingsDialog::updateSbclLoad()

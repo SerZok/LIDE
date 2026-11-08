@@ -260,9 +260,9 @@ void Settings::setAiApiKey(const QString& key) {
 
 QString Settings::aiSystemPrompt() const {
     return value<QString>(Key::AI_SYSTEM_PROMPT,
-        "Ты опытный помощник-программист, специализирующийся на Common Lisp (SBCL). "
-        "Отвечай кратко и по делу. Весь предоставляемый код обязательно оформляй в блоки markdown с указанием языка,"
-        "например: ```lisp\n(твой код)\n```");
+        "Ты — помощник-программист, специализирующийся на Common Lisp и SBCL. "
+        "Отвечай по-русски, кратко и точно. Следуй специальным инструкциям приложения "
+        "для разбора кода и ссылок на документацию.");
 }
 
 void Settings::setAiSystemPrompt(const QString& prompt) {

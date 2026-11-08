@@ -7,24 +7,27 @@ class QLabel;
 class QResizeEvent;
 class QTextBrowser;
 
-class ChatMessageWidget : public QWidget {
+class ChatMessageWidget : public QWidget
+{
     Q_OBJECT
 public:
-    enum class Role {
+    enum class Role
+    {
         User,
         Assistant,
         Error
     };
 
-    explicit ChatMessageWidget(Role role, const QString& text, QWidget* parent = nullptr);
+    explicit ChatMessageWidget(Role role, const QString &text, QWidget *parent = nullptr);
 
 protected:
-    void resizeEvent(QResizeEvent* event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
+    void updateLinkStyle();
     void updateTextHeight();
 
-    QWidget* m_bubble;
-    QLabel* m_roleLabel;
-    QTextBrowser* m_textBrowser;
+    QWidget *m_bubble;
+    QLabel *m_roleLabel;
+    QTextBrowser *m_textBrowser;
 };
