@@ -26,7 +26,7 @@ AiClient::AiClient(QObject *parent) : QObject(parent)
     connect(m_networkManager, &QNetworkAccessManager::finished, this, &AiClient::onReplyFinished);
 }
 
-void AiClient::sendRequest(const QString &prompt)
+void AiClient::sendRequest(const QJsonArray &conversationMessages)
 {
     m_currentRequestType = RequestType::Chat;
 
@@ -48,7 +48,10 @@ void AiClient::sendRequest(const QString &prompt)
 
     QJsonArray messages;
     messages.append(QJsonObject{{"role", "system"}, {"content", settings->aiSystemPrompt() + "\n\n" + buildChatInstructions() + "\n\n" + buildHyperSpecInstructions()}});
-    messages.append(QJsonObject{{"role", "user"}, {"content", prompt}});
+    for (const QJsonValue& message : conversationMessages)
+    {
+        messages.append(message);
+    }
     json["messages"] = messages;
 
     m_networkManager->post(request, QJsonDocument(json).toJson());

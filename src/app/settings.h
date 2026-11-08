@@ -64,6 +64,7 @@ public:
         static constexpr const char* AI_API_KEY = "ai/apiKey";
         static constexpr const char* AI_ENDPOINT = "ai/endpoint";
         static constexpr const char* AI_SYSTEM_PROMPT = "ai/systemPrompt";
+        static constexpr const char* AI_CONVERSATIONS = "ai/conversations";
     };
 
     enum class ParseOutputMode {
@@ -180,6 +181,9 @@ public:
 
     QString aiSystemPrompt() const;
     void setAiSystemPrompt(const QString& prompt);
+
+    QString aiConversations() const;
+    void setAiConversations(const QString& conversations);
 
     // Syntax highlighting colors
     QColor keywordColor() const;

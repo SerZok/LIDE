@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QJsonArray>
 #include <QString>
 
 class AiClient : public QObject {
@@ -15,7 +16,7 @@ public:
 
     static AiClient* instance();
 
-    void sendRequest(const QString& prompt);
+    void sendRequest(const QJsonArray& conversationMessages);
     void sendExplainRequest(const QString& selectedText, ExplainContext context);
 
 signals:

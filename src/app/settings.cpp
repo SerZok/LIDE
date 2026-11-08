@@ -272,6 +272,14 @@ void Settings::setAiSystemPrompt(const QString& prompt) {
     }
 }
 
+QString Settings::aiConversations() const {
+    return value<QString>(Key::AI_CONVERSATIONS, QString());
+}
+
+void Settings::setAiConversations(const QString& conversations) {
+    setValue(Key::AI_CONVERSATIONS, conversations);
+}
+
 // SBCL
 QString Settings::sbclPath() const
 {

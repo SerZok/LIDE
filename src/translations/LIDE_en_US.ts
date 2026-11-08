@@ -816,6 +816,46 @@ number of rows</translation>
 <context>
     <name>AIAssistantWidget</name>
     <message>
+        <source>Новый контекст</source>
+        <translation>New context</translation>
+    </message>
+    <message>
+        <source>Переименовать</source>
+        <translation>Rename</translation>
+    </message>
+    <message>
+        <source>Переименование контекста</source>
+        <translation>Rename context</translation>
+    </message>
+    <message>
+        <source>Название контекста:</source>
+        <translation>Context name:</translation>
+    </message>
+    <message>
+        <source>Удалить контекст</source>
+        <translation>Delete context</translation>
+    </message>
+    <message>
+        <source>Удаление контекста</source>
+        <translation>Delete context</translation>
+    </message>
+    <message>
+        <source>Удалить контекст «%1»?</source>
+        <translation>Delete context “%1”?</translation>
+    </message>
+    <message>
+        <source>Контекст:</source>
+        <translation>Context:</translation>
+    </message>
+    <message>
+        <source>Новый контекст 1</source>
+        <translation>New context 1</translation>
+    </message>
+    <message>
+        <source>Новый контекст %1</source>
+        <translation>New context %1</translation>
+    </message>
+    <message>
         <source>REPL</source>
         <translation>REPL</translation>
     </message>
