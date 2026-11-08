@@ -2,6 +2,280 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US" sourcelanguage="ru_RU">
 <context>
+    <name>BenchmarkDialog</name>
+    <message>
+        <source>Запустить тесты</source>
+        <translation>Run tests</translation>
+    </message>
+    <message>
+        <source>Остановить</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <source>Открыть папку отчётов</source>
+        <translation>Open reports folder</translation>
+    </message>
+    <message>
+        <source>Сохранить оценку</source>
+        <translation>Save evaluation</translation>
+    </message>
+    <message>
+        <source>Исследовательский бенчмарк LIDE</source>
+        <translation>LIDE research benchmark</translation>
+    </message>
+    <message>
+        <source>Число повторов каждой задачи для оценки разброса</source>
+        <translation>Number of repetitions per task for variability estimation</translation>
+    </message>
+    <message>
+        <source>%1 задач, %2 запросов с учётом повторов. Ответы и метрики сохраняются в JSON-отчёт.</source>
+        <translation>%1 tasks, %2 requests including repetitions. Responses and metrics are saved in a JSON report.</translation>
+    </message>
+    <message>
+        <source>Задача</source>
+        <translation>Task</translation>
+    </message>
+    <message>
+        <source>Повтор</source>
+        <translation>Repetition</translation>
+    </message>
+    <message>
+        <source>Статус</source>
+        <translation>Status</translation>
+    </message>
+    <message>
+        <source>Время, мс</source>
+        <translation>Time (ms)</translation>
+    </message>
+    <message>
+        <source>Вход, токены</source>
+        <translation>Prompt tokens</translation>
+    </message>
+    <message>
+        <source>Ответ, токены</source>
+        <translation>Completion tokens</translation>
+    </message>
+    <message>
+        <source>Скорость, ток/с</source>
+        <translation>Speed (tokens/s)</translation>
+    </message>
+    <message>
+        <source>Оценка</source>
+        <translation>Score</translation>
+    </message>
+    <message>
+        <source>Выберите завершённый запрос, чтобы посмотреть ответ и критерии оценки.</source>
+        <translation>Select a completed request to view its response and evaluation criteria.</translation>
+    </message>
+    <message>
+        <source>Заметки к оценке (необязательно)</source>
+        <translation>Evaluation notes (optional)</translation>
+    </message>
+    <message>
+        <source>Повторов на задачу:</source>
+        <translation>Repetitions per task:</translation>
+    </message>
+    <message>
+        <source>Фиксированный набор задач по Common Lisp. Используются текущие настройки модели; температура фиксирована на 0,2, максимум ответа — 512 токенов. Тестовые запросы, системная инструкция, ответы и метрики сохраняются в отчёте.</source>
+        <translation>Fixed Common Lisp task set. Current model settings are used; temperature is fixed at 0.2 and the maximum response is 512 tokens. Test prompts, system instructions, responses, and metrics are saved in the report.</translation>
+    </message>
+    <message>
+        <source>Ответ и критерии оценки</source>
+        <translation>Model response and evaluation criteria</translation>
+    </message>
+    <message>
+        <source>Оценка (1–5):</source>
+        <translation>Score (1-5):</translation>
+    </message>
+    <message>
+        <source>Оценок пока нет.</source>
+        <translation>No manual ratings yet.</translation>
+    </message>
+    <message>
+        <source>Оценено ответов: %1. Средняя оценка: %2/5.</source>
+        <translation>Responses rated: %1. Mean score: %2/5.</translation>
+    </message>
+    <message>
+        <source>Объяснение рекурсивной функции</source>
+        <translation>Explain a recursive function</translation>
+    </message>
+    <message>
+        <source>Корректно определить факториал, объяснить рекурсивный шаг и базовый случай; указать результаты для 0 и 5 без фактических ошибок.</source>
+        <translation>Identify factorial correctly, explain the recursive step and base case, and give the results for 0 and 5 without factual errors.</translation>
+    </message>
+    <message>
+        <source>Реализация функции и примеры</source>
+        <translation>Function implementation and examples</translation>
+    </message>
+    <message>
+        <source>Функция должна работать для пустого списка, учитывать EQL, возвращать целое число и давать согласованные примеры.</source>
+        <translation>The function must handle an empty list, use EQL, return an integer, and provide consistent examples.</translation>
+    </message>
+    <message>
+        <source>Поиск и исправление ошибки</source>
+        <translation>Find and fix a bug</translation>
+    </message>
+    <message>
+        <source>Обнаружить отсутствие обработки пустого списка и бесконечную рекурсию для списка без положительных значений; исправление должно завершаться и возвращать NIL при отсутствии результата.</source>
+        <translation>Identify the missing empty-list handling and infinite recursion when there are no positive values; the fix must terminate and return NIL when no result exists.</translation>
+    </message>
+    <message>
+        <source>Обработка списка с сохранением порядка</source>
+        <translation>List processing while preserving order</translation>
+    </message>
+    <message>
+        <source>Результат для (a b a c b) должен быть (a b c), порядок первых вхождений сохранён, пустой список обрабатывается.</source>
+        <translation>The result for (a b a c b) must be (a b c), preserving the order of first occurrences and handling an empty list.</translation>
+    </message>
+    <message>
+        <source>Разбор поведения стандартной функции</source>
+        <translation>Analyze standard function behavior</translation>
+    </message>
+    <message>
+        <source>Объяснить отсутствие начального значения при пустой последовательности и предложить корректный вариант, возвращающий 0 для пустого списка.</source>
+        <translation>Explain the missing initial value for an empty sequence and provide a correct variant that returns 0 for an empty list.</translation>
+    </message>
+    <message>
+        <source>Модель не выбрана</source>
+        <translation>No model selected</translation>
+    </message>
+    <message>
+        <source>Сначала выберите модель в настройках AI.</source>
+        <translation>Select a model in AI settings first.</translation>
+    </message>
+    <message>
+        <source>Некорректный адрес</source>
+        <translation>Invalid address</translation>
+    </message>
+    <message>
+        <source>Проверьте адрес AI-сервера в настройках.</source>
+        <translation>Check the AI server address in settings.</translation>
+    </message>
+    <message>
+        <source>Не удалось начать бенчмарк</source>
+        <translation>Could not start benchmark</translation>
+    </message>
+    <message>
+        <source>Уже выполняется запрос или другой бенчмарк. Дождитесь его завершения и повторите.</source>
+        <translation>A request or another benchmark is already running. Wait for it to finish and try again.</translation>
+    </message>
+    <message>
+        <source>Ожидание</source>
+        <translation>Pending</translation>
+    </message>
+    <message>
+        <source>Модель: %1</source>
+        <translation>Model: %1</translation>
+    </message>
+    <message>
+        <source>Задача %1 из %2: %3, повтор %4 из %5</source>
+        <translation>Task %1 of %2: %3, repetition %4 of %5</translation>
+    </message>
+    <message>
+        <source>Ошибка запроса %1, повтор %2: %3</source>
+        <translation>Request %1 failed, repetition %2: %3</translation>
+    </message>
+    <message>
+        <source>Готово</source>
+        <translation>Completed</translation>
+    </message>
+    <message>
+        <source>Ошибка</source>
+        <translation>Error</translation>
+    </message>
+    <message>
+        <source>%1. Успешно: %2 из %3. Среднее время: %4 мс.
+Отчёт: %5</source>
+        <translation>%1. Successful: %2 of %3. Average time: %4 ms.
+Report: %5</translation>
+    </message>
+    <message>
+        <source>Ошибка запроса: %1, повтор %2</source>
+        <translation type="vanished">Request failed: %1, repetition %2</translation>
+    </message>
+    <message>
+        <source>Остановлю бенчмарк после текущего запроса...</source>
+        <translation>The benchmark will stop after the current request...</translation>
+    </message>
+    <message>
+        <source>%1. Успешно: %2 из %3.
+Отчёт: %4</source>
+        <translation type="vanished">%1. Successful: %2 of %3.
+Report: %4</translation>
+    </message>
+    <message>
+        <source>Бенчмарк остановлен</source>
+        <translation>Benchmark stopped</translation>
+    </message>
+    <message>
+        <source>Бенчмарк завершён</source>
+        <translation>Benchmark completed</translation>
+    </message>
+    <message>
+        <source>Запрос ещё не завершён.</source>
+        <translation>The request has not finished yet.</translation>
+    </message>
+    <message>
+        <source>Ответ отсутствует.</source>
+        <translation>No response was returned.</translation>
+    </message>
+    <message>
+        <source>Задача: %1
+Повтор: %2
+Запрос:
+%3
+Критерии оценки:
+%4
+Ответ модели:
+%5</source>
+        <translation>Task: %1
+Repetition: %2
+Prompt:
+%3
+Evaluation criteria:
+%4
+Model response:
+%5</translation>
+    </message>
+    <message>
+        <source>Не удалось сохранить оценку</source>
+        <translation>Could not save evaluation</translation>
+    </message>
+    <message>
+        <source>Не удалось записать оценку в JSON-отчёт.</source>
+        <translation>Could not write the evaluation to the JSON report.</translation>
+    </message>
+    <message>
+        <source>Прогресс: %1 из %2 запросов. Успешных: %3.</source>
+        <translation>Progress: %1 of %2 requests. Successful: %3.</translation>
+    </message>
+    <message>
+        <source>Не удалось открыть папку</source>
+        <translation>Could not open folder</translation>
+    </message>
+    <message>
+        <source>Не удалось открыть папку с отчётом бенчмарка.</source>
+        <translation>Could not open the benchmark report folder.</translation>
+    </message>
+    <message>
+        <source>Не удалось создать каталог отчёта: %1</source>
+        <translation type="vanished">Could not create report directory: %1</translation>
+    </message>
+    <message>
+        <source>Не удалось открыть отчёт %1: %2</source>
+        <translation type="vanished">Could not open report %1: %2</translation>
+    </message>
+    <message>
+        <source>Не удалось записать отчёт %1: %2</source>
+        <translation type="vanished">Could not write report %1: %2</translation>
+    </message>
+    <message>
+        <source>Не удалось сохранить отчёт %1: %2</source>
+        <translation type="vanished">Could not save report %1: %2</translation>
+    </message>
+</context>
+
+<context>
     <name>AboutDialog</name>
     <message>
         <location filename="../ui/dialogs/about_dialog.ui" line="38"/>
@@ -67,6 +341,10 @@ Save before closing?</translation>
 </context>
 <context>
     <name>MainWindow</name>
+    <message>
+        <source>????????????????? ???????? ???????...</source>
+        <translation>Model research benchmark...</translation>
+    </message>
     <message>
         <location filename="../ui/dialogs/mainwindow.cpp" line="120"/>
         <location filename="../ui/dialogs/mainwindow.cpp" line="556"/>
@@ -924,6 +1202,13 @@ number of rows</translation>
         <translation>Explain the selected code from %1:
 
 %2</translation>
+    </message>
+</context>
+<context>
+    <name>AiClient</name>
+    <message>
+        <source>???????? ?? ???????.</source>
+        <translation>Benchmark is not active.</translation>
     </message>
 </context>
 </TS>

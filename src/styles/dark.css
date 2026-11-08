@@ -949,3 +949,64 @@ QPushButton#aiSendButton:disabled {
     color: #d4d4d4;
     border: 1px solid #3d3d3d;
 }
+
+QTableWidget#benchmarkResults {
+    background-color: #2d2d2d;
+    alternate-background-color: #1e1e1e;
+    color: #e0e0e0;
+    gridline-color: #3d3d3d;
+    border: 1px solid #3d3d3d;
+    border-radius: 0.4em;
+    selection-background-color: #3e4451;
+    selection-color: #e0e0e0;
+    outline: none;
+}
+
+QTableWidget#benchmarkResults::item {
+    padding: 0.35em 0.5em;
+    border-bottom: 1px solid #3d3d3d;
+}
+
+QTableWidget#benchmarkResults QHeaderView::section {
+    background-color: #3e4451;
+    color: #e0e0e0;
+    border: none;
+    border-bottom: 2px solid #00aca1;
+    padding: 0.55em 0.6em;
+    font-weight: bold;
+}
+
+QTextBrowser#benchmarkResponse {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border: 1px solid #3d3d3d;
+    border-radius: 0.4em;
+    padding: 0.5em;
+    selection-background-color: #3e4451;
+}
+
+QComboBox#benchmarkEvaluation, QPlainTextEdit#benchmarkEvaluationNotes {
+    min-height: 2em;
+    padding: 0.35em 0.5em;
+}
+
+QLabel#benchmarkQualitySummary {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border-left: 3px solid #00aca1;
+    border-radius: 0.3em;
+    padding: 0.55em 0.7em;
+    font-weight: bold;
+}
+
+QPushButton#benchmarkSaveEvaluation {
+    background-color: #00aca1;
+    color: #1a1a1c;
+    border: none;
+    font-weight: bold;
+    padding: 0.4em 0.9em;
+}
+
+QPushButton#benchmarkSaveEvaluation:hover {
+    background-color: #00c7b8;
+}

@@ -949,3 +949,64 @@ QPushButton#aiSendButton:disabled {
     color: @TEXT_SECONDARY@;
     border: 1px solid @BORDER@;
 }
+
+QTableWidget#benchmarkResults {
+    background-color: @BG_SECONDARY@;
+    alternate-background-color: @BG_PRIMARY@;
+    color: @TEXT_PRIMARY@;
+    gridline-color: @BORDER@;
+    border: 1px solid @BORDER@;
+    border-radius: 0.4em;
+    selection-background-color: @SELECTION_BG@;
+    selection-color: @TEXT_PRIMARY@;
+    outline: none;
+}
+
+QTableWidget#benchmarkResults::item {
+    padding: 0.35em 0.5em;
+    border-bottom: 1px solid @BORDER@;
+}
+
+QTableWidget#benchmarkResults QHeaderView::section {
+    background-color: @BG_TERTIARY@;
+    color: @TEXT_PRIMARY@;
+    border: none;
+    border-bottom: 2px solid @ACCENT@;
+    padding: 0.55em 0.6em;
+    font-weight: bold;
+}
+
+QTextBrowser#benchmarkResponse {
+    background-color: @BG_SECONDARY@;
+    color: @TEXT_PRIMARY@;
+    border: 1px solid @BORDER@;
+    border-radius: 0.4em;
+    padding: 0.5em;
+    selection-background-color: @SELECTION_BG@;
+}
+
+QComboBox#benchmarkEvaluation, QPlainTextEdit#benchmarkEvaluationNotes {
+    min-height: 2em;
+    padding: 0.35em 0.5em;
+}
+
+QLabel#benchmarkQualitySummary {
+    background-color: @BG_SECONDARY@;
+    color: @TEXT_PRIMARY@;
+    border-left: 3px solid @ACCENT@;
+    border-radius: 0.3em;
+    padding: 0.55em 0.7em;
+    font-weight: bold;
+}
+
+QPushButton#benchmarkSaveEvaluation {
+    background-color: @ACCENT@;
+    color: @AI_CODE_BG@;
+    border: none;
+    font-weight: bold;
+    padding: 0.4em 0.9em;
+}
+
+QPushButton#benchmarkSaveEvaluation:hover {
+    background-color: @ACCENT_HOVER@;
+}

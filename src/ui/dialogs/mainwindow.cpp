@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "benchmark_dialog.h"
 #include "ui/ui_mainwindow.h"
 
 #include <QMenu>
@@ -332,6 +333,14 @@ void MainWindow::setupMenuBar()
         SettingsDialog dlg(this);
         dlg.exec();
         });
+
+    m_toolsMenu->addSeparator();
+    auto benchmarkAction = m_toolsMenu->addAction(tr("Исследовательский бенчмарк моделей..."));
+    benchmarkAction->setObjectName("actionAiBenchmark");
+    connect(benchmarkAction, &QAction::triggered, this, [this]() {
+        BenchmarkDialog dlg(this);
+        dlg.exec();
+    });
 
     //  > Тема
     m_styleMenu = m_toolsMenu->addMenu(tr("Тема"));
