@@ -1,0 +1,4 @@
+[submodule "lide-ai-benchmark"]
+	path = lide-ai-benchmark
+	url = https://github.com/SerZok/lide-ai-benchmark.git
+	branch = master
