@@ -1,10 +1,9 @@
 set(TEMP_DIR "${CMAKE_CURRENT_BINARY_DIR}/install_temp")
-set(APP_BIN_DIR "${CMAKE_CURRENT_BINARY_DIR}/bin") 
 file(REMOVE_RECURSE ${TEMP_DIR})
 
 # Копируем exe
 file(COPY 
-    "${CMAKE_CURRENT_BINARY_DIR}/bin/${PROJECT_NAME}.exe"
+    "${APP_BIN_DIR}/${PROJECT_NAME}.exe"
     DESTINATION "${TEMP_DIR}"
 )
 
@@ -64,6 +63,38 @@ execute_process(
 
 if(NOT DEPLOY_RESULT EQUAL 0)
     message(WARNING "windeployqt завершился с ошибкой")
+endif()
+
+set(BENCHMARK_EXE "${APP_BIN_DIR}/lide-ai-benchmark.exe")
+if(NOT EXISTS "${BENCHMARK_EXE}")
+    message(FATAL_ERROR "lide-ai-benchmark.exe не найден: ${BENCHMARK_EXE}")
+endif()
+foreach(BENCHMARK_ASSET aggregator.py benchmark.example.json)
+    if(NOT EXISTS "${APP_BIN_DIR}/${BENCHMARK_ASSET}")
+        message(FATAL_ERROR "Файл бенчмарка не найден: ${APP_BIN_DIR}/${BENCHMARK_ASSET}")
+    endif()
+    file(COPY "${APP_BIN_DIR}/${BENCHMARK_ASSET}" DESTINATION "${TEMP_DIR}")
+endforeach()
+file(COPY "${BENCHMARK_EXE}" DESTINATION "${TEMP_DIR}")
+
+execute_process(
+    COMMAND ${WINDEPLOYQT}
+        "${TEMP_DIR}/lide-ai-benchmark.exe"
+        --verbose 0
+        --release
+        --no-network
+        --no-opengl
+        --no-opengl-sw
+        --no-translations
+        --no-compiler-runtime
+        --no-system-d3d-compiler
+        --no-system-dxc-compiler
+        --dir "${TEMP_DIR}"
+    WORKING_DIRECTORY ${TEMP_DIR}
+    RESULT_VARIABLE BENCHMARK_DEPLOY_RESULT
+)
+if(NOT BENCHMARK_DEPLOY_RESULT EQUAL 0)
+    message(FATAL_ERROR "windeployqt для lide-ai-benchmark.exe завершился с ошибкой")
 endif()
 
 if(EXISTS "${ROOT_PATH}/libs/SBCL")

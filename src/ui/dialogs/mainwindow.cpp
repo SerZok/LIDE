@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-#include "benchmark_dialog.h"
 #include "ui/ui_mainwindow.h"
 
 #include <QMenu>
@@ -22,6 +21,16 @@
 #include <QFontDatabase>
 #include <QStandardPaths>
 #include <QDesktopServices>
+#include <QCoreApplication>
+#include <QDir>
+#include <QProcess>
+#include <QProcessEnvironment>
+#include <QFileInfo>
+
+#ifdef Q_OS_WIN
+#define NOMINMAX
+#include <windows.h>
+#endif
 
 MainWindow::MainWindow(QWidget* parent) :
       QMainWindow(parent)
@@ -338,8 +347,47 @@ void MainWindow::setupMenuBar()
     auto benchmarkAction = m_toolsMenu->addAction(tr("Исследовательский бенчмарк моделей..."));
     benchmarkAction->setObjectName("actionAiBenchmark");
     connect(benchmarkAction, &QAction::triggered, this, [this]() {
-        BenchmarkDialog dlg(this);
-        dlg.exec();
+        QString executable = QDir(QCoreApplication::applicationDirPath())
+                                 .filePath(QStringLiteral("lide-ai-benchmark"));
+#ifdef Q_OS_WIN
+        executable += QStringLiteral(".exe");
+#endif
+        if (!QFileInfo(executable).isFile())
+        {
+            QMessageBox::warning(
+                this, tr("Бенчмарк не найден"),
+                tr("Не найден lide-ai-benchmark рядом с LIDE.\n"
+                   "Соберите проект вместе с подмодулем lide-ai-benchmark."));
+            return;
+        }
+
+        QProcess process;
+        process.setProgram(executable);
+        process.setArguments({QStringLiteral("--gui")});
+        process.setWorkingDirectory(QCoreApplication::applicationDirPath());
+#ifdef Q_OS_WIN
+        process.setCreateProcessArgumentsModifier(
+            [](QProcess::CreateProcessArguments *arguments)
+            {
+                arguments->flags |= CREATE_NO_WINDOW;
+            });
+#endif
+        QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
+        environment.insert(QStringLiteral("LIDE_AI_ENDPOINT"), m_settings->aiEndpoint());
+        environment.insert(QStringLiteral("LIDE_AI_MODEL"), m_settings->aiModel());
+        environment.insert(QStringLiteral("LIDE_SBCL_PATH"), m_settings->sbclPath());
+        const QString apiKey = m_settings->aiApiKey();
+        if (apiKey.isEmpty())
+            environment.remove(QStringLiteral("OLLAMA_API_KEY"));
+        else
+            environment.insert(QStringLiteral("OLLAMA_API_KEY"), apiKey);
+        process.setProcessEnvironment(environment);
+        if (!process.startDetached())
+        {
+            QMessageBox::warning(this, tr("Не удалось запустить бенчмарк"),
+                                 tr("Ошибка запуска lide-ai-benchmark: %1")
+                                     .arg(process.errorString()));
+        }
     });
 
     //  > Тема
