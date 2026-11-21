@@ -539,30 +539,107 @@
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="ai_hyper_spec_label">
+           <widget class="QLabel" name="ai_embedding_endpoint_label">
             <property name="text">
-             <string>Путь к локальному
-HyperSpec (опционально)</string>
+             <string>URL embeddings API</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
-           <layout class="QHBoxLayout" name="horizontalLayout">
+           <widget class="QLineEdit" name="ai_embedding_endpoint_lineEdit">
+            <property name="toolTip">
+             <string>Например, Ollama /api/embed или OpenAI-совместимый /v1/embeddings</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="ai_embedding_model_label">
+            <property name="text">
+             <string>Модель embeddings</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <layout class="QHBoxLayout" name="ai_embedding_model_layout">
             <item>
-             <widget class="QLineEdit" name="ai_hyper_spec_lineEdit"/>
-            </item>
-            <item>
-             <widget class="QPushButton" name="ai_hyper_spec_browse_button">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+             <widget class="QComboBox" name="ai_embedding_model_comboBox">
+              <property name="editable">
+               <bool>true</bool>
               </property>
-              <property name="text">
-               <string>...</string>
+              <property name="insertPolicy">
+               <enum>QComboBox::InsertPolicy::NoInsert</enum>
+              </property>
+              <property name="placeholderText">
+               <string>Например, nomic-embed-text</string>
               </property>
              </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="ai_embedding_refresh_models_button">
+              <property name="toolTip">
+               <string>Получить список embeddings-моделей с сервера</string>
+              </property>
+              <property name="text">
+               <string>Обновить</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="ai_context_files_label">
+            <property name="text">
+             <string>Файлы для RAG</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <layout class="QHBoxLayout" name="ai_context_files_layout">
+            <item>
+             <widget class="QListWidget" name="ai_context_files_listWidget">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>160</height>
+               </size>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="ai_context_files_buttons_layout">
+              <item>
+               <widget class="QToolButton" name="ai_context_files_add_button">
+                <property name="toolTip">
+                 <string>Добавить файлы...</string>
+                </property>
+                <property name="text">
+                 <string>+</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="ai_context_files_remove_button">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Удалить выбранные</string>
+                </property>
+                <property name="text">
+                 <string>×</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </item>

@@ -1,6 +1,7 @@
 #include "code_block_widget.h"
 #include <QFontMetrics>
 #include <QSizePolicy>
+#include <QShortcut>
 
 CodeBlockWidget::CodeBlockWidget(const QString &language, const QString &code, QWidget *parent)
     : QWidget(parent), m_code(code)
@@ -38,10 +39,13 @@ CodeBlockWidget::CodeBlockWidget(const QString &language, const QString &code, Q
     m_codeEdit->setWordWrapMode(QTextOption::NoWrap);
     m_codeEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_codeEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    m_codeEdit->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    m_codeEdit->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     m_codeEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     m_codeEdit->setMinimumSize(0, 0);
     m_codeEdit->setPlainText(m_code);
+    auto *copyShortcut = new QShortcut(QKeySequence::Copy, m_codeEdit);
+    copyShortcut->setContext(Qt::WidgetShortcut);
+    connect(copyShortcut, &QShortcut::activated, m_codeEdit, &QTextEdit::copy);
     mainLayout->addWidget(m_codeEdit);
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);

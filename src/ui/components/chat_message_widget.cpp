@@ -1,16 +1,22 @@
 #include "chat_message_widget.h"
 #include "app/settings.h"
+#include "context_color.h"
 
 #include <QHBoxLayout>
 #include <QFrame>
 #include <QLabel>
 #include <QColor>
+#include <QFileInfo>
 #include <QPalette>
 #include <QResizeEvent>
+#include <QRegularExpression>
+#include <QTextCharFormat>
+#include <QTextCursor>
 #include <QTextBrowser>
 #include <QTextDocument>
 #include <QTimer>
 #include <QVBoxLayout>
+#include <QShortcut>
 #include <QtMath>
 
 ChatMessageWidget::ChatMessageWidget(Role role, const QString &text, QWidget *parent)
@@ -24,7 +30,7 @@ ChatMessageWidget::ChatMessageWidget(Role role, const QString &text, QWidget *pa
     rowLayout->setSpacing(0);
 
     QVBoxLayout *bubbleLayout = new QVBoxLayout(m_bubble);
-    bubbleLayout->setContentsMargins(12, 8, 12, 8);
+    bubbleLayout->setContentsMargins(14, 10, 14, 10);
     bubbleLayout->setSpacing(4);
 
     switch (role)
@@ -63,11 +69,16 @@ ChatMessageWidget::ChatMessageWidget(Role role, const QString &text, QWidget *pa
     m_textBrowser->setFrameShape(QFrame::NoFrame);
     m_textBrowser->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_textBrowser->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_textBrowser->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse);
+    m_textBrowser->setTextInteractionFlags(
+        Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard | Qt::LinksAccessibleByMouse);
     m_textBrowser->setLineWrapMode(QTextEdit::WidgetWidth);
     m_textBrowser->setMinimumSize(0, 0);
-    m_textBrowser->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    m_textBrowser->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     m_textBrowser->document()->setDocumentMargin(0);
+
+    auto *copyShortcut = new QShortcut(QKeySequence::Copy, m_textBrowser);
+    copyShortcut->setContext(Qt::WidgetShortcut);
+    connect(copyShortcut, &QShortcut::activated, m_textBrowser, &QTextBrowser::copy);
 
     bubbleLayout->addWidget(m_roleLabel);
     bubbleLayout->addWidget(m_textBrowser);
@@ -79,12 +90,38 @@ ChatMessageWidget::ChatMessageWidget(Role role, const QString &text, QWidget *pa
 
 void ChatMessageWidget::updateLinkStyle()
 {
+    const bool darkTheme = Settings::instance()->currentTheme() == "dark";
     QPalette palette = m_textBrowser->palette();
-    palette.setColor(QPalette::Link, Settings::instance()->currentTheme() == "dark"
-        ? QColor("#4dd0c8")
-        : QColor("#0067a8"));
+    palette.setColor(QPalette::Link, darkTheme ? QColor("#4dd0c8") : QColor("#0067a8"));
     palette.setColor(QPalette::LinkVisited, palette.color(QPalette::Link));
     m_textBrowser->setPalette(palette);
+    highlightSourceCitations();
+}
+
+void ChatMessageWidget::highlightSourceCitations()
+{
+    static const QRegularExpression citationPattern(
+        R"(\[([^\],\r\n]+),\s*(?:(?:стр\.?|страниц(?:а|ы)?|pages?|p\.?)\s*\d+(?:\s*[-–—]\s*\d+)?|(?:строк(?:а|и)?|lines?)\s+\d+(?:\s*[-–—]\s*\d+)?)\])",
+        QRegularExpression::CaseInsensitiveOption);
+
+    const bool darkTheme = Settings::instance()->currentTheme() == "dark";
+    const QString renderedText = m_textBrowser->document()->toPlainText();
+    QRegularExpressionMatchIterator matches = citationPattern.globalMatch(renderedText);
+    while (matches.hasNext())
+    {
+        const QRegularExpressionMatch match = matches.next();
+        const QString fileName = QFileInfo(match.captured(1).trimmed()).fileName();
+        QTextCharFormat format;
+        format.setForeground(ContextColor::foreground(fileName, darkTheme));
+        format.setBackground(ContextColor::background(fileName, darkTheme));
+        format.setFontWeight(QFont::DemiBold);
+        format.setUnderlineStyle(QTextCharFormat::SingleUnderline);
+
+        QTextCursor cursor(m_textBrowser->document());
+        cursor.setPosition(match.capturedStart());
+        cursor.setPosition(match.capturedEnd(), QTextCursor::KeepAnchor);
+        cursor.mergeCharFormat(format);
+    }
 }
 
 void ChatMessageWidget::resizeEvent(QResizeEvent *event)
@@ -103,5 +140,5 @@ void ChatMessageWidget::updateTextHeight()
 
     QTextDocument *document = m_textBrowser->document();
     document->setTextWidth(textWidth);
-    m_textBrowser->setFixedHeight(qMax(1, qCeil(document->size().height())));
+    m_textBrowser->setFixedHeight(qMax(1, qCeil(document->size().height()) + 2));
 }

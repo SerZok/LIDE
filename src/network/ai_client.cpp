@@ -14,7 +14,6 @@
 #include <QStandardPaths>
 #include <QSysInfo>
 #include <QLibraryInfo>
-#include <QRegularExpression>
 #include <QCryptographicHash>
 #include <QThread>
 #include <QSettings>
@@ -53,7 +52,9 @@ void AiClient::sendRequest(const QJsonArray &conversationMessages)
     json["stream"] = false;
 
     QJsonArray messages;
-    messages.append(QJsonObject{{"role", "system"}, {"content", settings->aiSystemPrompt() + "\n\n" + buildChatInstructions() + "\n\n" + buildHyperSpecInstructions()}});
+    messages.append(QJsonObject{{"role", "system"},
+                                {"content", settings->aiSystemPrompt() + "\n\n" +
+                                                buildChatInstructions()}});
     for (const QJsonValue& message : conversationMessages)
     {
         messages.append(message);
@@ -89,8 +90,7 @@ bool AiClient::beginBenchmarkRun(const QString &suiteId, int repetitions, const 
         endpointOrigin += ":" + QString::number(endpoint.port());
 
     m_benchmarkSystemPrompt =
-        settings->aiSystemPrompt() + "\n\n" + buildChatInstructions() +
-        "\n\n" + buildHyperSpecInstructions();
+        settings->aiSystemPrompt() + "\n\n" + buildChatInstructions();
     const QByteArray systemPrompt = m_benchmarkSystemPrompt.toUtf8();
     m_benchmarkMetadata = QJsonObject{
         {"suiteId", m_benchmarkSuiteId},
@@ -358,7 +358,6 @@ void AiClient::onReplyFinished(QNetworkReply *reply)
 
     if (success)
     {
-        responseText = formatHyperSpecLinks(responseText);
         if (pending.type == RequestType::Chat)
             emit responseReady(responseText);
         else if (pending.type == RequestType::Explain)
@@ -376,7 +375,8 @@ void AiClient::onReplyFinished(QNetworkReply *reply)
     reply->deleteLater();
 }
 
-void AiClient::sendExplainRequest(const QString &selectedText, ExplainContext context)
+void AiClient::sendExplainRequest(const QString &selectedText, ExplainContext context,
+                                  const QString &filePath, const QString &fileContents)
 {
     Settings *settings = Settings::instance();
     QJsonObject json;
@@ -386,7 +386,19 @@ void AiClient::sendExplainRequest(const QString &selectedText, ExplainContext co
     QString teacherInstructions = buildTeacherInstructions(context);
     QJsonArray messages;
     messages.append(QJsonObject{{"role", "system"}, {"content", settings->aiSystemPrompt() + "\n\n" + teacherInstructions}});
-    messages.append(QJsonObject{{"role", "user"}, {"content", selectedText}});
+    QString userContent = selectedText;
+    if (context == ExplainContext::Editor &&
+        (!filePath.isEmpty() || !fileContents.isEmpty()))
+    {
+        const QString fileName = filePath.isEmpty()
+                                     ? tr("Текущий файл")
+                                     : QFileInfo(filePath).fileName();
+        userContent =
+            tr("Файл: %1\nПолное содержимое файла:\n```lisp\n%2\n```\n\n"
+               "Выделенный фрагмент для объяснения:\n```lisp\n%3\n```")
+                .arg(fileName, fileContents, selectedText);
+    }
+    messages.append(QJsonObject{{"role", "user"}, {"content", userContent}});
     json["messages"] = messages;
 
     int inputCharacters = 0;
@@ -743,12 +755,11 @@ QJsonObject AiClient::benchmarkEnvironment() const
 
 QString AiClient::buildTeacherInstructions(ExplainContext context) const
 {
-    QString instructions = buildHyperSpecInstructions() + R"(
+    QString instructions = R"(
 Ты — наставник по Common Lisp (SBCL).
 Используй Markdown.
 Если получен фрагмент кода без вопроса, объясни его, а не оценивай и не предлагай список тем.
 Разбери назначение кода и важные формы/функции; отмечай ошибки или нюансы только если они действительно есть.
-В поясняющем тексте делай ключевые имена Common Lisp кликабельными ссылками по правилам ниже.
 Код, который цитируешь или предлагаешь, оформляй fenced-блоком с языком lisp.
 )";
 
@@ -758,7 +769,7 @@ QString AiClient::buildTeacherInstructions(ExplainContext context) const
         instructions += R"(КОНТЕКСТ REPL: Выделенный текст может быть сообщением об ошибке SBCL. Начни с расшифровки сообщения, затем задай наводящий вопрос о том, как бы пользователь это исправил.)";
         break;
     case ExplainContext::Editor:
-        instructions += R"(КОНТЕКСТ РЕДАКТОРА: Выделенный текст — это код из файла. Разбери его по частям.)";
+        instructions += R"(КОНТЕКСТ РЕДАКТОРА: Выделенный текст — это код из файла. Разбери его по частям. Если приложено полное содержимое файла, учитывай его для понимания связей и окружения выделенного кода.)";
         break;
     }
     return instructions;
@@ -773,63 +784,9 @@ QString AiClient::buildChatInstructions() const
 - Не ограничивайся похвалой, пересказом очевидного или приглашением задать вопрос.
   Не предлагай примеры возможных вопросов вместо ответа по присланному коду.
 - Указывай вывод или ошибки только если можешь достоверно их определить; не выдумывай поведение.
-- В поясняющем тексте выделяй ключевые имена Common Lisp ссылками на HyperSpec согласно следующим правилам.
+- Если к запросу приложены найденные фрагменты документов, опирайся только на них при ответе о содержании документов.
+  Подкрепляй каждое утверждение ссылкой на точный файл и страницу или диапазон строк.
+  Если фрагменты не подтверждают ответ, прямо скажи, что в источниках ответа нет; не придумывай цитаты.
 - Код пользователя не переписывай без просьбы; любой код в ответе оформляй Markdown-блоком с языком lisp.
 )";
-}
-
-QString AiClient::buildHyperSpecInstructions() const
-{
-    return R"(
-Обязательные правила ссылок на Common Lisp HyperSpec:
-- Ставь Markdown-ссылку на HyperSpec при первом упоминании каждой ключевой функции,
-  макроса, специальной формы или переменной Common Lisp в поясняющем тексте.
-- Для обычного фрагмента кода с несколькими разными символами добавь не менее трёх ссылок,
-  если для них можно указать правильные страницы. Не нужно ссылать каждое повторное упоминание.
-- Ссылка должна быть Markdown-ссылкой с точным маркером __CLHS_PREFIX__ в начале адреса.
-  Пример оформления:
-[mapcar](__CLHS_PREFIX__/Body/f_mapcar.htm)
-[setf](__CLHS_PREFIX__/Body/m_setf.htm)
-- Указывай правильную страницу и имя файла HyperSpec для конкретного символа;
-  не угадывай имя файла по написанию символа. Не оформляй символы внутри блока кода ссылками.
-- Не оставляй маркер __CLHS_PREFIX__ в тексте ссылки: приложение подставит базовый адрес документации.
-- Перед отправкой проверь, что ответ действительно содержит Markdown-ссылки на ключевые символы;
-  если поясняющий текст называет символ без ссылки, исправь ответ.
-)";
-}
-
-QString AiClient::formatHyperSpecLinks(const QString &markdown) const
-{
-    Settings *settings = Settings::instance();
-    QString localPath = settings->localHyperSpecPath();
-
-    const QString onlineBaseUrl = "https://www.lispworks.com/documentation/HyperSpec";
-    const QRegularExpression linkPattern(R"((?:__CLHS_PREFIX__|CLHS_PREFIX)(/[^)\s]+))");
-    QRegularExpressionMatchIterator matches = linkPattern.globalMatch(markdown);
-
-    QString result;
-    int lastPosition = 0;
-    while (matches.hasNext())
-    {
-        const QRegularExpressionMatch match = matches.next();
-        const QString relativePath = match.captured(1);
-        QString linkUrl = onlineBaseUrl + relativePath;
-
-        if (!localPath.isEmpty())
-        {
-            const QString localFilePath = QDir(localPath).filePath(relativePath.mid(1));
-            const QFileInfo localFile(localFilePath);
-            if (localFile.isFile())
-            {
-                linkUrl = QUrl::fromLocalFile(localFile.absoluteFilePath()).toString(QUrl::FullyEncoded);
-            }
-        }
-
-        result += markdown.mid(lastPosition, match.capturedStart() - lastPosition);
-        result += linkUrl;
-        lastPosition = match.capturedEnd();
-    }
-
-    result += markdown.mid(lastPosition);
-    return result;
 }

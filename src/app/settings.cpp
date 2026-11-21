@@ -258,6 +258,44 @@ void Settings::setAiApiKey(const QString& key) {
     }
 }
 
+QStringList Settings::aiKnowledgeFiles() const {
+    return value<QStringList>(Key::AI_KNOWLEDGE_FILES, QStringList());
+}
+
+void Settings::setAiKnowledgeFiles(const QStringList& files) {
+    QStringList normalizedFiles;
+    for (const QString& file : files) {
+        if (!file.trimmed().isEmpty() && !normalizedFiles.contains(file))
+            normalizedFiles.append(file);
+    }
+    if (normalizedFiles != aiKnowledgeFiles()) {
+        setValue(Key::AI_KNOWLEDGE_FILES, normalizedFiles);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiEmbeddingEndpoint() const {
+    return value<QString>(Key::AI_EMBEDDING_ENDPOINT, "http://localhost:11434/api/embed");
+}
+
+void Settings::setAiEmbeddingEndpoint(const QString& endpoint) {
+    if (endpoint != aiEmbeddingEndpoint()) {
+        setValue(Key::AI_EMBEDDING_ENDPOINT, endpoint);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiEmbeddingModel() const {
+    return value<QString>(Key::AI_EMBEDDING_MODEL, "nomic-embed-text");
+}
+
+void Settings::setAiEmbeddingModel(const QString& model) {
+    if (model != aiEmbeddingModel()) {
+        setValue(Key::AI_EMBEDDING_MODEL, model);
+        emit settingsChanged();
+    }
+}
+
 QString Settings::aiSystemPrompt() const {
     return value<QString>(Key::AI_SYSTEM_PROMPT,
         "Ты — помощник-программист, специализирующийся на Common Lisp и SBCL. "
@@ -605,13 +643,6 @@ void Settings::setKeywordColor(const QColor& color)
         setValue(Key::SYNTAX_KEYWORD, color);
         emit settingsChanged();
     }
-}
-
-QString Settings::localHyperSpecPath() const {
-    return m_settings.value("ai/localHyperSpecPath", "").toString();
-}
-void Settings::setLocalHyperSpecPath(const QString& path) {
-    m_settings.setValue("ai/localHyperSpecPath", path);
 }
 
 bool Settings::contains(const QString& key) const

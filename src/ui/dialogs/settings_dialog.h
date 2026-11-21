@@ -15,10 +15,12 @@ public:
 	~SettingsDialog();
 
 private slots:
-	void onBrowseHyperSpecPath();
 	void onBrowseSBCLPath();
 	void onBrowseProjectPath();
 	void fetchAiModels();
+	void fetchAiEmbeddingModels();
+	void addContextFiles();
+	void removeContextFiles();
 
 protected:
 	void changeEvent(QEvent* event) override;
@@ -34,4 +36,5 @@ private:
 
 	void updateSbclArgs();
 	void updateSbclLoad();
+	void fetchModels(bool embedding);
 };

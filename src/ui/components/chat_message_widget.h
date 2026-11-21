@@ -25,6 +25,7 @@ protected:
 
 private:
     void updateLinkStyle();
+    void highlightSourceCitations();
     void updateTextHeight();
 
     QWidget *m_bubble;

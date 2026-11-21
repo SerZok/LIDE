@@ -436,6 +436,9 @@ void MainWindow::setupDockWidgets()
         });
 
     connect(m_tabWidget, &EditorTabWidget::currentFileChanged, m_projectTree, &ProjectTree::onFileLoaded);
+    connect(m_tabWidget, &EditorTabWidget::currentFileChanged,
+            static_cast<AIAssistantWidget *>(m_AiAssistant),
+            &AIAssistantWidget::setCurrentEditorFile);
     connect(m_tabWidget, &EditorTabWidget::fileModifiedChanged, m_projectTree, &ProjectTree::onFileModifiedChanged);
     connect(m_tabWidget, &EditorTabWidget::fileClosed, m_projectTree, &ProjectTree::onFileClosed);
     connect(m_projectTree, &ProjectTree::fileActivated, m_tabWidget, &EditorTabWidget::openFile);
@@ -557,7 +560,18 @@ void MainWindow::onRequestAIExplanation(const QString& code, AiClient::ExplainCo
     auto aiAssitant = static_cast<AIAssistantWidget*>(m_AiAssistant);
     aiAssitant->setVisible(true);
     aiAssitant->raise();
-    aiAssitant->explainSelectedCode(code, context);
+    QString filePath;
+    QString fileContents;
+    if (context == AiClient::ExplainContext::Editor && m_tabWidget) {
+        LispEditor *editor = qobject_cast<LispEditor *>(sender());
+        if (!editor)
+            editor = m_tabWidget->currentEditor();
+        if (editor) {
+            filePath = editor->currentFile();
+            fileContents = editor->toPlainText();
+        }
+    }
+    aiAssitant->explainSelectedCode(code, context, filePath, fileContents);
 }
 
 void MainWindow::openProject() {

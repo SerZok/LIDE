@@ -37,22 +37,22 @@
 
 namespace
 {
-QString markdownBody(const QString &markdown)
-{
-    QTextDocument document;
-    document.setMarkdown(markdown, QTextDocument::MarkdownNoHTML);
-    const QString rendered = document.toHtml();
-    const qsizetype bodyStart = rendered.indexOf(QStringLiteral("<body"));
-    if (bodyStart < 0)
-        return markdown.toHtmlEscaped();
+    QString markdownBody(const QString &markdown)
+    {
+        QTextDocument document;
+        document.setMarkdown(markdown, QTextDocument::MarkdownNoHTML);
+        const QString rendered = document.toHtml();
+        const qsizetype bodyStart = rendered.indexOf(QStringLiteral("<body"));
+        if (bodyStart < 0)
+            return markdown.toHtmlEscaped();
 
-    const qsizetype contentStart = rendered.indexOf(QLatin1Char('>'), bodyStart);
-    const qsizetype bodyEnd = rendered.lastIndexOf(QStringLiteral("</body>"));
-    if (contentStart < 0 || bodyEnd < contentStart)
-        return markdown.toHtmlEscaped();
+        const qsizetype contentStart = rendered.indexOf(QLatin1Char('>'), bodyStart);
+        const qsizetype bodyEnd = rendered.lastIndexOf(QStringLiteral("</body>"));
+        if (contentStart < 0 || bodyEnd < contentStart)
+            return markdown.toHtmlEscaped();
 
-    return rendered.mid(contentStart + 1, bodyEnd - contentStart - 1);
-}
+        return rendered.mid(contentStart + 1, bodyEnd - contentStart - 1);
+    }
 }
 
 BenchmarkDialog::BenchmarkDialog(QWidget *parent)
@@ -72,7 +72,7 @@ BenchmarkDialog::BenchmarkDialog(QWidget *parent)
       m_saveEvaluationButton(new QPushButton(tr("Сохранить оценку"), this)),
       m_tasks(benchmarkTasks())
 {
-    setWindowTitle(tr("Исследовательский бенчмарк LIDE"));
+    setWindowTitle(tr("Бенчмарк"));
     resize(1000, 720);
     setMinimumSize(800, 600);
     setModal(true);
@@ -89,10 +89,9 @@ BenchmarkDialog::BenchmarkDialog(QWidget *parent)
             .arg(m_tasks.size())
             .arg(m_tasks.size() * m_repetitions->value()));
     m_results->setColumnCount(9);
-    m_results->setHorizontalHeaderLabels({
-        tr("Задача"), tr("Повтор"), tr("Статус"), tr("Время, мс"),
-        tr("Вход, токены"), tr("Ответ, токены"), tr("Скорость, ток/с"),
-        tr("SBCL"), tr("Оценка")});
+    m_results->setHorizontalHeaderLabels({tr("Задача"), tr("Повтор"), tr("Статус"), tr("Время, мс"),
+                                          tr("Вход, токены"), tr("Ответ, токены"), tr("Скорость, ток/с"),
+                                          tr("SBCL"), tr("Оценка")});
     m_results->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     m_results->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     m_results->horizontalHeader()->setMinimumSectionSize(78);
@@ -172,99 +171,87 @@ BenchmarkDialog::BenchmarkDialog(QWidget *parent)
     connect(m_results, &QTableWidget::currentCellChanged,
             this, &BenchmarkDialog::showSelectedResult);
     connect(m_repetitions, QOverload<int>::of(&QSpinBox::valueChanged),
-            this, [this](int repetitions) {
-                m_status->setText(
-                    tr("%1 задач, %2 запросов с учётом повторов. Ответы и метрики сохраняются в JSON-отчёт.")
-                        .arg(m_tasks.size())
-                        .arg(m_tasks.size() * repetitions));
-            });
+            this, [this](int repetitions)
+            { m_status->setText(
+                  tr("%1 задач, %2 запросов с учётом повторов. Ответы и метрики сохраняются в JSON-отчёт.")
+                      .arg(m_tasks.size())
+                      .arg(m_tasks.size() * repetitions)); });
     connect(m_client, &AiClient::benchmarkRequestFinished,
             this, &BenchmarkDialog::onRequestFinished);
-    connect(m_client, &AiClient::benchmarkReportError, this, [this](const QString &error) {
-        m_status->setText(error);
-    });
+    connect(m_client, &AiClient::benchmarkReportError, this, [this](const QString &error)
+            { m_status->setText(error); });
 }
 
 QVector<BenchmarkDialog::BenchmarkTask> BenchmarkDialog::benchmarkTasks()
 {
     return {
-        {
-            "explain-recursion",
-            BenchmarkDialog::tr("Объяснение рекурсивной функции"),
-            QStringLiteral(
-                "Объясни, что вычисляет этот код на Common Lisp, как работает базовый случай "
-                "и что вернётся для аргументов 0 и 5. Не переписывай функцию.\n\n"
-                "(defun factorial (n)\n"
-                "  (if (zerop n)\n"
-                "      1\n"
-                "      (* n (factorial (1- n)))))"),
-            BenchmarkDialog::tr("Корректно определить факториал, объяснить рекурсивный шаг и базовый "
-                        "случай; указать результаты для 0 и 5 без фактических ошибок."),
-            {}, {}
-        },
-        {
-            "implement-count",
-            BenchmarkDialog::tr("Реализация функции и примеры"),
-            QStringLiteral(
-                "Напиши функцию Common Lisp COUNT-OCCURRENCES, которая принимает элемент и "
-                "список и возвращает число вхождений элемента. Используй сравнение EQL. "
-                "Приведи код функции в блоке ```lisp ... ``` и три проверочных вызова "
-                "с ожидаемыми результатами."),
-            BenchmarkDialog::tr("Функция должна работать для пустого списка, учитывать EQL, "
-                        "возвращать целое число и давать согласованные примеры."),
-            "COUNT-OCCURRENCES",
-            {{"duplicates", "2 '(2 3 2)", "2"},
-             {"empty-list", "'a nil", "0"},
-             {"symbol-matches", "'a '(a b a)", "2"}}
-        },
-        {
-            "debug-empty-list",
-            BenchmarkDialog::tr("Поиск и исправление ошибки"),
-            QStringLiteral(
-                "Функция должна вернуть первый положительный элемент списка или NIL, если "
-                "такого элемента нет. Найди проблему в коде и предложи исправленную функцию. "
-                "Объясни поведение для пустого списка. Верни исправленную функцию "
-                "в блоке ```lisp ... ```.\n\n"
-                "(defun first-positive (numbers)\n"
-                "  (if (> (first numbers) 0)\n"
-                "      (first numbers)\n"
-                "      (first-positive (rest numbers))))"),
-            BenchmarkDialog::tr("Обнаружить отсутствие обработки пустого списка и бесконечную рекурсию "
-                        "для списка без положительных значений; исправление должно завершаться "
-                        "и возвращать NIL при отсутствии результата."),
-            "FIRST-POSITIVE",
-            {{"first-positive", "'(-1 0 4 9)", "4"},
-             {"no-positive", "'(-2 0)", "cl:nil"},
-             {"empty-list", "cl:nil", "cl:nil"}}
-        },
-        {
-            "stable-unique",
-            BenchmarkDialog::tr("Обработка списка с сохранением порядка"),
-            QStringLiteral(
-                "Реализуй функцию UNIQUE-PRESERVING-ORDER для Common Lisp: она удаляет "
-                "повторные элементы списка, сохраняя первое вхождение и исходный порядок. "
-                "Сравнивай элементы через EQUAL. Приведи проверки для пустого списка и "
-                "списка (a b a c b). Помести реализацию в блок ```lisp ... ```."),
-            BenchmarkDialog::tr("Результат для (a b a c b) должен быть (a b c), порядок первых "
-                        "вхождений сохранён, пустой список обрабатывается."),
-            "UNIQUE-PRESERVING-ORDER",
-            {{"remove-duplicates", "'(a b a c b)", "'(a b c)"},
-             {"empty-list", "cl:nil", "cl:nil"}}
-        },
-        {
-            "reduce-empty",
-            BenchmarkDialog::tr("Разбор поведения стандартной функции"),
-            QStringLiteral(
-                "Реализуй функцию SUM-LIST на Common Lisp, используя REDUCE с "
-                ":INITIAL-VALUE 0. Объясни, почему начальное значение важно для пустого "
-                "списка. Верни функцию в блоке ```lisp ... ```."),
-            BenchmarkDialog::tr("Объяснить отсутствие начального значения при пустой последовательности "
-                        "и предложить корректный вариант, возвращающий 0 для пустого списка."),
-            "SUM-LIST",
-            {{"sum", "'(1 2 3 4)", "10"},
-             {"empty-list", "cl:nil", "0"}}
-        }
-    };
+        {"explain-recursion",
+         BenchmarkDialog::tr("Объяснение рекурсивной функции"),
+         QStringLiteral(
+             "Объясни, что вычисляет этот код на Common Lisp, как работает базовый случай "
+             "и что вернётся для аргументов 0 и 5. Не переписывай функцию.\n\n"
+             "(defun factorial (n)\n"
+             "  (if (zerop n)\n"
+             "      1\n"
+             "      (* n (factorial (1- n)))))"),
+         BenchmarkDialog::tr("Корректно определить факториал, объяснить рекурсивный шаг и базовый "
+                             "случай; указать результаты для 0 и 5 без фактических ошибок."),
+         {},
+         {}},
+        {"implement-count",
+         BenchmarkDialog::tr("Реализация функции и примеры"),
+         QStringLiteral(
+             "Напиши функцию Common Lisp COUNT-OCCURRENCES, которая принимает элемент и "
+             "список и возвращает число вхождений элемента. Используй сравнение EQL. "
+             "Приведи код функции в блоке ```lisp ... ``` и три проверочных вызова "
+             "с ожидаемыми результатами."),
+         BenchmarkDialog::tr("Функция должна работать для пустого списка, учитывать EQL, "
+                             "возвращать целое число и давать согласованные примеры."),
+         "COUNT-OCCURRENCES",
+         {{"duplicates", "2 '(2 3 2)", "2"},
+          {"empty-list", "'a nil", "0"},
+          {"symbol-matches", "'a '(a b a)", "2"}}},
+        {"debug-empty-list",
+         BenchmarkDialog::tr("Поиск и исправление ошибки"),
+         QStringLiteral(
+             "Функция должна вернуть первый положительный элемент списка или NIL, если "
+             "такого элемента нет. Найди проблему в коде и предложи исправленную функцию. "
+             "Объясни поведение для пустого списка. Верни исправленную функцию "
+             "в блоке ```lisp ... ```.\n\n"
+             "(defun first-positive (numbers)\n"
+             "  (if (> (first numbers) 0)\n"
+             "      (first numbers)\n"
+             "      (first-positive (rest numbers))))"),
+         BenchmarkDialog::tr("Обнаружить отсутствие обработки пустого списка и бесконечную рекурсию "
+                             "для списка без положительных значений; исправление должно завершаться "
+                             "и возвращать NIL при отсутствии результата."),
+         "FIRST-POSITIVE",
+         {{"first-positive", "'(-1 0 4 9)", "4"},
+          {"no-positive", "'(-2 0)", "cl:nil"},
+          {"empty-list", "cl:nil", "cl:nil"}}},
+        {"stable-unique",
+         BenchmarkDialog::tr("Обработка списка с сохранением порядка"),
+         QStringLiteral(
+             "Реализуй функцию UNIQUE-PRESERVING-ORDER для Common Lisp: она удаляет "
+             "повторные элементы списка, сохраняя первое вхождение и исходный порядок. "
+             "Сравнивай элементы через EQUAL. Приведи проверки для пустого списка и "
+             "списка (a b a c b). Помести реализацию в блок ```lisp ... ```."),
+         BenchmarkDialog::tr("Результат для (a b a c b) должен быть (a b c), порядок первых "
+                             "вхождений сохранён, пустой список обрабатывается."),
+         "UNIQUE-PRESERVING-ORDER",
+         {{"remove-duplicates", "'(a b a c b)", "'(a b c)"},
+          {"empty-list", "cl:nil", "cl:nil"}}},
+        {"reduce-empty",
+         BenchmarkDialog::tr("Разбор поведения стандартной функции"),
+         QStringLiteral(
+             "Реализуй функцию SUM-LIST на Common Lisp, используя REDUCE с "
+             ":INITIAL-VALUE 0. Объясни, почему начальное значение важно для пустого "
+             "списка. Верни функцию в блоке ```lisp ... ```."),
+         BenchmarkDialog::tr("Объяснить отсутствие начального значения при пустой последовательности "
+                             "и предложить корректный вариант, возвращающий 0 для пустого списка."),
+         "SUM-LIST",
+         {{"sum", "'(1 2 3 4)", "10"},
+          {"empty-list", "cl:nil", "0"}}}};
 }
 
 QJsonArray BenchmarkDialog::taskDefinitions() const
@@ -390,7 +377,8 @@ void BenchmarkDialog::onRequestFinished(const QString &taskId, int repetition,
         return;
 
     const auto task = std::find_if(m_tasks.cbegin(), m_tasks.cend(),
-                                   [&taskId](const BenchmarkTask &candidate) {
+                                   [&taskId](const BenchmarkTask &candidate)
+                                   {
                                        return candidate.id == taskId;
                                    });
     if (task == m_tasks.cend())
@@ -414,8 +402,7 @@ void BenchmarkDialog::onRequestFinished(const QString &taskId, int repetition,
         result.contains("promptTokens") ? QString::number(result.value("promptTokens").toInteger()) : "—");
     m_results->item(row, 5)->setText(
         result.contains("completionTokens") ? QString::number(result.value("completionTokens").toInteger()) : "—");
-    const double speed = result.value("generationTokensPerSecond").toDouble(
-        result.value("endToEndTokensPerSecond").toDouble(-1.0));
+    const double speed = result.value("generationTokensPerSecond").toDouble(result.value("endToEndTokensPerSecond").toDouble(-1.0));
     m_results->item(row, 6)->setText(speed >= 0.0 ? QString::number(speed, 'f', 1) : "—");
     m_results->item(row, 7)->setText(
         task->sbclTests.isEmpty() ? "—" : (success ? tr("Ожидание") : tr("Не запускалось")));
@@ -436,7 +423,7 @@ void BenchmarkDialog::onRequestFinished(const QString &taskId, int repetition,
 }
 
 void BenchmarkDialog::startSbclValidation(int row, const QString &taskId, int repetition,
-                                           const QString &response, const BenchmarkTask &task)
+                                          const QString &response, const BenchmarkTask &task)
 {
     m_validationRunning = true;
     m_status->setText(tr("Запуск автоматических тестов в изолированном SBCL..."));
@@ -445,14 +432,16 @@ void BenchmarkDialog::startSbclValidation(int row, const QString &taskId, int re
     const QVector<SbclSandbox::TestCase> tests = task.sbclTests;
     QPointer<BenchmarkDialog> dialog(this);
     m_validationThread = QThread::create(
-        [dialog, sbclExecutable, response, functionName, tests, row, taskId, repetition]() {
+        [dialog, sbclExecutable, response, functionName, tests, row, taskId, repetition]()
+        {
             const QJsonObject validation =
                 SbclSandbox::run(sbclExecutable, response, functionName, tests);
             if (!dialog)
                 return;
             QMetaObject::invokeMethod(
                 dialog,
-                [dialog, row, taskId, repetition, validation]() {
+                [dialog, row, taskId, repetition, validation]()
+                {
                     if (dialog)
                         dialog->finishSbclValidation(row, taskId, repetition, validation);
                 },
@@ -475,11 +464,9 @@ void BenchmarkDialog::finishSbclValidation(int row, const QString &taskId, int r
     const QString status = result.value("status").toString();
     QString displayStatus = status;
     if (status == "passed")
-        displayStatus = tr("Пройдено %1/%2").arg(result.value("passedTests").toInt())
-                            .arg(result.value("totalTests").toInt());
+        displayStatus = tr("Пройдено %1/%2").arg(result.value("passedTests").toInt()).arg(result.value("totalTests").toInt());
     else if (status == "failed")
-        displayStatus = tr("Не пройдено %1/%2").arg(result.value("passedTests").toInt())
-                            .arg(result.value("totalTests").toInt());
+        displayStatus = tr("Не пройдено %1/%2").arg(result.value("passedTests").toInt()).arg(result.value("totalTests").toInt());
     else if (status == "timeout")
         displayStatus = tr("Тайм-аут");
     else if (status == "no-code")
@@ -528,7 +515,8 @@ void BenchmarkDialog::finishBenchmark(bool canceled)
             .arg(m_nextRequest)
             .arg(m_requestResults.isEmpty()
                      ? QStringLiteral("—")
-                     : QString::number([this]() {
+                     : QString::number([this]()
+                                       {
                            qint64 total = 0;
                            int count = 0;
                            for (const QJsonObject &result : m_requestResults)
@@ -539,8 +527,7 @@ void BenchmarkDialog::finishBenchmark(bool canceled)
                                    ++count;
                                }
                            }
-                           return count ? total / count : 0;
-                       }()))
+                           return count ? total / count : 0; }()))
             .arg(QDir::toNativeSeparators(m_client->benchmarkReportPath())));
     updateSummary();
     if (m_results->rowCount() > 0)
@@ -564,7 +551,8 @@ void BenchmarkDialog::showSelectedResult(int row, int)
     const QString taskId = m_results->item(row, 0)->data(Qt::UserRole).toString();
     const int repetition = m_results->item(row, 1)->text().toInt();
     const auto task = std::find_if(m_tasks.cbegin(), m_tasks.cend(),
-                                   [&taskId](const BenchmarkTask &candidate) {
+                                   [&taskId](const BenchmarkTask &candidate)
+                                   {
                                        return candidate.id == taskId;
                                    });
     if (task == m_tasks.cend())
@@ -573,37 +561,38 @@ void BenchmarkDialog::showSelectedResult(int row, int)
     const QJsonObject result = m_requestResults.value(resultKey(taskId, repetition));
     const QString response = result.isEmpty()
                                  ? tr("Запрос ещё не завершён.")
-                                 : result.value("response").toString(
-                                       result.value("error").toString(tr("Ответ отсутствует.")));
+                                 : result.value("response").toString(result.value("error").toString(tr("Ответ отсутствует.")));
     const QJsonObject sbclTest = result.value("sbclTest").toObject();
     const QColor textColor = m_resultDetails->palette().color(QPalette::Text);
     const QColor baseColor = m_resultDetails->palette().color(QPalette::Base);
     const QColor accentColor = m_resultDetails->palette().color(QPalette::Highlight);
     QString html = QStringLiteral(
-        "<html><head><style>"
-        "body { color: %1; background: %2; font-family: 'Segoe UI', sans-serif; "
-        "font-size: 10pt; line-height: 1.4; }"
-        "h2 { margin: 0 0 12px; font-size: 14pt; }"
-        "h3 { color: %3; margin: 14px 0 6px; font-size: 10pt; }"
-        "pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; padding: 10px; "
-        "background: %4; border-left: 3px solid %3; font-family: Consolas, monospace; }"
-        ".response p { margin: 0 0 8px; }"
-        ".response pre { margin: 8px 0; border-radius: 4px; }"
-        ".response code { font-family: Consolas, monospace; }"
-        ".response a { color: %3; }"
-        "</style></head><body>")
-                            .arg(textColor.name(QColor::HexRgb),
-                                 baseColor.name(QColor::HexRgb),
-                                 accentColor.name(QColor::HexRgb),
-                                 baseColor.darker(108).name(QColor::HexRgb));
+                       "<html><head><style>"
+                       "body { color: %1; background: %2; font-family: 'Segoe UI', sans-serif; "
+                       "font-size: 10pt; line-height: 1.4; }"
+                       "h2 { margin: 0 0 12px; font-size: 14pt; }"
+                       "h3 { color: %3; margin: 14px 0 6px; font-size: 10pt; }"
+                       "pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; padding: 10px; "
+                       "background: %4; border-left: 3px solid %3; font-family: Consolas, monospace; }"
+                       ".response p { margin: 0 0 8px; }"
+                       ".response pre { margin: 8px 0; border-radius: 4px; }"
+                       ".response code { font-family: Consolas, monospace; }"
+                       ".response a { color: %3; }"
+                       "</style></head><body>")
+                       .arg(textColor.name(QColor::HexRgb),
+                            baseColor.name(QColor::HexRgb),
+                            accentColor.name(QColor::HexRgb),
+                            baseColor.darker(108).name(QColor::HexRgb));
     html += QStringLiteral("<h2>%1 — %2</h2>")
                 .arg(task->title.toHtmlEscaped(),
                      tr("Повтор %1").arg(repetition).toHtmlEscaped());
-    const auto appendSection = [&html](const QString &title, const QString &content) {
+    const auto appendSection = [&html](const QString &title, const QString &content)
+    {
         html += QStringLiteral("<h3>%1</h3><pre>%2</pre>")
                     .arg(title.toHtmlEscaped(), content.toHtmlEscaped());
     };
-    const auto appendMarkdownSection = [&html](const QString &title, const QString &content) {
+    const auto appendMarkdownSection = [&html](const QString &title, const QString &content)
+    {
         html += QStringLiteral("<h3>%1</h3><div class=\"response\">%2</div>")
                     .arg(title.toHtmlEscaped(), markdownBody(content));
     };
@@ -696,11 +685,13 @@ void BenchmarkDialog::updateQualitySummary()
 void BenchmarkDialog::updateEvaluationControls()
 {
     const bool validSelection = m_selectedRow >= 0 &&
-        m_results->item(m_selectedRow, 0) && m_results->item(m_selectedRow, 1);
+                                m_results->item(m_selectedRow, 0) && m_results->item(m_selectedRow, 1);
     const bool hasResult = validSelection &&
-        m_requestResults.value(resultKey(
-            m_results->item(m_selectedRow, 0)->data(Qt::UserRole).toString(),
-            m_results->item(m_selectedRow, 1)->text().toInt())).value("success").toBool();
+                           m_requestResults.value(resultKey(
+                                                      m_results->item(m_selectedRow, 0)->data(Qt::UserRole).toString(),
+                                                      m_results->item(m_selectedRow, 1)->text().toInt()))
+                               .value("success")
+                               .toBool();
     m_saveEvaluationButton->setEnabled(
         !m_running && hasResult && !m_evaluation->currentData().toString().isEmpty());
 }

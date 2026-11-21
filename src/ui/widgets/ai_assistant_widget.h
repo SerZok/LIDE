@@ -11,12 +11,14 @@
 #include <QVector>
 
 #include "network/ai_client.h"
+#include "network/document_retriever.h"
 #include "code_block_widget.h"
 #include "components/chat_message_widget.h"
+#include "components/flow_layout.h"
 #include "components/input_text_edit.h"
 
 class QLabel;
-class QListWidget;
+class QMenu;
 
 class AIAssistantWidget : public QDockWidget
 {
@@ -24,15 +26,19 @@ class AIAssistantWidget : public QDockWidget
 public:
     explicit AIAssistantWidget(QWidget *parent = nullptr);
     void appendToInput(const QString &text);
+    void setCurrentEditorFile(const QString &path);
 
-    void explainSelectedCode(const QString &code, AiClient::ExplainContext context);
+    void explainSelectedCode(const QString &code, AiClient::ExplainContext context,
+                             const QString &filePath = QString(),
+                             const QString &fileContents = QString());
 
 private slots:
     void onSendClicked();
     void onResponse(const QString &response);
     void onError(const QString &error);
+    void onRetrievedContext(const QString &context);
+    void refreshKnowledgeFilesFromSettings();
     void addContextFiles();
-    void removeSelectedContextFile();
 
 private:
     struct Conversation
@@ -53,15 +59,18 @@ private:
     void saveConversations() const;
     void renderConversation();
     void updateConversationTitle(const QString &firstPrompt);
+    void updateContextLibraryMenu();
     void updateContextFilesWidget();
+    void setContextFileSelected(const QString &path, bool selected);
     void setContextFilesEnabled(bool enabled);
-    bool buildContextFilesPrompt(QString &prompt, QString &error) const;
+    void removeKnowledgeFile(const QString &path);
     bool readContextFile(const QString &path, QString &content, QString &error) const;
     void addWaitingIndicator(const QString &text);
     void clearWaitingIndicator();
     void scrollToBottom();
 
     AiClient *m_client;
+    DocumentRetriever *m_documentRetriever;
     QScrollArea *m_scrollArea;
     QWidget *m_contentWidget;
     QVBoxLayout *m_chatLayout;
@@ -72,12 +81,15 @@ private:
     QComboBox *m_contextSelector;
     QToolButton* m_newContextButton;
     QToolButton* m_deleteContextButton;
-    QListWidget *m_contextFiles;
-    QToolButton *m_addContextFilesButton;
-    QToolButton *m_removeContextFileButton;
+    QWidget *m_contextFiles;
+    FlowLayout *m_contextFilesLayout;
+    QToolButton *m_contextLibraryButton;
+    QMenu *m_contextLibraryMenu;
 
     QVector<Conversation> m_conversations;
+    QStringList m_knowledgeFiles;
     int m_currentConversation = 0;
+    QString m_currentEditorFile;
 
     bool m_isWaiting;
     bool m_isContextDialogOpen = false;

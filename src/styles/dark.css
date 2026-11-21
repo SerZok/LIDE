@@ -631,8 +631,9 @@ QComboBox#aiContextSelector {
     color: #e0e0e0;
     border: 1px solid #3d3d3d;
     border-radius: 0.3em;
-    min-height: 1.65em;
-    padding: 0.15em 0.5em;
+    min-height: 0;
+    max-height: 26px;
+    padding: 0 0.4em;
 }
 
 QComboBox#aiContextSelector:hover,
@@ -650,24 +651,21 @@ QComboBox#aiContextSelector QAbstractItemView {
 }
 
 QToolButton#aiNewContextButton,
-QToolButton#aiDeleteContextButton,
-QToolButton#aiAddContextFilesButton,
-QToolButton#aiRemoveContextFileButton {
-    background-color: transparent;
+QToolButton#aiDeleteContextButton {
+    background-color: #2d2d2d;
     color: #e0e0e0;
-    border: none;
-    border-radius: 0.3em;
-    min-width: 1.8em;
-    max-width: 1.8em;
-    min-height: 1.8em;
-    max-height: 1.8em;
-    padding: 0.12em;
-    font-size: 12pt;
+    border: 1px solid #3d3d3d;
+    border-radius: 12px;
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    padding: 0;
+    font-size: 11pt;
     font-weight: bold;
 }
 
-QToolButton#aiNewContextButton:hover,
-QToolButton#aiAddContextFilesButton:hover {
+QToolButton#aiNewContextButton:hover {
     background-color: #3e4451;
     color: #00aca1;
 }
@@ -676,23 +674,65 @@ QToolButton#aiDeleteContextButton {
     color: #cc5555;
 }
 
-QToolButton#aiDeleteContextButton:hover,
-QToolButton#aiRemoveContextFileButton:hover {
+QToolButton#aiDeleteContextButton:hover {
     background-color: #3e4451;
 }
 
+QToolButton#aiAddContextFilesButton {
+    background-color: #00aca1;
+    color: #1e1e1e;
+    border: 1px solid #00aca1;
+    border-radius: 12px;
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    font-size: 14pt;
+    font-weight: bold;
+    padding: 0;
+}
+
 QToolButton#aiNewContextButton:pressed,
-QToolButton#aiDeleteContextButton:pressed,
-QToolButton#aiAddContextFilesButton:pressed,
-QToolButton#aiRemoveContextFileButton:pressed {
+QToolButton#aiDeleteContextButton:pressed {
     background-color: #2d2d2d;
 }
 
 QToolButton#aiNewContextButton:disabled,
-QToolButton#aiDeleteContextButton:disabled,
-QToolButton#aiAddContextFilesButton:disabled,
-QToolButton#aiRemoveContextFileButton:disabled {
+QToolButton#aiDeleteContextButton:disabled {
     background-color: transparent;
+    color: #6a6a6a;
+}
+
+QToolButton#aiAddContextFilesButton:hover {
+    background-color: #00c7b8;
+    border-color: #00c7b8;
+    color: #1e1e1e;
+}
+
+QToolButton#aiAddContextFilesButton:disabled {
+    background-color: #3e4451;
+    color: #6a6a6a;
+    border-color: #3d3d3d;
+}
+
+QToolButton#aiContextLibraryButton {
+    background-color: #2d2d2d;
+    color: #00aca1;
+    border: 1px solid #3d3d3d;
+    border-radius: 12px;
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    font-weight: bold;
+}
+
+QToolButton#aiContextLibraryButton:hover {
+    background-color: #3e4451;
+    color: #00aca1;
+}
+
+QToolButton#aiContextLibraryButton:disabled {
     color: #6a6a6a;
 }
 
@@ -702,22 +742,23 @@ QLabel#aiContextFilesLabel {
     padding: 0.15em 0.3em;
 }
 
-QListWidget#aiContextFiles {
-    background-color: #1e1e1e;
-    color: #d4d4d4;
-    border: none;
-    outline: none;
+QWidget#aiContextFiles {
+    background-color: transparent;
+}
+
+QWidget#aiInputContainer {
+    background-color: transparent;
+}
+
+QFrame#aiDocumentChip {
     padding: 0;
 }
 
-QListWidget#aiContextFiles::item {
-    padding: 0.25em 0.5em;
-    border-radius: 0.25em;
-}
-
-QListWidget#aiContextFiles::item:selected {
-    background-color: #3e4451;
-    color: #e0e0e0;
+QToolButton#aiDocumentChipRemoveButton {
+    border: none;
+    border-radius: 9px;
+    background-color: transparent;
+    padding: 0;
 }
 
 QScrollArea#aiChatScrollArea > QWidget {
@@ -907,7 +948,7 @@ QTextEdit#aiInputField {
     color: #e0e0e0;
     border: 1px solid #3d3d3d;
     border-radius: 0.4em;
-    padding: 0.25em 0.55em;
+    padding: 0.25em 3.2em 0.25em 0.55em;
     font-size: 11pt;
     font-family: 'Segoe UI', 'Arial', sans-serif;
     selection-background-color: #3e4451;
@@ -928,11 +969,10 @@ QPushButton#aiSendButton {
     background-color: #00aca1;
     color: #1a1a1c;
     border: none;
-    border-radius: 0.4em;
+    border-radius: 12px;
     font-weight: bold;
-    min-width: 5em;
-    min-height: 2em;
-    padding: 0.1em 0.65em;
+    font-size: 12pt;
+    padding: 0;
 }
 
 QPushButton#aiSendButton:hover {

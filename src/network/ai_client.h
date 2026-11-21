@@ -21,7 +21,9 @@ public:
     static AiClient* instance();
 
     void sendRequest(const QJsonArray& conversationMessages);
-    void sendExplainRequest(const QString& selectedText, ExplainContext context);
+    void sendExplainRequest(const QString &selectedText, ExplainContext context,
+                            const QString &filePath = QString(),
+                            const QString &fileContents = QString());
     bool beginBenchmarkRun(const QString &suiteId, int repetitions, const QJsonArray &tasks);
     void sendBenchmarkRequest(const QString &taskId, const QString &prompt, int repetition);
     void endBenchmarkRun(bool canceled);
@@ -84,9 +86,7 @@ private:
     AiClient& operator=(const AiClient&) = delete;
 
     QString buildChatInstructions() const;
-    QString buildHyperSpecInstructions() const;
     QString buildTeacherInstructions(ExplainContext context) const;
-    QString formatHyperSpecLinks(const QString &markdown) const;
     void postRequest(const QJsonObject &payload, RequestType type, int inputCharacters,
                      const QString &benchmarkTaskId = QString(),
                      const QString &benchmarkPrompt = QString(),

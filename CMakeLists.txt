@@ -33,8 +33,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Путь к Qt
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Gui LinguistTools Network)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools Network)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Gui LinguistTools Network Pdf)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools Network Pdf)
 
 qt_standard_project_setup(
     I18N_SOURCE_LANGUAGE ru_RU
@@ -156,6 +156,7 @@ target_link_libraries(${PROJECT_NAME}
         Qt${QT_VERSION_MAJOR}::Core
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::Pdf
 )
 
 # Добавляем пути для include файлов
