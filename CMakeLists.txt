@@ -41,7 +41,7 @@ qt_standard_project_setup(
     I18N_TRANSLATED_LANGUAGES en_US
 )
 
-add_subdirectory(benchmark)
+add_subdirectory(lide-ai-benchmark)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui
