@@ -32,13 +32,7 @@
 #include <windows.h>
 #endif
 
-MainWindow::MainWindow(QWidget* parent) :
-      QMainWindow(parent)
-    , ui(new Ui::MainWindow)
-    , m_projectTree(nullptr)
-    , m_tabWidget(nullptr)
-    , m_settings(Settings::instance())
-    , m_aiClient(AiClient::instance())
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), m_projectTree(nullptr), m_tabWidget(nullptr), m_settings(Settings::instance()), m_aiClient(AiClient::instance())
 {
     ui->setupUi(this);
     resize(1366, 1080);
@@ -68,66 +62,83 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::saveBeforeExit(){
-    if (m_tabWidget) {
+void MainWindow::saveBeforeExit()
+{
+    if (m_tabWidget)
+    {
         if (m_settings->saveExit())
             m_tabWidget->saveAll();
         else
         {
             // Спрашиваем, надо ли сохранять ?
-            if (int modCnt = m_tabWidget->modifFileCounts()) {
+            if (int modCnt = m_tabWidget->modifFileCounts())
+            {
                 int ret = QMessageBox::question(this,
-                    tr("LIDE"),
-                    tr("Есть несохраненные файлы: %1. Сохранить?").arg(modCnt),
-                    QMessageBox::Yes | QMessageBox::No);
+                                                tr("LIDE"),
+                                                tr("Есть несохраненные файлы: %1. Сохранить?").arg(modCnt),
+                                                QMessageBox::Yes | QMessageBox::No);
 
-                if (ret == QMessageBox::Yes) {
-                    m_tabWidget->saveAll();;
+                if (ret == QMessageBox::Yes)
+                {
+                    m_tabWidget->saveAll();
+                    ;
                 }
             }
         }
     }
 }
 
-void MainWindow::changeEvent(QEvent* event) {
-    if (event->type() == QEvent::LanguageChange) {
+void MainWindow::changeEvent(QEvent *event)
+{
+    if (event->type() == QEvent::LanguageChange)
+    {
         ui->retranslateUi(this);
         updateTranslations();
     }
     QMainWindow::changeEvent(event);
 }
 
-void MainWindow::openFiles(QStringList files) {
-    if (!m_tabWidget) return;
+void MainWindow::openFiles(QStringList files)
+{
+    if (!m_tabWidget)
+        return;
 
-    for (const QString& file : files) {
+    for (const QString &file : files)
+    {
         if (file.endsWith(".lisp", Qt::CaseInsensitive) ||
-            file.endsWith(".lsp", Qt::CaseInsensitive)) {
+            file.endsWith(".lsp", Qt::CaseInsensitive))
+        {
             m_tabWidget->openFile(file);
         }
     }
 }
 
-void MainWindow::setupSaveTimer() {
+void MainWindow::setupSaveTimer()
+{
     int intervalMinutes = m_settings->saveTime();
     int intervalMs = intervalMinutes * 60 * 1000;
 
-    if (intervalMs > 0 && m_tabWidget) {
+    if (intervalMs > 0 && m_tabWidget)
+    {
         m_autoSaveTimer->setInterval(intervalMs);
         m_autoSaveTimer->start();
     }
-    else {
+    else
+    {
         m_autoSaveTimer->stop();
     }
 }
 
-void MainWindow::triggerAutoSave() {
-    if (!m_tabWidget) return;
+void MainWindow::triggerAutoSave()
+{
+    if (!m_tabWidget)
+        return;
 
     m_tabWidget->saveAll();
 }
 
-void MainWindow::onSettingsChanged() {
+void MainWindow::onSettingsChanged()
+{
     setupSaveTimer();
 }
 
@@ -137,7 +148,8 @@ void MainWindow::setupMenuBar()
     m_fileMenu = menuBar()->addMenu(tr("&Файл"));
 
     m_createFileAction = m_fileMenu->addAction(QIcon(":/icons/images/new-file.svg"), tr("Новый файл..."), QKeySequence::New);
-    connect(m_createFileAction, &QAction::triggered, this, [this]() {
+    connect(m_createFileAction, &QAction::triggered, this, [this]()
+            {
         QString path = QFileDialog::getSaveFileName(this, tr("Новый файл"), m_projectTree->rootPath(), tr("Lisp файлы (*.lisp *.lsp)"));
         if (!path.isEmpty()) {
             if (QFile::exists(path)) {
@@ -155,15 +167,14 @@ void MainWindow::setupMenuBar()
             else {
                 QMessageBox::warning(this, tr("Ошибка"), tr("Не удалось создать файл %1").arg(path));
             }
-        }
-        });
+        } });
     addAction(m_createFileAction);
 
     m_openFileAction = m_fileMenu->addAction(QIcon(":/icons/images/open-file.svg"), tr("Открыть файл..."), QKeySequence::Open);
-    connect(m_openFileAction, &QAction::triggered, this, [this]() {
+    connect(m_openFileAction, &QAction::triggered, this, [this]()
+            {
         QString path = QFileDialog::getOpenFileName(this, tr("Открытие файла"), m_projectTree->rootPath(), tr("Lisp файлы (* .lisp *.lsp)"));
-        if (!path.isEmpty()) m_tabWidget->openFile(path);
-        });
+        if (!path.isEmpty()) m_tabWidget->openFile(path); });
     addAction(m_openFileAction);
 
     m_fileMenu->addSeparator();
@@ -179,13 +190,14 @@ void MainWindow::setupMenuBar()
     m_saveFileAllAction = m_fileMenu->addAction(QIcon(":/icons/images/save-all.svg"), tr("Сохранить все"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
     m_saveFileAsAction = m_fileMenu->addAction(tr("Сохранить как..."), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_S));
 
-    connect(m_saveFileAction, &QAction::triggered, [this]() {
+    connect(m_saveFileAction, &QAction::triggered, [this]()
+            {
         if (auto* editor = m_tabWidget->currentEditor()) {
             editor->saveFile();
-        }
-        });
+        } });
 
-    connect(m_saveFileAsAction, &QAction::triggered, [this]() {
+    connect(m_saveFileAsAction, &QAction::triggered, [this]()
+            {
         auto* editor = m_tabWidget->currentEditor();
         if (!editor) return;
 
@@ -196,22 +208,20 @@ void MainWindow::setupMenuBar()
 
         if (!path.isEmpty()) {
             editor->saveFileAs(path);
-        }
-        });
+        } });
 
-    connect(m_saveFileAllAction, &QAction::triggered, [this]() {
-        m_tabWidget->saveAll();
-        });
+    connect(m_saveFileAllAction, &QAction::triggered, [this]()
+            { m_tabWidget->saveAll(); });
 
-    auto* exitAction = m_fileMenu->addAction(tr("Выйти"), [this]() { 
+    auto *exitAction = m_fileMenu->addAction(tr("Выйти"), [this]()
+                                             { 
         saveBeforeExit();
-        close();
-        });
+        close(); });
     exitAction->setObjectName("actionExit");
 
     // Edit menu
     m_editMenu = menuBar()->addMenu(tr("&Правка"));
-    m_redoAction = m_editMenu->addAction(QIcon(":/icons/images/redo.svg"),tr("Повтор"), QKeySequence::Redo);
+    m_redoAction = m_editMenu->addAction(QIcon(":/icons/images/redo.svg"), tr("Повтор"), QKeySequence::Redo);
     m_undoAction = m_editMenu->addAction(QIcon(":/icons/images/undo.svg"), tr("Отмена"), QKeySequence::Undo);
     m_editMenu->addSeparator();
     m_copyAction = m_editMenu->addAction(QIcon(":/icons/images/copy.svg"), tr("Скопировать"), QKeySequence::Copy);
@@ -224,7 +234,8 @@ void MainWindow::setupMenuBar()
     m_copyAction->setEnabled(false);
     m_pasteAction->setEnabled(false);
 
-    connect(m_tabWidget, &EditorTabWidget::currentEditorChanged, this, [this](LispEditor* editor) {
+    connect(m_tabWidget, &EditorTabWidget::currentEditorChanged, this, [this](LispEditor *editor)
+            {
         if (editor) {
             connect(m_undoAction, &QAction::triggered, editor, &LispEditor::undo, Qt::UniqueConnection);
             connect(m_redoAction, &QAction::triggered, editor, &LispEditor::redo, Qt::UniqueConnection);
@@ -255,40 +266,39 @@ void MainWindow::setupMenuBar()
             m_runAction->setEnabled(false);
             m_restartAction->setEnabled(false);
             //m_cleanRunAction->setEnabled(false);
-        }
-        });
+        } });
 
     // View
     m_viewMenu = menuBar()->addMenu(tr("&Вид"));
-    auto* fullScreenAction = new QAction(tr("Полноэкранный режим"), this);
+    auto *fullScreenAction = new QAction(tr("Полноэкранный режим"), this);
     fullScreenAction->setObjectName("actionFullScreen");
     fullScreenAction->setShortcut(QKeySequence::FullScreen);
     fullScreenAction->setCheckable(true);
     fullScreenAction->setChecked(isFullScreen());
-    connect(fullScreenAction, &QAction::triggered, this, [this](bool checked) {
+    connect(fullScreenAction, &QAction::triggered, this, [this](bool checked)
+            {
         if (checked)
             showFullScreen();
         else
-            showNormal();
-        });
+            showNormal(); });
     addAction(fullScreenAction);
     m_viewMenu->addAction(fullScreenAction);
     m_viewMenu->addSeparator();
-    for (auto it = m_dockNames.begin(); it != m_dockNames.end(); ++it) {
-        auto* dock = it.key();
-        auto* action = m_viewMenu->addAction(it.value());
+    for (auto it = m_dockNames.begin(); it != m_dockNames.end(); ++it)
+    {
+        auto *dock = it.key();
+        auto *action = m_viewMenu->addAction(it.value());
         action->setCheckable(true);
         action->setChecked(dock->isVisible());
 
-        connect(dock, &QDockWidget::visibilityChanged, [this, action](bool visible) {
+        connect(dock, &QDockWidget::visibilityChanged, [this, action](bool visible)
+                {
             action->blockSignals(true);
             action->setChecked(visible);
-            action->blockSignals(false);
-            });
+            action->blockSignals(false); });
 
-        connect(action, &QAction::toggled, [this, dock](bool checked) {
-            dock->setVisible(checked);
-            });
+        connect(action, &QAction::toggled, [this, dock](bool checked)
+                { dock->setVisible(checked); });
     }
 
     // Run menu
@@ -297,7 +307,8 @@ void MainWindow::setupMenuBar()
     m_runAction = m_runMenu->addAction(QIcon(":/icons/images/start.svg"), tr("Запустить"), QKeySequence(Qt::Key_F5));
     m_runAction->setEnabled(false);
     m_runAction->setToolTip(tr("Запустить текущий код в REPL"));
-    connect(m_runAction, &QAction::triggered, this, [this]() {
+    connect(m_runAction, &QAction::triggered, this, [this]()
+            {
         if (m_console && m_tabWidget) {
             QString filePath = m_tabWidget->currentFilePath();
             if (!filePath.isEmpty()) {
@@ -305,32 +316,31 @@ void MainWindow::setupMenuBar()
                 m_tabWidget->currentEditor()->clearErrorHighlight();
                 m_console->sendFile(filePath);
             }
-        }
-        });
+        } });
 
     m_restartAction = m_runMenu->addAction(QIcon(":/icons/images/restart.svg"), tr("Перезапустить SBCL"), QKeySequence(Qt::CTRL | Qt::Key_R));
     m_restartAction->setEnabled(false);
     m_restartAction->setToolTip(tr("Перезапустить SBCL"));
-    connect(m_restartAction, &QAction::triggered, this, [this]() {
+    connect(m_restartAction, &QAction::triggered, this, [this]()
+            {
         if (m_console){
             m_console->restart();
-            }
-        });
+            } });
 
-    //m_cleanRunAction = m_runMenu->addAction(QIcon(":/icons/images/force-start.svg"), tr("Принудительный запуск"), QKeySequence(Qt::CTRL | Qt::Key_F5));
-    //m_cleanRunAction->setEnabled(false);
-    //m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и запуск текущего кода"));
-    //connect(m_cleanRunAction, &QAction::triggered, this, [this]() {
-    //    if (m_console && m_tabWidget) {
-    //        QString filePath = m_tabWidget->currentFilePath();
-    //        if (!filePath.isEmpty()) {
-    //            m_tabWidget->currentEditor()->saveFile();
-    //            m_tabWidget->currentEditor()->clearErrorHighlight();
-    //            m_console->restart();
-    //            m_console->sendFile(filePath);
-    //        }
-    //    }
-    //    });
+    // m_cleanRunAction = m_runMenu->addAction(QIcon(":/icons/images/force-start.svg"), tr("Принудительный запуск"), QKeySequence(Qt::CTRL | Qt::Key_F5));
+    // m_cleanRunAction->setEnabled(false);
+    // m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и запуск текущего кода"));
+    // connect(m_cleanRunAction, &QAction::triggered, this, [this]() {
+    //     if (m_console && m_tabWidget) {
+    //         QString filePath = m_tabWidget->currentFilePath();
+    //         if (!filePath.isEmpty()) {
+    //             m_tabWidget->currentEditor()->saveFile();
+    //             m_tabWidget->currentEditor()->clearErrorHighlight();
+    //             m_console->restart();
+    //             m_console->sendFile(filePath);
+    //         }
+    //     }
+    //     });
 
     // Tools menu
     m_toolsMenu = menuBar()->addMenu(tr("&Опции"));
@@ -338,15 +348,16 @@ void MainWindow::setupMenuBar()
     // > Настройки
     auto settingsAction = m_toolsMenu->addAction(tr("Настройки"));
     settingsAction->setObjectName("actionSettings");
-    connect(settingsAction, &QAction::triggered, this, [this]() {
+    connect(settingsAction, &QAction::triggered, this, [this]()
+            {
         SettingsDialog dlg(this);
-        dlg.exec();
-        });
+        dlg.exec(); });
 
     m_toolsMenu->addSeparator();
-    auto benchmarkAction = m_toolsMenu->addAction(tr("Исследовательский бенчмарк моделей..."));
+    auto benchmarkAction = m_toolsMenu->addAction(tr("Бенчмарк моделей..."));
     benchmarkAction->setObjectName("actionAiBenchmark");
-    connect(benchmarkAction, &QAction::triggered, this, [this]() {
+    connect(benchmarkAction, &QAction::triggered, this, [this]()
+            {
         QString executable = QDir(QCoreApplication::applicationDirPath())
                                  .filePath(QStringLiteral("lide-ai-benchmark"));
 #ifdef Q_OS_WIN
@@ -387,37 +398,36 @@ void MainWindow::setupMenuBar()
             QMessageBox::warning(this, tr("Не удалось запустить бенчмарк"),
                                  tr("Ошибка запуска lide-ai-benchmark: %1")
                                      .arg(process.errorString()));
-        }
-    });
+        } });
 
     //  > Тема
     m_styleMenu = m_toolsMenu->addMenu(tr("Тема"));
-    auto* themeGroup = new QActionGroup(this);
+    auto *themeGroup = new QActionGroup(this);
     m_lightStyleAction = m_styleMenu->addAction(QIcon(":/icons/images/light-theme.svg"), tr("Светлая"));
     m_lightStyleAction->setActionGroup(themeGroup);
     m_darkStyleAction = m_styleMenu->addAction(QIcon(":/icons/images/dark-theme.svg"), tr("Тёмная"));
     m_darkStyleAction->setActionGroup(themeGroup);
-    connect(themeGroup, &QActionGroup::triggered, this, [this](QAction* action) {
+    connect(themeGroup, &QActionGroup::triggered, this, [this](QAction *action)
+            {
         QString theme = (action == m_lightStyleAction) ? "light" : "dark";
-        m_settings->setCurrentTheme(theme);
-        });
-
+        m_settings->setCurrentTheme(theme); });
 
     // Справка
     m_helpMenu = menuBar()->addMenu(tr("&Справка"));
     auto aboutAction = m_helpMenu->addAction(QIcon(":/icons/images/info.svg"), tr("О программе"));
     aboutAction->setObjectName("actionAbout");
-    connect(aboutAction, &QAction::triggered, this, [this]() {
+    connect(aboutAction, &QAction::triggered, this, [this]()
+            {
         AboutDialog dlg(this);
-        dlg.exec();
-        });
+        dlg.exec(); });
 
     auto manualAction = m_helpMenu->addAction(tr("Руководство"), QKeySequence(Qt::Key_F1));
     manualAction->setObjectName("actionManual");
     connect(manualAction, &QAction::triggered, this, &MainWindow::openManual);
 }
 
-void MainWindow::setupToolBar() {
+void MainWindow::setupToolBar()
+{
     m_mainToolBar = addToolBar(tr("Панель инструментов"));
     m_mainToolBar->setObjectName("ToolBar");
     m_mainToolBar->setMovable(false);
@@ -431,7 +441,7 @@ void MainWindow::setupToolBar() {
     m_mainToolBar->addSeparator();
     m_mainToolBar->addAction(m_runAction);
     m_mainToolBar->addAction(m_restartAction);
-    //m_mainToolBar->addAction(m_cleanRunAction);
+    // m_mainToolBar->addAction(m_cleanRunAction);
 }
 
 void MainWindow::setupStatusBar()
@@ -472,7 +482,8 @@ void MainWindow::setupDockWidgets()
 
     connect(m_console, &ReplWidget::errorLocationAvailable, this, &MainWindow::onLispError);
 
-    QTimer::singleShot(0, [this]() {
+    QTimer::singleShot(0, [this]()
+                       {
         if (m_projectTree && m_projectDock) {
             QString currentPath = m_projectTree->rootPath();
             if (!currentPath.isEmpty()) {
@@ -480,8 +491,7 @@ void MainWindow::setupDockWidgets()
                 m_projectDock->setWindowTitle(tr("%1/").arg(info.fileName()));
                 m_projectDock->setToolTip(tr("%1").arg(currentPath));
             }
-        }
-        });
+        } });
 
     connect(m_tabWidget, &EditorTabWidget::currentFileChanged, m_projectTree, &ProjectTree::onFileLoaded);
     connect(m_tabWidget, &EditorTabWidget::currentFileChanged,
@@ -490,16 +500,17 @@ void MainWindow::setupDockWidgets()
     connect(m_tabWidget, &EditorTabWidget::fileModifiedChanged, m_projectTree, &ProjectTree::onFileModifiedChanged);
     connect(m_tabWidget, &EditorTabWidget::fileClosed, m_projectTree, &ProjectTree::onFileClosed);
     connect(m_projectTree, &ProjectTree::fileActivated, m_tabWidget, &EditorTabWidget::openFile);
-    connect(m_projectTree, &ProjectTree::projectOpened, this, [this](const QString& projectPath) {
+    connect(m_projectTree, &ProjectTree::projectOpened, this, [this](const QString &projectPath)
+            {
         QFileInfo info(projectPath);
         if (!info.exists() || !info.isDir()) return;
 
         m_projectDock->setWindowTitle(tr("%1/").arg(info.fileName()));
-        m_projectDock->setToolTip(tr("%1").arg(info.absolutePath()));
-        });
+        m_projectDock->setToolTip(tr("%1").arg(info.absolutePath())); });
 
     connect(m_tabWidget, &EditorTabWidget::currentEditorChanged,
-        this, [this](LispEditor* editor) {
+            this, [this](LispEditor *editor)
+            {
             if (editor) {
                 connect(editor, &LispEditor::cursorPositionChanged,
                     this, [this, editor]() {
@@ -519,42 +530,46 @@ void MainWindow::setupDockWidgets()
             }
             else {
                 updateStatusBarPosition(0, 0);
-            }
-        });
+            } });
 }
 
-void MainWindow::onLispError(const QString& file,
-    const QString& message, int line, int column)
+void MainWindow::onLispError(const QString &file,
+                             const QString &message, int line, int column)
 {
-    if (m_tabWidget) {
-        LispEditor* editor = findEditorByFile(file);
-        if (editor) {
+    if (m_tabWidget)
+    {
+        LispEditor *editor = findEditorByFile(file);
+        if (editor)
+        {
             // Подсвечиваем ошибку по позиции в файле
             editor->highlightErrorAtPosition(message, line, column);
 
             m_errorNotification->showError(
-                tr("(%1:%2) %3").arg(line).arg(column).arg(message)
-            );
+                tr("(%1:%2) %3").arg(line).arg(column).arg(message));
 
             // Переключаемся на вкладку
             int index = m_tabWidget->indexOf(editor);
-            if (index >= 0) {
+            if (index >= 0)
+            {
                 m_tabWidget->setCurrentIndex(index);
             }
         }
     }
 }
 
-LispEditor* MainWindow::findEditorByFile(const QString& filePath)
+LispEditor *MainWindow::findEditorByFile(const QString &filePath)
 {
     // Нормализуем пути для сравнения
     QString normalizedFile = QFileInfo(filePath).absoluteFilePath();
 
-    for (int i = 0; i < m_tabWidget->count(); ++i) {
-        LispEditor* editor = m_tabWidget->editorAt(i);
-        if (editor) {
+    for (int i = 0; i < m_tabWidget->count(); ++i)
+    {
+        LispEditor *editor = m_tabWidget->editorAt(i);
+        if (editor)
+        {
             QString editorFile = editor->currentFile();
-            if (QFileInfo(editorFile).absoluteFilePath() == normalizedFile) {
+            if (QFileInfo(editorFile).absoluteFilePath() == normalizedFile)
+            {
                 return editor;
             }
         }
@@ -562,14 +577,14 @@ LispEditor* MainWindow::findEditorByFile(const QString& filePath)
     return nullptr;
 }
 
-ProjectTree* MainWindow::createProjectTree()
+ProjectTree *MainWindow::createProjectTree()
 {
     m_projectTree = new ProjectTree();
     m_projectTree->setObjectName("projectTree_1");
     return m_projectTree;
 }
 
-ReplWidget* MainWindow::createConsoleLisp()
+ReplWidget *MainWindow::createConsoleLisp()
 {
     m_console = new ReplWidget();
     m_console->setObjectName("consoleLisp_1");
@@ -582,7 +597,7 @@ void MainWindow::saveAppState()
     m_settings->setMainWindowState(state);
     m_settings->setMainWindowGeometry(saveGeometry());
 
-    if(m_tabWidget)
+    if (m_tabWidget)
         m_settings->setOpenedFiles(m_tabWidget->openedFiles());
 }
 
@@ -591,30 +606,35 @@ void MainWindow::loadAppState()
     restoreGeometry(m_settings->mainWindowGeometry());
     restoreState(m_settings->mainWindowState());
     openFiles(m_settings->openedFiles());
-    
+
     m_settings->setCurrentTheme(m_settings->currentTheme());
     m_settings->setCurrentLang(m_settings->currentLang());
 }
 
-void MainWindow::onAiError(const QString& error) {
+void MainWindow::onAiError(const QString &error)
+{
     QMessageBox::warning(this, "Ошибка AI",
-        "Не удалось получить объяснение:\n" + error +
-        "\n\nПроверьте, запущен ли локальный сервер (например, Ollama) или корректен ли API-ключ в настройках.");
+                         "Не удалось получить объяснение:\n" + error +
+                             "\n\nПроверьте, запущен ли локальный сервер (например, Ollama) или корректен ли API-ключ в настройках.");
 }
 
-void MainWindow::onRequestAIExplanation(const QString& code, AiClient::ExplainContext context) {
-    if (!m_AiAssistant) return;
+void MainWindow::onRequestAIExplanation(const QString &code, AiClient::ExplainContext context)
+{
+    if (!m_AiAssistant)
+        return;
 
-    auto aiAssitant = static_cast<AIAssistantWidget*>(m_AiAssistant);
+    auto aiAssitant = static_cast<AIAssistantWidget *>(m_AiAssistant);
     aiAssitant->setVisible(true);
     aiAssitant->raise();
     QString filePath;
     QString fileContents;
-    if (context == AiClient::ExplainContext::Editor && m_tabWidget) {
+    if (context == AiClient::ExplainContext::Editor && m_tabWidget)
+    {
         LispEditor *editor = qobject_cast<LispEditor *>(sender());
         if (!editor)
             editor = m_tabWidget->currentEditor();
-        if (editor) {
+        if (editor)
+        {
             filePath = editor->currentFile();
             fileContents = editor->toPlainText();
         }
@@ -622,33 +642,40 @@ void MainWindow::onRequestAIExplanation(const QString& code, AiClient::ExplainCo
     aiAssitant->explainSelectedCode(code, context, filePath, fileContents);
 }
 
-void MainWindow::openProject() {
+void MainWindow::openProject()
+{
     QString path = QFileDialog::getExistingDirectory(this, tr("Открыть проект"), m_projectTree->rootPath(), QFileDialog::ReadOnly | QFileDialog::ShowDirsOnly);
-    if (!path.isEmpty()) {
+    if (!path.isEmpty())
+    {
         m_projectTree->openProject(path);
     }
 }
 
-void MainWindow::createProject() {
+void MainWindow::createProject()
+{
     QString parentPath = QFileDialog::getExistingDirectory(
         this,
         tr("Выберите папку для нового проекта"),
         m_projectTree->rootPath(),
         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-    if (parentPath.isEmpty()) return;
+    if (parentPath.isEmpty())
+        return;
 
     QString projectName = QInputDialog::getText(
         this,
         tr("Новый проект"),
         tr("Название проекта:"));
-    if (!projectName.isEmpty()) {
+    if (!projectName.isEmpty())
+    {
         QString newPath = parentPath + "/" + projectName;
         QDir dir;
-        if (dir.mkpath(newPath)) {
+        if (dir.mkpath(newPath))
+        {
             m_projectTree->openProject(newPath);
         }
-        else {
+        else
+        {
             QMessageBox::critical(this, tr("Ошибка"), tr("Не удалось создать проект"));
         }
     }
@@ -657,59 +684,83 @@ void MainWindow::createProject() {
 void MainWindow::updateTranslations()
 {
     // ── Заголовки меню ─────────────────────────────────
-    if (m_fileMenu) m_fileMenu->setTitle(tr("&Файл"));
-    if (m_editMenu) m_editMenu->setTitle(tr("&Правка"));
-    if (m_viewMenu) m_viewMenu->setTitle(tr("&Вид"));
-    if (m_runMenu) m_runMenu->setTitle(tr("&Запуск"));
-    if (m_toolsMenu) m_toolsMenu->setTitle(tr("&Опции"));
-    if (m_helpMenu) m_helpMenu->setTitle(tr("&Справка"));
-    if (m_styleMenu) m_styleMenu->setTitle(tr("Тема"));
-
+    if (m_fileMenu)
+        m_fileMenu->setTitle(tr("&Файл"));
+    if (m_editMenu)
+        m_editMenu->setTitle(tr("&Правка"));
+    if (m_viewMenu)
+        m_viewMenu->setTitle(tr("&Вид"));
+    if (m_runMenu)
+        m_runMenu->setTitle(tr("&Запуск"));
+    if (m_toolsMenu)
+        m_toolsMenu->setTitle(tr("&Опции"));
+    if (m_helpMenu)
+        m_helpMenu->setTitle(tr("&Справка"));
+    if (m_styleMenu)
+        m_styleMenu->setTitle(tr("Тема"));
 
     // ── File Menu Actions ─────────────────────────────
-    if (m_createFileAction) m_createFileAction->setText(tr("Новый файл..."));
-    if (m_openFileAction) m_openFileAction->setText(tr("Открыть файл..."));
-    if (m_openProjectAction) m_openProjectAction->setText(tr("Открыть проект..."));
-    if (m_newProjectAction) m_newProjectAction->setText(tr("Новый проект..."));
-    if (m_saveFileAction) m_saveFileAction->setText(tr("Сохранить"));
-    if (m_saveFileAllAction) m_saveFileAllAction->setText(tr("Сохранить все"));
-    if (m_saveFileAsAction) m_saveFileAsAction->setText(tr("Сохранить как..."));
+    if (m_createFileAction)
+        m_createFileAction->setText(tr("Новый файл..."));
+    if (m_openFileAction)
+        m_openFileAction->setText(tr("Открыть файл..."));
+    if (m_openProjectAction)
+        m_openProjectAction->setText(tr("Открыть проект..."));
+    if (m_newProjectAction)
+        m_newProjectAction->setText(tr("Новый проект..."));
+    if (m_saveFileAction)
+        m_saveFileAction->setText(tr("Сохранить"));
+    if (m_saveFileAllAction)
+        m_saveFileAllAction->setText(tr("Сохранить все"));
+    if (m_saveFileAsAction)
+        m_saveFileAsAction->setText(tr("Сохранить как..."));
 
     // ── Edit Menu Actions ──────────────────────────────
-    if (m_undoAction) m_undoAction->setText(tr("Отмена"));
-    if (m_redoAction) m_redoAction->setText(tr("Повтор"));
-    if (m_cutAction) m_cutAction->setText(tr("Вырезать"));
-    if (m_copyAction) m_copyAction->setText(tr("Скопировать"));
-    if (m_pasteAction) m_pasteAction->setText(tr("Вставить"));
+    if (m_undoAction)
+        m_undoAction->setText(tr("Отмена"));
+    if (m_redoAction)
+        m_redoAction->setText(tr("Повтор"));
+    if (m_cutAction)
+        m_cutAction->setText(tr("Вырезать"));
+    if (m_copyAction)
+        m_copyAction->setText(tr("Скопировать"));
+    if (m_pasteAction)
+        m_pasteAction->setText(tr("Вставить"));
 
     // ── Run Menu Actions ───────────────────────────────
-    if (m_runAction) {
+    if (m_runAction)
+    {
         m_runAction->setText(tr("Запустить"));
         m_runAction->setToolTip(tr("Запустить текущий код в REPL"));
     }
-    if (m_restartAction) {
+    if (m_restartAction)
+    {
         m_restartAction->setText(tr("Перезапустить SBCL"));
         m_restartAction->setToolTip(tr("Перезапустить SBCL"));
     }
-    //if (m_cleanRunAction) {
-    //    m_cleanRunAction->setText(tr("Принудительный запуск"));
-    //    m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и запуск текущего кода"));
-    //}
+    // if (m_cleanRunAction) {
+    //     m_cleanRunAction->setText(tr("Принудительный запуск"));
+    //     m_cleanRunAction->setToolTip(tr("Перезапуск SBCL и запуск текущего кода"));
+    // }
 
     // ── Tools Menu ─────────────────────────────────────
-    if (m_lightStyleAction) m_lightStyleAction->setText(tr("Светлая"));
-    if (m_darkStyleAction) m_darkStyleAction->setText(tr("Тёмная"));
+    if (m_lightStyleAction)
+        m_lightStyleAction->setText(tr("Светлая"));
+    if (m_darkStyleAction)
+        m_darkStyleAction->setText(tr("Тёмная"));
 
     // ── ToolBar ────────────────────────────────────────
-    if (m_mainToolBar) m_mainToolBar->setWindowTitle(tr("Панель инструментов"));
+    if (m_mainToolBar)
+        m_mainToolBar->setWindowTitle(tr("Панель инструментов"));
 
     // ── Actions по objectName ─────────
-    auto setActionText = [this](QString name, const QString& text) {
-
-        if (auto* action = findChild<QAction*>(name, Qt::FindChildOption(Qt::FindDirectChildrenOnly | Qt::FindChildrenRecursively))) {
+    auto setActionText = [this](QString name, const QString &text)
+    {
+        if (auto *action = findChild<QAction *>(name, Qt::FindChildOption(Qt::FindDirectChildrenOnly | Qt::FindChildrenRecursively)))
+        {
             action->setText(text);
         }
-        };
+    };
 
     setActionText("actionExit", tr("Выйти"));
     setActionText("actionFullScreen", tr("Полноэкранный режим"));
@@ -727,9 +778,11 @@ void MainWindow::openManual()
     searchPaths << QDir::currentPath() + "/docs";
     searchPaths << QDir::currentPath() + "/../docs";
 
-    for (const QString& path : searchPaths) {
+    for (const QString &path : searchPaths)
+    {
         QString fullPath = QDir(path).filePath(manualFileName);
-        if (QFile::exists(fullPath)) {
+        if (QFile::exists(fullPath))
+        {
             QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
             return;
         }
