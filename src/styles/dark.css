@@ -615,3 +615,438 @@ ErrorNotificationCloseButton {
         padding: 0;
         margin: 0;
     }
+
+
+/* ==========================================================================
+   AI ASSISTANT WIDGET - MESSAGES
+   ========================================================================== */
+
+QDockWidget#AI-assist {
+    background-color: #1e1e1e;
+    border: none;
+}
+
+QComboBox#aiContextSelector {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border: 1px solid #3d3d3d;
+    border-radius: 0.3em;
+    min-height: 0;
+    max-height: 26px;
+    padding: 0 0.4em;
+}
+
+QComboBox#aiContextSelector:hover,
+QComboBox#aiContextSelector:focus {
+    border-color: #00aca1;
+}
+
+QComboBox#aiContextSelector QAbstractItemView {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border: 1px solid #3d3d3d;
+    selection-background-color: #3e4451;
+    selection-color: #e0e0e0;
+    padding: 0.2em;
+}
+
+QToolButton#aiNewContextButton,
+QToolButton#aiDeleteContextButton {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border: 1px solid #3d3d3d;
+    border-radius: 12px;
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    padding: 0;
+    font-size: 11pt;
+    font-weight: bold;
+}
+
+QToolButton#aiNewContextButton:hover {
+    background-color: #3e4451;
+    color: #00aca1;
+}
+
+QToolButton#aiDeleteContextButton {
+    color: #cc5555;
+}
+
+QToolButton#aiDeleteContextButton:hover {
+    background-color: #3e4451;
+}
+
+QToolButton#aiAddContextFilesButton {
+    background-color: #00aca1;
+    color: #1e1e1e;
+    border: 1px solid #00aca1;
+    border-radius: 12px;
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    font-size: 14pt;
+    font-weight: bold;
+    padding: 0;
+}
+
+QToolButton#aiNewContextButton:pressed,
+QToolButton#aiDeleteContextButton:pressed {
+    background-color: #2d2d2d;
+}
+
+QToolButton#aiNewContextButton:disabled,
+QToolButton#aiDeleteContextButton:disabled {
+    background-color: transparent;
+    color: #6a6a6a;
+}
+
+QToolButton#aiAddContextFilesButton:hover {
+    background-color: #00c7b8;
+    border-color: #00c7b8;
+    color: #1e1e1e;
+}
+
+QToolButton#aiAddContextFilesButton:disabled {
+    background-color: #3e4451;
+    color: #6a6a6a;
+    border-color: #3d3d3d;
+}
+
+QToolButton#aiContextLibraryButton {
+    background-color: #2d2d2d;
+    color: #00aca1;
+    border: 1px solid #3d3d3d;
+    border-radius: 12px;
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    font-weight: bold;
+}
+
+QToolButton#aiContextLibraryButton:hover {
+    background-color: #3e4451;
+    color: #00aca1;
+}
+
+QToolButton#aiContextLibraryButton:disabled {
+    color: #6a6a6a;
+}
+
+QLabel#aiContextFilesLabel {
+    color: #d4d4d4;
+    font-size: 9pt;
+    padding: 0.15em 0.3em;
+}
+
+QWidget#aiContextFiles {
+    background-color: transparent;
+}
+
+QWidget#aiInputContainer {
+    background-color: transparent;
+}
+
+QFrame#aiDocumentChip {
+    padding: 0;
+}
+
+QToolButton#aiDocumentChipRemoveButton {
+    border: none;
+    border-radius: 9px;
+    background-color: transparent;
+    padding: 0;
+}
+
+QScrollArea#aiChatScrollArea > QWidget {
+    background-color: #1e1e1e;
+}
+
+/* Фон самой области чата */
+QScrollArea#aiChatScrollArea {
+    background-color: #1e1e1e;
+    border: none;
+}
+
+QScrollArea#aiChatScrollArea QScrollBar:vertical {
+    background-color: transparent;
+    border: none;
+    width: 8px;
+    margin: 4px 2px;
+}
+
+QScrollArea#aiChatScrollArea QScrollBar::handle:vertical {
+    background-color: #4a4a4a;
+    border-radius: 4px;
+    min-height: 28px;
+}
+
+QScrollArea#aiChatScrollArea QScrollBar::handle:vertical:hover {
+    background-color: #5a5a5a;
+}
+
+QScrollArea#aiChatScrollArea QScrollBar::add-line:vertical,
+QScrollArea#aiChatScrollArea QScrollBar::sub-line:vertical,
+QScrollArea#aiChatScrollArea QScrollBar::add-page:vertical,
+QScrollArea#aiChatScrollArea QScrollBar::sub-page:vertical {
+    background: transparent;
+    border: none;
+    height: 0;
+}
+
+/* Фон внутреннего виджета (контент) */
+QWidget#aiChatContent {
+    background-color: #1e1e1e;
+    border: none;
+}
+
+QWidget#userMessageBubble {
+    background-color: #353b45;
+    color: #e0e0e0;
+    border: 1px solid #4a4a4a;
+    border-radius: 0.8em;
+    border-top-right-radius: 0.2em;
+}
+
+QWidget#assistantMessageBubble {
+    background-color: #252528;
+    color: #e0e0e0;
+    border-radius: 0.8em;
+    border-top-left-radius: 0.2em;
+    border: 1px solid #3d3d3d;
+    border-left: 3px solid #00aca1;
+    padding-bottom: 1em;
+}
+
+QWidget#errorMessageBubble {
+    background-color: #2d2d2d;
+    color: #ffffff;
+    border-radius: 0.8em;
+    border: 1px solid #cc5555;
+    border-left: 3px solid #cc5555;
+}
+
+QLabel#chatMessageRole {
+    color: #00aca1;
+    font-size: 9.5pt;
+    font-weight: bold;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+QTextBrowser#userMessageText,
+QTextBrowser#assistantMessageText,
+QTextBrowser#errorMessageText {
+    background-color: transparent;
+    border: none;
+    font-size: 11pt;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    selection-background-color: #3e4451;
+    selection-color: #e0e0e0;
+}
+
+QTextBrowser#userMessageText {
+    color: #e0e0e0;
+}
+
+QTextBrowser#assistantMessageText {
+    color: #e0e0e0;
+}
+
+QTextBrowser#errorMessageText {
+    color: #ffffff;
+}
+
+/* Индикатор "Думаю..." */
+QLabel#thinkingLabel {
+    color: #d4d4d4;
+    font-style: italic;
+    background-color: #252528;
+    border: 1px solid #3d3d3d;
+    border-left: 3px solid #00aca1;
+    border-radius: 0.6em;
+    padding: 0.6em 0.8em;
+}
+
+/* ==========================================================================
+   AI ASSISTANT - CODE BLOCKS
+   ========================================================================== */
+
+/* Контейнер всего блока кода */
+QWidget#codeBlockWidget {
+    background-color: #1a1a1c;
+    border: 1px solid #3d3d3d;
+    border-top: 3px solid #00aca1;
+    border-radius: 0.55em;
+    margin: 0.2em 0;
+}
+
+/* Шапка блока кода */
+QWidget#codeBlockHeader {
+    background-color: #2d2d30;
+    border-bottom: 1px solid #3d3d3d;
+}
+
+/* Название языка (lisp, python и т.д.) */
+QLabel#codeLangLabel {
+    color: #d4d4d4;
+    font-size: 9pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding-left: 0.2em;
+}
+
+/* Кнопки "Копировать" и "Вставить" */
+QPushButton#codeActionBtn {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border: 1px solid #3d3d3d;
+    border-radius: 0.4em;
+    padding: 0.25em 0.7em;
+    font-size: 9pt;
+    min-height: 1.8em;
+}
+
+    QPushButton#codeActionBtn:hover {
+        background-color: #1a1a1c;
+        border-color: #00aca1;
+        color: #00aca1;
+    }
+
+    QPushButton#codeActionBtn:pressed {
+        background-color: #00aca1;
+        color: #1e1e1e;
+    }
+
+/* Сам редактор кода внутри блока */
+QTextEdit#codeBlockEditor {
+    background-color: #1a1a1c;
+    color: #c5c8c6;
+    border: none;
+    border-bottom-left-radius: 0.4em;
+    border-bottom-right-radius: 0.4em;
+    font-family: 'Consolas', 'Monaco', 'Fira Code', monospace;
+    font-size: 10.5pt;
+    padding: 0.25em 0.8em;
+    selection-background-color: #3e4451;
+    selection-color: #e0e0e0;
+}
+
+/* Стилизация inline-кода (если Markdown его сгенерирует как `code`) */
+QTextBrowser#assistantMessageText code {
+    background-color: #1a1a1c;
+    color: #00aca1;
+    padding: 0.1em 0.3em;
+    border-radius: 0.2em;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+QTextEdit#aiInputField {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border: 1px solid #3d3d3d;
+    border-radius: 0.4em;
+    padding: 0.25em 3.2em 0.25em 0.55em;
+    font-size: 11pt;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    selection-background-color: #3e4451;
+    selection-color: #e0e0e0;
+}
+
+QTextEdit#aiInputField:focus {
+    border: 1px solid #00aca1;
+}
+
+QTextEdit#aiInputField:disabled {
+    background-color: #3e4451;
+    color: #e0e0e0;
+    border-color: #3d3d3d;
+}
+
+QPushButton#aiSendButton {
+    background-color: #00aca1;
+    color: #1a1a1c;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 12pt;
+    padding: 0;
+}
+
+QPushButton#aiSendButton:hover {
+    background-color: #00c7b8;
+}
+
+QPushButton#aiSendButton:pressed {
+    background-color: #00aca1;
+    color: #1a1a1c;
+}
+
+QPushButton#aiSendButton:disabled {
+    background-color: #3e4451;
+    color: #d4d4d4;
+    border: 1px solid #3d3d3d;
+}
+
+QTableWidget#benchmarkResults {
+    background-color: #2d2d2d;
+    alternate-background-color: #1e1e1e;
+    color: #e0e0e0;
+    gridline-color: #3d3d3d;
+    border: 1px solid #3d3d3d;
+    border-radius: 0.4em;
+    selection-background-color: #3e4451;
+    selection-color: #e0e0e0;
+    outline: none;
+}
+
+QTableWidget#benchmarkResults::item {
+    padding: 0.35em 0.5em;
+    border-bottom: 1px solid #3d3d3d;
+}
+
+QTableWidget#benchmarkResults QHeaderView::section {
+    background-color: #3e4451;
+    color: #e0e0e0;
+    border: none;
+    border-bottom: 2px solid #00aca1;
+    padding: 0.55em 0.6em;
+    font-weight: bold;
+}
+
+QTextBrowser#benchmarkResponse {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border: 1px solid #3d3d3d;
+    border-radius: 0.4em;
+    padding: 0.5em;
+    selection-background-color: #3e4451;
+}
+
+QComboBox#benchmarkEvaluation, QPlainTextEdit#benchmarkEvaluationNotes {
+    min-height: 2em;
+    padding: 0.35em 0.5em;
+}
+
+QLabel#benchmarkQualitySummary {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border-left: 3px solid #00aca1;
+    border-radius: 0.3em;
+    padding: 0.55em 0.7em;
+    font-weight: bold;
+}
+
+QPushButton#benchmarkSaveEvaluation {
+    background-color: #00aca1;
+    color: #1a1a1c;
+    border: none;
+    font-weight: bold;
+    padding: 0.4em 0.9em;
+}
+
+QPushButton#benchmarkSaveEvaluation:hover {
+    background-color: #00c7b8;
+}

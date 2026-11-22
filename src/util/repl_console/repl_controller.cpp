@@ -25,7 +25,7 @@ void ReplController::setupConnections()
     connect(&parser, &ReplParser::errorLocationAvailable, this, &ReplController::errorLocationAvailable);
     connect(&parser, &ReplParser::sbclTerminated, this, [this]() {
         if (m_settings->replAutoRestart()) {
-            qDebug() << "[ReplController] SBCL terminated, auto-restarting...";
+            //qDebug() << "[ReplController] SBCL terminated, auto-restarting...";
             restart();
         }
         });
@@ -80,7 +80,7 @@ void ReplController::sendCommand(const QString& cmd)
     if (!command.endsWith('\n'))
         command += '\n';
 
-    qDebug() << "Отправка команды:" << command;
+    //qDebug() << "Отправка команды:" << command;
     process.send(command);
 }
 

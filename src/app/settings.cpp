@@ -28,7 +28,6 @@ Settings::Settings(QObject* parent) :
 {
     QSettings::Format format = m_settings.format();
     QString path = m_settings.fileName();
-    qDebug() << "Файл настроек:" << path;
 
     m_defaultFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     m_defaultFont.setPointSize(11);
@@ -222,28 +221,102 @@ void Settings::setLastProjectPath(const QString& path)
     setValue(Key::PROJECT_LAST_PATH, path);
 }
 
-//TODO: сохранять несколько проектов
-// 
-//QStringList Settings::recentProjects() const
-//{
-//    return value<QStringList>(Key::PROJECT_RECENT, QStringList());
-//}
-//
-//void Settings::addRecentProject(const QString& path)
-//{
-//    QStringList recent = recentProjects();
-//    recent.removeAll(path);
-//    recent.prepend(path);
-//    while (recent.size() > 10) {
-//        recent.removeLast();
-//    }
-//    setValue(Key::PROJECT_RECENT, recent);
-//}
-//
-//void Settings::clearRecentProjects()
-//{
-//    m_settings.remove(Key::PROJECT_RECENT);
-//}
+// =========================================================================
+// AI Assistant settings
+// =========================================================================
+
+QString Settings::aiEndpoint() const {
+    return value<QString>(Key::AI_ENDPOINT, "http://localhost:11434/api/chat");
+}
+
+void Settings::setAiEndpoint(const QString& endpoint) {
+    if (endpoint != aiEndpoint()) {
+        setValue(Key::AI_ENDPOINT, endpoint);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiModel() const {
+    return value<QString>(Key::AI_MODEL, "");
+}
+
+void Settings::setAiModel(const QString& model) {
+    if (model != aiModel()) {
+        setValue(Key::AI_MODEL, model);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiApiKey() const {
+    return value<QString>(Key::AI_API_KEY, "");
+}
+
+void Settings::setAiApiKey(const QString& key) {
+    if (key != aiApiKey()) {
+        setValue(Key::AI_API_KEY, key);
+        emit settingsChanged();
+    }
+}
+
+QStringList Settings::aiKnowledgeFiles() const {
+    return value<QStringList>(Key::AI_KNOWLEDGE_FILES, QStringList());
+}
+
+void Settings::setAiKnowledgeFiles(const QStringList& files) {
+    QStringList normalizedFiles;
+    for (const QString& file : files) {
+        if (!file.trimmed().isEmpty() && !normalizedFiles.contains(file))
+            normalizedFiles.append(file);
+    }
+    if (normalizedFiles != aiKnowledgeFiles()) {
+        setValue(Key::AI_KNOWLEDGE_FILES, normalizedFiles);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiEmbeddingEndpoint() const {
+    return value<QString>(Key::AI_EMBEDDING_ENDPOINT, "http://localhost:11434/api/embed");
+}
+
+void Settings::setAiEmbeddingEndpoint(const QString& endpoint) {
+    if (endpoint != aiEmbeddingEndpoint()) {
+        setValue(Key::AI_EMBEDDING_ENDPOINT, endpoint);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiEmbeddingModel() const {
+    return value<QString>(Key::AI_EMBEDDING_MODEL, "nomic-embed-text");
+}
+
+void Settings::setAiEmbeddingModel(const QString& model) {
+    if (model != aiEmbeddingModel()) {
+        setValue(Key::AI_EMBEDDING_MODEL, model);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiSystemPrompt() const {
+    return value<QString>(Key::AI_SYSTEM_PROMPT,
+        "Ты — помощник-программист, специализирующийся на Common Lisp и SBCL. "
+        "Отвечай по-русски, кратко и точно. Следуй специальным инструкциям приложения "
+        "для разбора кода и ссылок на документацию.");
+}
+
+void Settings::setAiSystemPrompt(const QString& prompt) {
+    if (prompt != aiSystemPrompt()) {
+        setValue(Key::AI_SYSTEM_PROMPT, prompt);
+        emit settingsChanged();
+    }
+}
+
+QString Settings::aiConversations() const {
+    return value<QString>(Key::AI_CONVERSATIONS, QString());
+}
+
+void Settings::setAiConversations(const QString& conversations) {
+    setValue(Key::AI_CONVERSATIONS, conversations);
+}
 
 // SBCL
 QString Settings::sbclPath() const
@@ -571,8 +644,6 @@ void Settings::setKeywordColor(const QColor& color)
         emit settingsChanged();
     }
 }
-
-// ... аналогично для других цветов ...
 
 bool Settings::contains(const QString& key) const
 {

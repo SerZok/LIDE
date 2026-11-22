@@ -1,4 +1,4 @@
-﻿#include "repl_parser.h"
+#include "repl_parser.h"
 
 #include <QRegularExpression>
 #include <QString>
@@ -58,7 +58,7 @@ void ReplParser::processBuffer()
         m_inputBuffer.remove(0, pos + 1);
 
         // Сырой вывод строки для анализа
-        qDebug() << "[line]:" << line;
+        //qDebug() << "[line]:" << line;
 
         // Проверяем промпты
         if (isPromptLine(line)) {
@@ -114,7 +114,7 @@ bool ReplParser::isBlockComplete() const
 
     if (m_state == ParseState::CollectingError || m_state == ParseState::CollectingBacktrace) {
         if (lastLine.contains("unhandled condition") && lastLine.contains("quitting")) {
-            qDebug() << "[isBlockComplete] END: quitting detected";
+            //qDebug() << "[isBlockComplete] END: quitting detected";
             return true;
         }
 
@@ -170,7 +170,7 @@ void ReplParser::flushBlock()
     }
 
     if (m_pendingSbclTerminated) {
-        qDebug() << "[flushBlock] EMITTING deferred sbclTerminated";
+        //qDebug() << "[flushBlock] EMITTING deferred sbclTerminated";
         emit sbclTerminated();
         m_pendingSbclTerminated = false;
     }
@@ -299,7 +299,7 @@ ReplMessage ReplParser::parseErrorBlock(const QStringList& lines)
     extractErrorFile(joined, msg);
 
     if (joined.contains("unhandled condition in --disable-debugger mode, quitting", Qt::CaseInsensitive)) {
-        qDebug() << "[parseErrorBlock] SBCL terminated signal detected";
+        //qDebug() << "[parseErrorBlock] SBCL terminated signal detected";
         m_pendingSbclTerminated = true;
     }
 
@@ -377,7 +377,7 @@ void ReplParser::extractErrorPosition(const QString& joined, ReplMessage& msg) c
     if (tryExtractPosition(joined, line, column)) {
         msg.line = line;
         msg.column = column;
-        qDebug() << "[extractErrorPosition] FOUND" << line << ":" << column;
+        //qDebug() << "[extractErrorPosition] FOUND" << line << ":" << column;
     }
 }
 
@@ -404,7 +404,7 @@ void ReplParser::extractErrorFile(const QString& joined, ReplMessage& msg) const
             extracted.endsWith(".fasl", Qt::CaseInsensitive)) {
 
             msg.file = extracted.trimmed().replace("\\\\", "\\");
-            qDebug() << "[extractErrorFile] FOUND:" << msg.file.value();
+            //qDebug() << "[extractErrorFile] FOUND:" << msg.file.value();
         }
     }
 }

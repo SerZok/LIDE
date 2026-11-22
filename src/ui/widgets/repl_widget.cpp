@@ -1,4 +1,4 @@
-﻿#include "repl_widget.h"
+#include "repl_widget.h"
 
 #include <QMenu>
 #include <QKeyEvent>
@@ -563,13 +563,13 @@ void ReplWidget::contextMenuEvent(QContextMenuEvent* event)
 
 void ReplWidget::onControllerStarted()
 {
-    qDebug() << "=== SBCL запущен ===";
+    //qDebug() << "=== SBCL запущен ===";
     m_waitingForInput = true;
 }
 
 void ReplWidget::onControllerFinished()
 {
-    qDebug() << "=== SBCL остановлен ===";
+    //qDebug() << "=== SBCL остановлен ===";
 }
 
 void ReplWidget::onErrorLocationAvailable(const QString& message, int line, int column)

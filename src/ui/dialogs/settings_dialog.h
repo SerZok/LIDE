@@ -14,6 +14,14 @@ public:
 	SettingsDialog(QWidget*parent = nullptr);
 	~SettingsDialog();
 
+private slots:
+	void onBrowseSBCLPath();
+	void onBrowseProjectPath();
+	void fetchAiModels();
+	void fetchAiEmbeddingModels();
+	void addContextFiles();
+	void removeContextFiles();
+
 protected:
 	void changeEvent(QEvent* event) override;
 
@@ -28,6 +36,5 @@ private:
 
 	void updateSbclArgs();
 	void updateSbclLoad();
-	void onBrowseSBCLPath();
-	void onBrowseProjectPath();
+	void fetchModels(bool embedding);
 };

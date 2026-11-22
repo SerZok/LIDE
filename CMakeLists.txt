@@ -1,7 +1,7 @@
-﻿cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.19)
 set(PROJECT_NAME LIDE)
 set(PROJECT_VERSION_MAJOR 0)
-set(PROJECT_VERSION_MINOR 5)
+set(PROJECT_VERSION_MINOR 7)
 set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
@@ -33,13 +33,15 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Путь к Qt
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Gui LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets Gui LinguistTools Network Pdf)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools Network Pdf)
 
 qt_standard_project_setup(
     I18N_SOURCE_LANGUAGE ru_RU
     I18N_TRANSLATED_LANGUAGES en_US
 )
+
+add_subdirectory(lide-ai-benchmark)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/ui
@@ -132,6 +134,7 @@ qt_add_translations(${PROJECT_NAME}
 )
 
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_lrelease)
+add_dependencies(${PROJECT_NAME} lide-ai-benchmark)
 
 # Добавляем .qm в сборку (для AUTORCC / ресурсов)
 set_source_files_properties(${QM_FILES} PROPERTIES
@@ -152,8 +155,11 @@ endforeach()
 #================================[ Подключение библиотек ]================================
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE
-        Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Gui
+        Qt${QT_VERSION_MAJOR}::Core
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Network
+        Qt${QT_VERSION_MAJOR}::Pdf
 )
 
 # Добавляем пути для include файлов
@@ -188,13 +194,13 @@ if(WIN32)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory 
         "${CMAKE_CURRENT_SOURCE_DIR}/libs/SBCL" 
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sbcl"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/SBCL"
     COMMENT "Copying SBCL to output directory...")
 
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory 
         "${CMAKE_CURRENT_SOURCE_DIR}/src/docs" 
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/docs"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/docs"
     COMMENT "Copying Manual to output directory...")
 
 endif()
@@ -213,6 +219,7 @@ if(WIN32)
         set(PROJECT_VERSION_MINOR \"${PROJECT_VERSION_MINOR}\")
         set(PROJECT_VERSION_PATCH \"${PROJECT_VERSION_PATCH}\")
         set(WINDEPLOYQT \"${WINDEPLOYQT}\")
+        set(APP_BIN_DIR \"$<TARGET_FILE_DIR:${PROJECT_NAME}>\")
         set(SETUP_DIR \"${CMAKE_CURRENT_SOURCE_DIR}/setups\")
         set(ICON_PATH \"${CMAKE_CURRENT_SOURCE_DIR}/src/images/logo.ico\")
         set(ROOT_PATH \"${CMAKE_CURRENT_SOURCE_DIR}\")

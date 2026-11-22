@@ -1,11 +1,14 @@
 #include "lisp_editor.h"
+#include "network/ai_client.h"
 
 #include <QFile>
+#include <QMenu>
 #include <QPainter>
+#include <QFileInfo>
+#include <QShortcut>
 #include <QTextBlock>
 #include <QTextStream>
 #include <QMessageBox>
-#include <QFileInfo>
 
 LispEditor::LispEditor(QWidget* parent)
     : QPlainTextEdit(parent)
@@ -16,6 +19,8 @@ LispEditor::LispEditor(QWidget* parent)
     , m_ignoreChanges(false)
     , m_highlighter(new LispHighlighter(this->document()))
 {
+    this->setContextMenuPolicy(Qt::CustomContextMenu);
+
     applyEditorSettings();
 
     m_lineNumberArea->setObjectName("LineNumberArea");
@@ -46,6 +51,24 @@ LispEditor::LispEditor(QWidget* parent)
         loadThemeColors();
         highlightMatchingBrackets();
         });
+
+    connect(this, &LispEditor::customContextMenuRequested, this, [this](const QPoint& pos) {
+        QMenu* menu = this->createStandardContextMenu();
+        menu->addSeparator();
+
+        auto explainAction = menu->addAction("🧠 Объяснить выделенное");
+        explainAction->setEnabled(this->textCursor().hasSelection());
+
+        // Вызываем единый метод
+        connect(explainAction, &QAction::triggered, this, &LispEditor::triggerAIExplanation);
+
+        menu->exec(this->mapToGlobal(pos));
+        delete menu;
+        });
+
+    // Горячая клавиша Alt+Q
+    QShortcut* explainShortcut = new QShortcut(QKeySequence("Alt+Q"), this);
+    connect(explainShortcut, &QShortcut::activated, this, &LispEditor::triggerAIExplanation);
 
     updateLineNumberAreaWidth(0);
 }
@@ -476,7 +499,7 @@ void LispEditor::highlightErrorAtPosition(const QString& message, int line, int 
     // Находим блок по номеру строки
     QTextBlock block = document()->findBlockByNumber(line - 1);
     if (!block.isValid()) {
-        qDebug() << "Invalid line:" << line;
+        //qDebug() << "Invalid line:" << line;
         return;
     }
 
@@ -532,4 +555,19 @@ void LispEditor::updateErrorHighlight()
     // Просто копируем список подсветок
     m_extraSelections = m_errorSelections;
     setExtraSelections(m_extraSelections);
+}
+
+void LispEditor::triggerAIExplanation() {
+    QString selectedText = textCursor().selectedText().trimmed();
+    selectedText = selectedText.replace(QChar::ParagraphSeparator, '\n').trimmed();
+
+    if (selectedText.isEmpty()) {
+        return;
+    }
+
+    AiClient::ExplainContext context = (this->objectName() == "replWidget")
+        ? AiClient::ExplainContext::Repl
+        : AiClient::ExplainContext::Editor;
+
+    emit requestAIExplanation(selectedText, context);
 }

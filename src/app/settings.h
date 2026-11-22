@@ -58,6 +58,16 @@ public:
         static constexpr const char* SYNTAX_COMMENT = "syntax/comment";
         static constexpr const char* SYNTAX_FUNCTION = "syntax/function";
         static constexpr const char* SYNTAX_PARENTHESIS = "syntax/parenthesis";
+
+        // AI Assistant settings
+        static constexpr const char* AI_MODEL = "ai/model";
+        static constexpr const char* AI_API_KEY = "ai/apiKey";
+        static constexpr const char* AI_ENDPOINT = "ai/endpoint";
+        static constexpr const char* AI_KNOWLEDGE_FILES = "ai/knowledgeFiles";
+        static constexpr const char* AI_EMBEDDING_ENDPOINT = "ai/embeddingEndpoint";
+        static constexpr const char* AI_EMBEDDING_MODEL = "ai/embeddingModel";
+        static constexpr const char* AI_SYSTEM_PROMPT = "ai/systemPrompt";
+        static constexpr const char* AI_CONVERSATIONS = "ai/conversations";
     };
 
     enum class ParseOutputMode {
@@ -155,7 +165,6 @@ public:
     QStringList projectExcludeFiltersList() const;
     void setProjectExcludeFilters(const QString& filters);
 
-
     QString lastProjectPath() const;
     void setLastProjectPath(const QString& path);
 
@@ -163,27 +172,48 @@ public:
     //void addRecentProject(const QString& path);
     //void clearRecentProjects();
 
+    // AI Assistant settings
+    QString aiEndpoint() const;
+    void setAiEndpoint(const QString& endpoint);
+
+    QString aiModel() const;
+    void setAiModel(const QString& model);
+
+    QString aiApiKey() const;
+    void setAiApiKey(const QString& key);
+
+    QStringList aiKnowledgeFiles() const;
+    void setAiKnowledgeFiles(const QStringList& files);
+
+    QString aiEmbeddingEndpoint() const;
+    void setAiEmbeddingEndpoint(const QString& endpoint);
+
+    QString aiEmbeddingModel() const;
+    void setAiEmbeddingModel(const QString& model);
+
+    QString aiSystemPrompt() const;
+    void setAiSystemPrompt(const QString& prompt);
+
+    QString aiConversations() const;
+    void setAiConversations(const QString& conversations);
+
     // Syntax highlighting colors
     QColor keywordColor() const;
     void setKeywordColor(const QColor& color);
 
-    QColor functionColor() const;
-    void setFunctionColor(const QColor& color);
-
-    QColor commentColor() const;
-    void setCommentColor(const QColor& color);
-
-    QColor stringColor() const;
-    void setStringColor(const QColor& color);
-
-    QColor numberColor() const;
-    void setNumberColor(const QColor& color);
-
-    QColor parenthesisColor() const;
-    void setParenthesisColor(const QColor& color);
-
-    QColor quoteColor() const;
-    void setQuoteColor(const QColor& color);
+    // TODO: задание пользовательских цветов...
+    //QColor functionColor() const;
+    //void setFunctionColor(const QColor& color);
+    //QColor commentColor() const;
+    //void setCommentColor(const QColor& color);
+    //QColor stringColor() const;
+    //void setStringColor(const QColor& color);
+    //QColor numberColor() const;
+    //void setNumberColor(const QColor& color);
+    //QColor parenthesisColor() const;
+    //void setParenthesisColor(const QColor& color);
+    //QColor quoteColor() const;
+    //void setQuoteColor(const QColor& color);
 
     // Utility methods
     void resetToDefaults();
