@@ -1,0 +1,41 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "x64-Debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/${presetName}",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+            }
+        },
+        {
+            "name": "x64-Release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/${presetName}",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "x64-Debug",
+            "configurePreset": "x64-Debug"
+        },
+        {
+            "name": "x64-Release",
+            "configurePreset": "x64-Release"
+        }
+    ]
+}
